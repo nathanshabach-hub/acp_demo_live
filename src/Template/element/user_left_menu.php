@@ -239,3 +239,38 @@ if ($this->request->getSession()->read("user_id") > 0 && ($this->request->getSes
 <?php
 }
 ?>
+
+<?php
+// student left menu
+if ($this->request->getSession()->read("user_id") > 0 && ($this->request->getSession()->read("user_type") == "Student"))
+{
+?>
+	<div class="sidebar-icon d-md-none"><i class="fa fa-bars"></i></div>
+	<nav id="sidebarMenu" class="col-md-3 col-lg-2 d-md-block bg-blue sidebar collapse">
+		<div class="position-sticky pt-3 pb-3 sidebar-sticky">
+			<ul class="nav flex-column">
+				<li class="nav-item dash-item">
+					<?php echo $this->Html->link('Dashboard', ['controller' => 'users', 'action' => 'dashboard'], ['escape' => false, 'class' => 'nav-link ' . $active_dashboard]); ?>
+				</li>
+				<li class="nav-item dash-item">
+					<?php echo $this->Html->link('My Schedule', ['controller' => 'users', 'action' => 'myschedule'], ['escape' => false, 'class' => 'nav-link']); ?>
+				</li>
+				<li class="nav-item dash-item">
+					<?php echo $this->Html->link('My Events', ['controller' => 'users', 'action' => 'myevents'], ['escape' => false, 'class' => 'nav-link']); ?>
+				</li>
+				<hr>
+				<li class="nav-item dash-item">
+					<?php echo $this->Html->link('Edit Profile', ['controller' => 'users', 'action' => 'editprofile'], ['escape' => false, 'class' => 'nav-link ' . $active_editprofile]); ?>
+				</li>
+				<li class="nav-item dash-item">
+					<?php echo $this->Html->link('Change Password', ['controller' => 'users', 'action' => 'changepassword'], ['escape' => false, 'class' => 'nav-link ' . $active_changepassword]); ?>
+				</li>
+				<li class="nav-item dash-item">
+					<?php echo $this->Html->link('Logout', ['controller' => 'users', 'action' => 'logout'], ['escape' => false, 'class' => 'nav-link']); ?>
+				</li>
+			</ul>
+		</div>
+	</nav>
+<?php
+}
+?>

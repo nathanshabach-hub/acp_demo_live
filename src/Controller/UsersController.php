@@ -57,6 +57,46 @@ class UsersController extends AppController {
             $password		= $this->request->getData('Users.password');
             $user_type		= $this->request->getData('Users.user_type');
             $rememberme		= $this->request->getData('Users.rememberme');
+
+			// -------------------------------------------------------
+			// Student login: code + first 4 letters of last name
+			// -------------------------------------------------------
+			if ($user_type === 'Student') {
+				$student_code    = strtoupper(trim($this->request->getData('Users.student_code') ?? ''));
+				$last_name_input = strtolower(trim($this->request->getData('Users.last_name_prefix') ?? ''));
+
+				$userInfo = $this->Users->find()
+					->where(['Users.customer_code' => $student_code, 'Users.user_type' => 'Student'])
+					->first();
+
+				if (!$userInfo) {
+					$this->Flash->error('Invalid student code. Account not found.');
+				} elseif ($userInfo->status == 0) {
+					$this->Flash->error('Your account is temporarily disabled. Please contact the events team.');
+				} elseif ($userInfo->status == 2) {
+					$this->Flash->error('Your account is archived. Please contact the events team.');
+				} elseif (strtolower(substr($userInfo->last_name, 0, 4)) !== substr($last_name_input, 0, 4)) {
+					$this->Flash->error('Invalid last name. Please try again.');
+				} else {
+					$this->request->getSession()->write('user_id',       $userInfo->id);
+					$this->request->getSession()->write('email_address', $userInfo->email_address);
+					$this->request->getSession()->write('user_type',     $userInfo->user_type);
+					$this->request->getSession()->write('last_login',    $userInfo->last_login);
+
+					$this->Users->updateAll(['last_login' => date('Y-m-d H:i:s')], ['id' => $userInfo->id]);
+
+					$returnUrl = $this->request->getSession()->read('returnUrl');
+					if (isset($returnUrl) && !empty($returnUrl)) {
+						$this->request->getSession()->delete('returnUrl');
+						$this->redirect('/' . $returnUrl);
+					} else {
+						$this->request->getSession()->delete('returnUrl');
+						$this->redirect(['controller' => 'users', 'action' => 'dashboard']);
+					}
+				}
+				return;
+			}
+			// -------------------------------------------------------
 			
 			// Step 1 :: To check in users table
 			$userInfo = $this->Users->find()->where(['Users.email_address' => $email_address,'Users.user_type' => $user_type])->first();
@@ -482,7 +522,7 @@ class UsersController extends AppController {
 	public function editprofile() {
 		
 		$this->userLoginCheck();
-		$this->multiLoginCheck(['School','Teacher_Parent']);
+		$this->multiLoginCheck(['School','Teacher_Parent','Student']);
 		
 		//echo ' fsdf sdf sdf d';exit;
 		$this->viewBuilder()->setLayout("home");
@@ -516,7 +556,7 @@ class UsersController extends AppController {
 	public function changepassword() {
         
 		$this->userLoginCheck();
-		$this->multiLoginCheck(['School','Teacher_Parent','Judge']);
+		$this->multiLoginCheck(['School','Teacher_Parent','Judge','Student']);
 		
         $this->set("title_for_layout", "Change Password" . TITLE_FOR_PAGES);
         $this->viewBuilder()->setLayout('home');
@@ -899,7 +939,8 @@ class UsersController extends AppController {
 
         if (isset($keyword) && $keyword != '') {
             $separator[] = 'keyword:' . urlencode($keyword);
-            $condition[] = "(Users.name LIKE '%".addslashes($keyword)."%')";
+			$safeKeyword = addslashes($keyword);
+			$condition[] = "(Users.first_name LIKE '%{$safeKeyword}%' OR Users.last_name LIKE '%{$safeKeyword}%' OR Users.customer_code LIKE '%{$safeKeyword}%')";
             $this->set('keyword', $keyword);
         }
         //pr($condition);exit;
@@ -907,8 +948,9 @@ class UsersController extends AppController {
         $this->set('separator', $separator);
         $query = $this->Users->find()
             ->contain(['Schools'])
-            ->where($condition);
-        $this->paginate = ['limit' => 30];
+			->where($condition)
+			->order(['Users.id' => 'DESC']);
+		$this->paginate = ['limit' => 30, 'order' => ['Users.id' => 'DESC']];
         $this->set('users', $this->paginate($query));
         if ($this->request->is("ajax")) {
             $this->viewBuilder()->setLayout(($this->request->is("ajax")) ? "" : "default");
@@ -962,6 +1004,14 @@ class UsersController extends AppController {
 				{
 					$data->school_id 			= $userDetails->school_id;
 				}
+				
+				// auto-generate a unique student login code (STU + 5 uppercase alphanumeric chars)
+				do {
+					$chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+					$studentCode = 'STU' . substr(str_shuffle(str_repeat($chars, 5)), 0, 5);
+					$codeExists = $this->Users->find()->where(['Users.customer_code' => $studentCode])->first();
+				} while ($codeExists);
+				$data->customer_code = $studentCode;
 				
 				$data->user_type = 'Student';
 				$data->status = 1;
@@ -1417,7 +1467,88 @@ class UsersController extends AppController {
 		//pr($users);exit;
 		
     }
-	
+
+	public function myschedule() {
+
+		$this->userLoginCheck();
+		$this->multiLoginCheck(['Student']);
+
+		$this->viewBuilder()->setLayout('home');
+		$this->set('title_for_layout', 'My Schedule ' . TITLE_FOR_PAGES);
+
+		$student_id = $this->request->getSession()->read('user_id');
+
+		$this->Schedulingtimings = $this->fetchTable('Schedulingtimings');
+		$this->Conventionregistrationstudents = $this->fetchTable('Conventionregistrationstudents');
+		$this->Crstudentevents = $this->fetchTable('Crstudentevents');
+
+		$studentD = $this->Users->find()->where(['Users.id' => $student_id])->first();
+		$this->set('studentD', $studentD);
+
+		// get current season
+		$season_id = $this->getCurrentSeason();
+		$seasonD = $this->Seasons->find()->where(['Seasons.id' => $season_id])->first();
+
+		// find convention registrations for this student
+		$convRegStudent = $this->Conventionregistrationstudents->find()
+			->where([
+				'Conventionregistrationstudents.student_id' => $student_id,
+				'Conventionregistrationstudents.season_id'  => $season_id,
+				'Conventionregistrationstudents.season_year' => $seasonD->season_year,
+				'Conventionregistrationstudents.status' => 1,
+			])
+			->contain(['Conventionregistrations', 'Conventions'])
+			->first();
+		$this->set('convRegStudent', $convRegStudent);
+
+		$schedulingTimingsList = [];
+		if ($convRegStudent) {
+			$condSch = [];
+			$condSch[] = "(Schedulingtimings.season_id = '{$season_id}' AND Schedulingtimings.season_year = '{$seasonD->season_year}')";
+			$condSch[] = "(Schedulingtimings.user_id = '{$student_id}' OR Schedulingtimings.user_id_opponent = '{$student_id}')";
+
+			$schedulingTimingsList = $this->Schedulingtimings->find()
+				->where($condSch)
+				->contain(['Events', 'Users', 'Opponentuser', 'Conventionrooms'])
+				->order(['Schedulingtimings.sch_date_time' => 'ASC'])
+				->all();
+		}
+		$this->set('schedulingTimingsList', $schedulingTimingsList);
+	}
+
+	public function myevents() {
+
+		$this->userLoginCheck();
+		$this->multiLoginCheck(['Student']);
+
+		$this->viewBuilder()->setLayout('home');
+		$this->set('title_for_layout', 'My Events ' . TITLE_FOR_PAGES);
+
+		$student_id = $this->request->getSession()->read('user_id');
+
+		$this->Conventionregistrationstudents = $this->fetchTable('Conventionregistrationstudents');
+		$this->Crstudentevents = $this->fetchTable('Crstudentevents');
+
+		$studentD = $this->Users->find()->where(['Users.id' => $student_id])->first();
+		$this->set('studentD', $studentD);
+
+		// get current season
+		$season_id = $this->getCurrentSeason();
+		$seasonD = $this->Seasons->find()->where(['Seasons.id' => $season_id])->first();
+
+		// get student event registrations
+		$crstudentevents = $this->Crstudentevents->find()
+			->where([
+				'Crstudentevents.student_id' => $student_id,
+				'Crstudentevents.season_id'  => $season_id,
+				'Crstudentevents.season_year' => $seasonD->season_year,
+			])
+			->contain(['Events', 'Conventions'])
+			->order(['Events.event_name' => 'ASC'])
+			->all();
+		$this->set('crstudentevents', $crstudentevents);
+	}
+
 	public function logout() {
 
         $this->Flash->success('Logout successfully.');

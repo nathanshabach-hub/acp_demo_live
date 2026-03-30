@@ -98,6 +98,7 @@ $loginUserTypes = array(
     'School' => 'School',
 	'Teacher_Parent' => 'Supervisor',
 	'Judge' => 'Judge',
+	'Student' => 'Student',
 );
 
 define('PAYPAL_MODE', 'Live'); // options 1. Sandbox  2. Live

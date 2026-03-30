@@ -16,7 +16,7 @@ namespace App\Controller;
 
 use Cake\Controller\Controller;
 use Cake\Event\EventInterface;
-use Cake\Utility\Inflector;
+use Cake\Utility\Text;
 use Cake\Mailer\Mailer;
 use Cake\Controller\Component\FlashComponent;
 use Cake\Datasource\ConnectionManager;
@@ -116,6 +116,20 @@ class AppController extends Controller{
 					if(!in_array($convreg->convention_id,(array)$conventionIDSHeader))
 					{
 						$conventionIDSHeader[] 	= $convreg->convention_id;
+					}
+				}
+			}
+
+			// now get convention id for student
+			if($user_type == "Student")
+			{
+				$this->Conventionregistrationstudents = $this->fetchTable('Conventionregistrationstudents');
+				$convregstudents = $this->Conventionregistrationstudents->find()->where(['Conventionregistrationstudents.student_id' => $user_id,'Conventionregistrationstudents.season_id' => $season_id,'Conventionregistrationstudents.season_year' => $seasonD->season_year,'Conventionregistrationstudents.status' => 1])->order(['Conventionregistrationstudents.id' => 'ASC'])->all();
+				foreach($convregstudents as $convregs)
+				{
+					if(!in_array($convregs->convention_id,(array)$conventionIDSHeader))
+					{
+						$conventionIDSHeader[] 	= $convregs->convention_id;
 					}
 				}
 			}
@@ -1087,7 +1101,7 @@ class AppController extends Controller{
 	}
     
     public function getSlug($str, $table='Admins'){
-        $slug = Inflector::slug($str);
+		$slug = Text::slug($str);
         $slug = strtolower($slug);
         //$slug = 'dinesh-dhaker';
         $isRecord =  $this->$table->find()->where([$table . '.slug like' => $slug . '%'])->order([$table.'.id'=>'DESC'])->first();

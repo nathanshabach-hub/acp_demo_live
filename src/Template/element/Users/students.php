@@ -25,6 +25,7 @@
                             <th class="sorting_paging"><?php echo $this->Paginator->sort('first_name', 'First Name'); ?></th>
                             <th class="sorting_paging"><?php echo $this->Paginator->sort('middle_name', 'Middle Name'); ?></th>
                             <th class="sorting_paging"><?php echo $this->Paginator->sort('last_name', 'Last Name'); ?></th>
+                            <th class="sorting_paging">Login Code</th>
                             <th class="sorting_paging"><?php echo $this->Paginator->sort('birth_year', 'Birth Year'); ?></th>
                             <th class="sorting_paging">Age</th>
                             <th class="sorting_paging"><?php echo $this->Paginator->sort('gender', 'Gender'); ?></th>
@@ -40,6 +41,7 @@
                                 <td data-title="First Name"><?php echo $datarecord->first_name;?></td>
                                 <td data-title="Middle Name"><?php echo $datarecord->middle_name ? $datarecord->middle_name : 'N/A'; ?></td>
                                 <td data-title="Last Name"><?php echo $datarecord->last_name;?></td>
+                                <td data-title="Login Code"><strong><?php echo $datarecord->customer_code ? h($datarecord->customer_code) : '<em style="color:#aaa;">not set</em>'; ?></strong></td>
                                 <td data-title="Birth Year"><?php echo $datarecord->birth_year;?></td>
                                 <td data-title="Age"><?php echo date("Y")-$datarecord->birth_year;?></td>
                                 
