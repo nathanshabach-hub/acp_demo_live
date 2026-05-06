@@ -39,7 +39,7 @@ class PaginatorHelper extends Helper
      *
      * @var array
      */
-    protected array $helpers = ['Url', 'Number', 'Html'];
+    protected $helpers = ['Url', 'Number', 'Html'];
 
     /**
      * Default config for this class
@@ -59,7 +59,7 @@ class PaginatorHelper extends Helper
      *
      * @var array
      */
-    protected array $_defaultConfig = [
+    protected $_defaultConfig = [
         'options' => [],
         'templates' => [
             'nextActive' => '<li class="next"><a rel="next" href="{{url}}">{{text}}</a></li>',

@@ -9,12 +9,12 @@ use Cake\Datasource\ConnectionManager;
 
 class JudgeevaluationsController extends AppController {
 
-    protected array $paginate = ['limit' => 50, 'order' => ['Conventions.name' => 'asc']];
+    public $paginate = ['limit' => 50, 'order' => ['Conventions.name' => 'asc']];
     public $components = array('PImage', 'PImageTest');
 
     //public $helpers = array('Javascript', 'Ajax');
 
-    public function initialize(): void {
+    public function initialize() {
         parent::initialize();
         $this->loadComponent('Flash');
         $action = $this->request->getParam('action');
@@ -25,14 +25,14 @@ class JudgeevaluationsController extends AppController {
             }
         }
 		
-		$this->Conventions = $this->fetchTable('Conventions');
-		$this->Conventionseasons = $this->fetchTable('Conventionseasons');
-		$this->Seasons = $this->fetchTable('Seasons');
-		$this->Events = $this->fetchTable('Events');
-		$this->Conventionseasonevents = $this->fetchTable('Conventionseasonevents');
-		$this->Conventionregistrations = $this->fetchTable('Conventionregistrations');
-		$this->Eventsubmissions = $this->fetchTable('Eventsubmissions');
-		$this->Judgeevaluationmarks = $this->fetchTable('Judgeevaluationmarks');
+		$this->Conventions = $this->loadModel('Conventions');
+		$this->Conventionseasons = $this->loadModel('Conventionseasons');
+		$this->Seasons = $this->loadModel('Seasons');
+		$this->Events = $this->loadModel('Events');
+		$this->Conventionseasonevents = $this->loadModel('Conventionseasonevents');
+		$this->Conventionregistrations = $this->loadModel('Conventionregistrations');
+		$this->Eventsubmissions = $this->loadModel('Eventsubmissions');
+		$this->Judgeevaluationmarks = $this->loadModel('Judgeevaluationmarks');
     }
 	
 	public function index() {

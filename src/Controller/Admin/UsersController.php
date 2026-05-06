@@ -8,10 +8,10 @@ use Cake\Datasource\ConnectionManager;
 
 class UsersController extends AppController{
 
-    protected array $paginate = ['limit' => 50];
+    public $paginate = ['limit' => 50];
     public $components = array('PImage', 'PImageTest');
    
-    public function initialize(): void {
+    public function initialize() {
         parent::initialize();
         $this->loadComponent('Flash');
         $action = $this->request->getParam('action');
@@ -22,8 +22,8 @@ class UsersController extends AppController{
             }
         }
 		
-		$this->Emailtemplates = $this->fetchTable('Emailtemplates');
-		$this->Admins = $this->fetchTable('Admins');
+		$this->Emailtemplates = $this->loadModel('Emailtemplates');
+		$this->Admins = $this->loadModel('Admins');
     }
     
  
@@ -135,7 +135,7 @@ class UsersController extends AppController{
         $this->set('manageSchools', '1');
         $this->set('schoolAdd', '1');
 		
-        $users = $this->Users->newEmptyEntity();
+        $users = $this->Users->newEntity();
         if ($this->request->is('post')) {
 			
 			//$this->prx($this->request->getData());
@@ -182,7 +182,7 @@ class UsersController extends AppController{
         $this->set('manageSchools', '1');
         $this->set('schoolAdd', '1');
 		
-        $users = $this->Users->newEmptyEntity();
+        $users = $this->Users->newEntity();
         if ($this->request->is('post')) {
 			
 			//$this->prx($this->request->getData());
@@ -427,7 +427,7 @@ class UsersController extends AppController{
 		global $yesNoDD;
 		$this->set('yesNoDD', $yesNoDD);
 		
-        $users = $this->Users->newEmptyEntity();
+        $users = $this->Users->newEntity();
         if ($this->request->is('post')) {
 			
 			//$this->prx($this->request->getData());
@@ -732,7 +732,7 @@ class UsersController extends AppController{
         $this->set('manageSchools', '1');
         $this->set('schoolImport', '1');
 		
-        $users = $this->Users->newEmptyEntity();
+        $users = $this->Users->newEntity();
         if ($this->request->is('post')) {
 			
 			//$this->prx($this->request->getData());
@@ -795,7 +795,7 @@ class UsersController extends AppController{
 							if($flagCheck == 1)
 							{
 								// import records here
-								$users = $this->Users->newEmptyEntity();
+								$users = $this->Users->newEntity();
 								$dataU = $this->Users->patchEntity($users, array());
 								
 								$dataU->slug 							= $this->getSlug($getData[2] . ' ' . time(), 'Users');

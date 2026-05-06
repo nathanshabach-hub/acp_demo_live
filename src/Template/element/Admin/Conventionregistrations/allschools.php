@@ -40,14 +40,14 @@ $this->Conventionregistrationteachers = TableRegistry::getTableLocator()->get('C
 						{
 						?>
                             <?php
-							if($datarecord->Users['user_type'] == "School")
+                            if(!empty($datarecord->Users) && isset($datarecord->Users['user_type']) && $datarecord->Users['user_type'] == "School")
 							{
 							?>
                             <tr>
                                 <td data-title="ID"><?php echo $datarecord->id;?></td>
                                 <td data-title="School Name">
 									<?php 
-									echo $datarecord->Users['first_name'];
+                                    echo isset($datarecord->Users['first_name']) ? $datarecord->Users['first_name'] : '';
 									?>
 								</td>
 								<td data-title="Sponsor/Teacher">

@@ -10,12 +10,12 @@ use Cake\Mailer\Mailer;
 
 class ConventionsController extends AppController {
 
-    protected array $paginate = ['limit' => 50, 'order' => ['Conventions.name' => 'asc']];
+    public $paginate = ['limit' => 50, 'order' => ['Conventions.name' => 'asc']];
     public $components = array('PImage', 'PImageTest');
 
     //public $helpers = array('Javascript', 'Ajax');
 
-    public function initialize(): void {
+    public function initialize() {
         parent::initialize();
         $this->loadComponent('Flash');
         $action = $this->request->getParam('action');
@@ -26,14 +26,14 @@ class ConventionsController extends AppController {
             }
         }
 		
-		$this->Conventionseasons = $this->fetchTable('Conventionseasons');
-		$this->Seasons = $this->fetchTable('Seasons');
-		$this->Events = $this->fetchTable('Events');
-		$this->Conventionseasonevents = $this->fetchTable('Conventionseasonevents');
-		$this->Conventionregistrations = $this->fetchTable('Conventionregistrations');
-		$this->Conventionrooms = $this->fetchTable('Conventionrooms');
-		$this->Conventionseasonroomevents = $this->fetchTable('Conventionseasonroomevents');
-		$this->Conventionregistrationstudents = $this->fetchTable('Conventionregistrationstudents');
+		$this->Conventionseasons = $this->loadModel('Conventionseasons');
+		$this->Seasons = $this->loadModel('Seasons');
+		$this->Events = $this->loadModel('Events');
+		$this->Conventionseasonevents = $this->loadModel('Conventionseasonevents');
+		$this->Conventionregistrations = $this->loadModel('Conventionregistrations');
+		$this->Conventionrooms = $this->loadModel('Conventionrooms');
+		$this->Conventionseasonroomevents = $this->loadModel('Conventionseasonroomevents');
+		$this->Conventionregistrationstudents = $this->loadModel('Conventionregistrationstudents');
     }
 
     public function index() {
@@ -185,7 +185,7 @@ class ConventionsController extends AppController {
 		global $conventionTypeDD;
 		$this->set('conventionTypeDD', $conventionTypeDD);
 		
-        $conventions = $this->Conventions->newEmptyEntity();
+        $conventions = $this->Conventions->newEntity();
         if ($this->request->is('post')) {
 			
 			//$this->prx($this->request->getData());
@@ -361,7 +361,7 @@ class ConventionsController extends AppController {
 		$seasonsDD = $this->Seasons->find()->where([])->order(['Seasons.season_year' => 'ASC'])->all()->combine('id', 'season_year')->toArray();
 		$this->set('seasonsDD', $seasonsDD);
 		
-        $conventionseasons = $this->Conventionseasons->newEmptyEntity();
+        $conventionseasons = $this->Conventionseasons->newEntity();
         if ($this->request->is('post')) {
 			
 			//$this->prx($this->request->getData());
@@ -662,7 +662,7 @@ class ConventionsController extends AppController {
 		
 		foreach($eventsAll as $event)
 		{
-			$conventionseasonevents = $this->Conventionseasonevents->newEmptyEntity();
+			$conventionseasonevents = $this->Conventionseasonevents->newEntity();
 			$dataCSE = $this->Conventionseasonevents->patchEntity($conventionseasonevents, $this->request->getData());
 
 			$dataCSE->slug 						= "cse-".$convention_id."-".$season_id."-".$event->id."-".time();
@@ -748,24 +748,40 @@ class ConventionsController extends AppController {
 		
         $this->redirect(['controller' => 'conventions', 'action' => 'seasons',$convention_slug]);
     }
-	
-	public function importeventsfromprevyear($slug_convention_season = null,$slug_convention = null) {
-		
-		$this->redirect(['controller' => 'conventions', 'action' => 'events',$slug_convention_season,$slug_convention]);
-		
+
+	public function locksubmissions($convention_season_slug = null, $convention_slug = null) {
+		$convSeasonD = $this->Conventionseasons->find()->where(['Conventionseasons.slug' => $convention_season_slug])->first();
+		if ($convSeasonD) {
+			$this->Conventionseasons->updateAll(['submissions_open' => '0'], ['slug' => $convention_season_slug]);
+			$this->Flash->success('Submissions locked. Users can no longer submit or upload.');
+		} else {
+			$this->Flash->error('Convention season not found.');
+		}
+		return $this->redirect(['controller' => 'conventions', 'action' => 'seasons', $convention_slug]);
 	}
-	
-	public function changeprices($conv_season_slug = null,$slug = null) {
-        $this->set('title', ADMIN_TITLE . 'Change Prices');
-        $this->viewBuilder()->setLayout('admin');
-        
-		$this->set('manageConventions', '1');
-        $this->set('conventionList', '1');
-		
+
+	public function unlocksubmissions($convention_season_slug = null, $convention_slug = null) {
+		$convSeasonD = $this->Conventionseasons->find()->where(['Conventionseasons.slug' => $convention_season_slug])->first();
+		if ($convSeasonD) {
+			$this->Conventionseasons->updateAll(['submissions_open' => '1'], ['slug' => $convention_season_slug]);
+			$this->Flash->success('Submissions unlocked. Users can now submit and upload.');
+		} else {
+			$this->Flash->error('Convention season not found.');
+		}
+		return $this->redirect(['controller' => 'conventions', 'action' => 'seasons', $convention_slug]);
+	}
+
+	public function importeventsfromprevyear($slug_convention_season = null, $slug_convention = null) {
+		$this->redirect(['controller' => 'conventions', 'action' => 'events', $slug_convention_season, $slug_convention]);
+	}
+
+	public function changeprices($conv_season_slug = null, $slug = null) {
+		$this->set('title', ADMIN_TITLE . 'Change Prices');
+		$this->viewBuilder()->setLayout('admin');
+
 		if ($conv_season_slug) {
-            $convSeasonD = $this->Conventionseasons->find()->where(['Conventionseasons.slug' => $conv_season_slug])->first();
+			$convSeasonD = $this->Conventionseasons->find()->where(['Conventionseasons.slug' => $conv_season_slug])->first();
 			$uid = $convSeasonD->id;
-			$this->set('conv_season_slug', $conv_season_slug);
 			$this->set('convSeasonD', $convSeasonD);
         }
 		else
@@ -905,7 +921,7 @@ class ConventionsController extends AppController {
 		
 		$this->set('title', ADMIN_TITLE . 'Add Room - '.$conventionD->name);
 		
-        $conventionrooms = $this->Conventionrooms->newEmptyEntity();
+        $conventionrooms = $this->Conventionrooms->newEntity();
         if ($this->request->is('post')) {
 			
 			//$this->prx($this->request->getData());
@@ -1174,7 +1190,7 @@ class ConventionsController extends AppController {
 			{
 				$event_ids_implode = implode(",",$event_ids);
 				
-				$conventionseasonroomevents = $this->Conventionseasonroomevents->newEmptyEntity();
+				$conventionseasonroomevents = $this->Conventionseasonroomevents->newEntity();
 				$data = $this->Conventionseasonroomevents->patchEntity($conventionseasonroomevents, $this->request->getData());
 				
 				$slug = "conv-season-room-event-".time()."-".rand(100,10000);
@@ -1760,8 +1776,78 @@ class ConventionsController extends AppController {
 		$this->set('arrCertData', $arrCertData); 
 	
 	}
-	
-	
+
+	public function certificates($slug_convention_season = null, $slug_convention = null) {
+		$this->viewBuilder()->setLayout('admin');
+		$this->set('manageConventions', '1');
+		$this->set('conventionList', '1');
+
+		if (!$slug_convention_season || !$slug_convention) {
+			$this->Flash->error('Convention season not found.');
+			return $this->redirect(['controller' => 'conventions', 'action' => 'index']);
+		}
+
+		$conventionSD = $this->Conventionseasons->find()->where(['Conventionseasons.slug' => $slug_convention_season])->first();
+		$conventionD  = $this->Conventions->find()->where(['Conventions.slug' => $slug_convention])->first();
+
+		if (!$conventionSD || !$conventionD) {
+			$this->Flash->error('Convention or season not found.');
+			return $this->redirect(['controller' => 'conventions', 'action' => 'index']);
+		}
+
+		$this->set('title', ADMIN_TITLE . 'Generate Certificate - ' . $conventionD->name . ' - ' . $conventionSD->season_year);
+		$this->set(compact('conventionSD', 'conventionD', 'slug_convention_season', 'slug_convention'));
+
+		// Certificate types
+		$certTypes = [
+			'participation' => 'Participation Certificate',
+			'achievement'   => 'Achievement Certificate',
+			'excellence'    => 'Excellence Certificate',
+			'appreciation'  => 'Appreciation Certificate',
+			'custom'        => 'Custom Certificate',
+		];
+		$this->set('certTypes', $certTypes);
+	}
+
+	public function certificatespdf($slug_convention_season = null, $slug_convention = null) {
+		$this->viewBuilder()->setLayout('');
+
+		if (!$slug_convention_season || !$slug_convention) {
+			return $this->redirect(['controller' => 'conventions', 'action' => 'index']);
+		}
+
+		$conventionSD = $this->Conventionseasons->find()->where(['Conventionseasons.slug' => $slug_convention_season])->first();
+		$conventionD  = $this->Conventions->find()->where(['Conventions.slug' => $slug_convention])->first();
+
+		if (!$conventionSD || !$conventionD) {
+			return $this->redirect(['controller' => 'conventions', 'action' => 'index']);
+		}
+
+		$cert_type   = $this->request->getData('Certificates.cert_type');
+		$name        = trim($this->request->getData('Certificates.name') ?? '');
+		$description = trim($this->request->getData('Certificates.description') ?? '');
+
+		// cert_type label
+		$certTypes = [
+			'participation' => 'Participation Certificate',
+			'achievement'   => 'Achievement Certificate',
+			'excellence'    => 'Excellence Certificate',
+			'appreciation'  => 'Appreciation Certificate',
+			'custom'        => 'Custom Certificate',
+		];
+		$cert_type_label = $certTypes[$cert_type] ?? 'Certificate';
+
+		$arrCertData = [
+			'convention_name' => $conventionD->name,
+			'season_year'     => $conventionSD->season_year,
+			'name'            => $name,
+			'description'     => $description,
+			'cert_type'       => $cert_type,
+			'cert_type_label' => $cert_type_label,
+		];
+
+		$this->set(compact('arrCertData', 'conventionSD', 'conventionD', 'slug_convention_season', 'slug_convention'));
+	}
 
 }
 

@@ -8,12 +8,12 @@ use Cake\Core\Configure\Engine\PhpConfig;
 
 class AdvertisementsController extends AppController {
 
-    protected array $paginate = ['limit' => 50, 'order' => ['Advertisements.name' => 'asc']];
+    public $paginate = ['limit' => 50, 'order' => ['Advertisements.name' => 'asc']];
     public $components = array('PImage', 'PImageTest');
 
     //public $helpers = array('Javascript', 'Ajax');
 
-    public function initialize(): void {
+    public function initialize() {
         parent::initialize();
         $this->loadComponent('Flash');
         $action = $this->request->getParam('action');
@@ -24,8 +24,8 @@ class AdvertisementsController extends AppController {
             }
         }
 		
-		$this->Amenities = $this->fetchTable('Amenities');
-        $this->Cities = $this->fetchTable('Cities');
+		$this->Amenities = $this->loadModel('Amenities');
+        $this->Cities = $this->loadModel('Cities');
     }
 
     public function index() {

@@ -16,6 +16,7 @@
                     <li class="<?php if(isset($changePassword)){ echo 'active';} ?>"><?php echo $this->Html->link('<i class="fa fa-circle-o"></i> Change Password', ['controller'=>'admins', 'action' => 'changePassword'], ['escape'=>false]); ?></li>
 					<li class="<?php if(isset($settings)){ echo 'active';} ?>"><?php echo $this->Html->link('<i class="fa fa-circle-o"></i> Settings', ['controller'=>'admins', 'action' => 'settings'], ['escape'=>false]); ?></li>
 					<li class="<?php if(isset($postinfo)){ echo 'active';} ?>"><?php echo $this->Html->link('<i class="fa fa-circle-o"></i> Post Information', ['controller'=>'admins', 'action' => 'postinfo'], ['escape'=>false]); ?></li>
+                    <li class="<?php if(isset($videos)){ echo 'active';} ?>"><?php echo $this->Html->link('<i class="fa fa-circle-o"></i> Videos', ['controller'=>'admins', 'action' => 'videos'], ['escape'=>false]); ?></li>
                 </ul>
             </li>
 			
@@ -143,9 +144,12 @@
                     <li class="<?php if(isset($nameTagsStudents)){ echo 'active';} ?>"><?php echo $this->Html->link('<i class="fa fa-circle-o"></i> List Students', ['controller'=>'nametags', 'action' => 'students'], ['escape'=>false]); ?></li>
 					<li class="<?php if(isset($nameTagsSponsors)){ echo 'active';} ?>"><?php echo $this->Html->link('<i class="fa fa-circle-o"></i> List Sponsors', ['controller'=>'nametags', 'action' => 'sponsors'], ['escape'=>false]); ?></li>
 					<li class="<?php if(isset($nameTagsVisitors)){ echo 'active';} ?>"><?php echo $this->Html->link('<i class="fa fa-circle-o"></i> List Visitors', ['controller'=>'nametags', 'action' => 'visitors'], ['escape'=>false]); ?></li>
-					
                 </ul>
             </li>
+
+			<li class="<?php if(isset($runningList)){ echo 'active';} ?>">
+				<?php echo $this->Html->link('<i class="fa fa-list-ol"></i> <span>Running List</span>', ['controller'=>'admins', 'action' => 'runninglist'], ['escape'=>false]); ?>
+			</li>
 			<?php
 			}
 			?>

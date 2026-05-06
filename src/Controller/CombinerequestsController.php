@@ -12,22 +12,22 @@ use Cake\I18n\I18n;
 
 class CombinerequestsController extends AppController {
 
-    protected array $paginate = ['limit' => 50];
+    public $paginate = ['limit' => 50];
     public $components = array('PImage', 'PImageTest');
 	
-	public function initialize(): void {
+	public function initialize() {
         parent::initialize();
 
         // Include the FlashComponent
         $this->loadComponent('Flash');
 
-        $this->Users = $this->fetchTable('Users'); 
-		$this->Emailtemplates = $this->fetchTable('Emailtemplates');
-		$this->Conventionregistrations = $this->fetchTable('Conventionregistrations');
-		$this->Conventionregistrationstudents = $this->fetchTable('Conventionregistrationstudents');
-		$this->Conventionseasonevents = $this->fetchTable('Conventionseasonevents');
-		$this->Events = $this->fetchTable('Events');
-		$this->Crstudentevents = $this->fetchTable('Crstudentevents');
+        $this->Users = $this->loadModel('Users');
+		$this->Emailtemplates = $this->loadModel('Emailtemplates');
+		$this->Conventionregistrations = $this->loadModel('Conventionregistrations');
+		$this->Conventionregistrationstudents = $this->loadModel('Conventionregistrationstudents');
+		$this->Conventionseasonevents = $this->loadModel('Conventionseasonevents');
+		$this->Events = $this->loadModel('Events');
+		$this->Crstudentevents = $this->loadModel('Crstudentevents');
     }
 
     public function viewlist() {
@@ -200,7 +200,7 @@ class CombinerequestsController extends AppController {
 			$this->redirect(['controller' => 'users', 'action' => 'dashboard']);
 		}
 		
-        $combinerequests = $this->Combinerequests->newEmptyEntity();
+        $combinerequests = $this->Combinerequests->newEntity();
 		if ($this->request->is('post')) {
 			
 			$data = $this->Combinerequests->patchEntity($combinerequests, $this->request->getData());

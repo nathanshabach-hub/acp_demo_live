@@ -8,12 +8,12 @@ use Cake\Core\Configure\Engine\PhpConfig;
 
 class ConventionregistrationteachersController extends AppController {
 
-    protected array $paginate = ['limit' => 50, 'order' => ['Events.name' => 'asc']];
+    public $paginate = ['limit' => 50, 'order' => ['Events.name' => 'asc']];
     public $components = array('PImage', 'PImageTest');
 
     //public $helpers = array('Javascript', 'Ajax');
 
-    public function initialize(): void {
+    public function initialize() {
         parent::initialize();
         $this->loadComponent('Flash');
         $action = $this->request->getParam('action');
@@ -23,10 +23,10 @@ class ConventionregistrationteachersController extends AppController {
                 $this->redirect(['controller' => 'admins', 'action' => 'login']);
             }
         }
-		$this->Users = $this->fetchTable('Users');
-		$this->Conventionregistrations = $this->fetchTable('Conventionregistrations');
-		$this->Conventionseasons = $this->fetchTable('Conventionseasons');
-		$this->Conventionregistrationstudents = $this->fetchTable('Conventionregistrationstudents');
+		$this->Users = $this->loadModel('Users');
+		$this->Conventionregistrations = $this->loadModel('Conventionregistrations');
+		$this->Conventionseasons = $this->loadModel('Conventionseasons');
+		$this->Conventionregistrationstudents = $this->loadModel('Conventionregistrationstudents');
     }
 	
 	public function allteachers() {

@@ -1,7 +1,7 @@
 <?php
 //date_default_timezone_set('Africa/Johannesburg');
 
-define('DB_HOST','localhost');
+define('DB_HOST','172.24.0.1');
 define('DB_USER','convention_acpdemo');
 define('DB_PASSWORD','p+M9$TRzp9C8');
 define('DB_NAME','convention_acpdemo');

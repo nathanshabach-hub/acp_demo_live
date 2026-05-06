@@ -102,8 +102,20 @@
                     <?php echo $this->Html->link('More info <i class="fa fa-arrow-circle-right"></i>', ['controller' => 'transactions', 'action' => 'index'], [ 'escape' => false, 'title' => 'More info', 'class' => 'small-box-footer']); ?>
                 </div>
             </div>
+
+			<div class="col-lg-3 col-xs-6">
+                <div class="small-box bg-purple">
+                    <div class="inner">
+                        <h3><?php echo isset($total_running_list) ? $total_running_list : '0'; ?></h3>
+                        <p>Running List</p>
+                    </div>
+                    <div class="icon">
+                        <i class="fa fa-list-ol"></i>
+                    </div>
+                    <?php echo $this->Html->link('More info <i class="fa fa-arrow-circle-right"></i>', ['controller' => 'admins', 'action' => 'runninglist'], [ 'escape' => false, 'title' => 'More info', 'class' => 'small-box-footer']); ?>
+                </div>
+            </div>
 			
-			 
     </section>
 	<?php
 	}

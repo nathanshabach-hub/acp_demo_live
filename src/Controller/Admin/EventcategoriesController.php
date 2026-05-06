@@ -8,12 +8,12 @@ use Cake\Core\Configure\Engine\PhpConfig;
 
 class EventcategoriesController extends AppController {
 
-    protected array $paginate = ['limit' => 50, 'order' => ['Eventcategories.name' => 'asc']];
+    public $paginate = ['limit' => 50, 'order' => ['Eventcategories.name' => 'asc']];
     public $components = array('PImage', 'PImageTest');
 
     //public $helpers = array('Javascript', 'Ajax');
 
-    public function initialize(): void {
+    public function initialize() {
         parent::initialize();
         $this->loadComponent('Flash');
         $action = $this->request->getParam('action');
@@ -24,8 +24,8 @@ class EventcategoriesController extends AppController {
             }
         }
 		
-		$this->Conventions = $this->fetchTable('Conventions');
-		$this->Events = $this->fetchTable('Events');
+		$this->Conventions = $this->loadModel('Conventions');
+		$this->Events = $this->loadModel('Events');
     }
 
     public function index() {
@@ -133,7 +133,7 @@ class EventcategoriesController extends AppController {
         $this->set('manageEvents', '1');
         $this->set('manageEventcategories', '1');
 		
-        $eventcategories = $this->Eventcategories->newEmptyEntity();
+        $eventcategories = $this->Eventcategories->newEntity();
         if ($this->request->is('post')) {
 			
 			//$this->prx($this->request->getData());

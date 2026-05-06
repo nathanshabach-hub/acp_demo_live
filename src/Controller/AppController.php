@@ -33,26 +33,26 @@ use Cake\Datasource\ConnectionManager;
 #[\AllowDynamicProperties]
 class AppController extends Controller{
     
-    public function initialize(): void {
+    public function initialize() {
     parent::initialize();
-		$this->Timezones = $this->fetchTable('Timezones');
-		$this->Eventtypes = $this->fetchTable('Eventtypes');
-		$this->Companies = $this->fetchTable('Companies');
-		$this->Users = $this->fetchTable('Users');
-		$this->Admins = $this->fetchTable('Admins');
-		$this->Settings = $this->fetchTable('Settings');
+		$this->Timezones = $this->loadModel('Timezones');
+		$this->Eventtypes = $this->loadModel('Eventtypes');
+		$this->Companies = $this->loadModel('Companies');
+		$this->Users = $this->loadModel('Users');
+		$this->Admins = $this->loadModel('Admins');
+		$this->Settings = $this->loadModel('Settings');
 		
-		$this->Emailtemplates = $this->fetchTable('Emailtemplates');
-		$this->Conventions = $this->fetchTable('Conventions');
-		$this->Conventionseasons = $this->fetchTable('Conventionseasons');
-		$this->Schedulings = $this->fetchTable('Schedulings');
-		$this->Events = $this->fetchTable('Events');
-		$this->Divisions = $this->fetchTable('Divisions');
-		$this->Seasons = $this->fetchTable('Seasons');
-		$this->Conventionregistrations = $this->fetchTable('Conventionregistrations');
-		$this->Conventionregistrationteachers = $this->fetchTable('Conventionregistrationteachers');
-		$this->Eventsubmissions = $this->fetchTable('Eventsubmissions');
-		$this->Schedulingtimings = $this->fetchTable('Schedulingtimings');
+		$this->Emailtemplates = $this->loadModel('Emailtemplates');
+		$this->Conventions = $this->loadModel('Conventions');
+		$this->Conventionseasons = $this->loadModel('Conventionseasons');
+		$this->Schedulings = $this->loadModel('Schedulings');
+		$this->Events = $this->loadModel('Events');
+		$this->Divisions = $this->loadModel('Divisions');
+		$this->Seasons = $this->loadModel('Seasons');
+		$this->Conventionregistrations = $this->loadModel('Conventionregistrations');
+		$this->Conventionregistrationteachers = $this->loadModel('Conventionregistrationteachers');
+		$this->Eventsubmissions = $this->loadModel('Eventsubmissions');
+		$this->Schedulingtimings = $this->loadModel('Schedulingtimings');
     }
 	
 	public function beforeRender(EventInterface $event) {
@@ -123,7 +123,7 @@ class AppController extends Controller{
 			// now get convention id for student
 			if($user_type == "Student")
 			{
-				$this->Conventionregistrationstudents = $this->fetchTable('Conventionregistrationstudents');
+				$this->Conventionregistrationstudents = $this->loadModel('Conventionregistrationstudents');
 				$convregstudents = $this->Conventionregistrationstudents->find()->where(['Conventionregistrationstudents.student_id' => $user_id,'Conventionregistrationstudents.season_id' => $season_id,'Conventionregistrationstudents.season_year' => $seasonD->season_year,'Conventionregistrationstudents.status' => 1])->order(['Conventionregistrationstudents.id' => 'ASC'])->all();
 				foreach($convregstudents as $convregs)
 				{
@@ -182,7 +182,7 @@ class AppController extends Controller{
 			if(!$checkSubmission)
 			{
 				// submit event
-				$eventsubmissions = $this->Eventsubmissions->newEmptyEntity();
+				$eventsubmissions = $this->Eventsubmissions->newEntity();
 				$dataES = $this->Eventsubmissions->patchEntity($eventsubmissions, array());
 
 				$dataES->slug 						= 'event-submission-'.$conventionregistration_id.'-'.time().'-'.rand(100,1000000);
@@ -958,7 +958,7 @@ class AppController extends Controller{
 		// $returnUrl = $this->request->getAttribute('params')->url;
 	$returnUrl = ltrim((string)$this->request->getRequestTarget(), '/');
         $userid =$this->request->getSession()->read("user_id");
-        $this->Users = $this->fetchTable('Users');
+        $this->Users = $this->loadModel('Users');
         $isExists = $this->Users->find()->where(['Users.id' => $userid, 'Users.activation_status' => 1, 'Users.status' => 1])->select(['id'])->first();
         if (empty($isExists)) {
             $msgString = "Please Login"; 
@@ -1013,10 +1013,20 @@ class AppController extends Controller{
         }
     }
 	
-	function checkRegistrationStillOpen($convention_registration_id=NULL) {
+function checkSubmissionsOpen($conventionseason_id = NULL) {
+		if (!$conventionseason_id) return;
+		$this->Conventionseasons = $this->loadModel('Conventionseasons');
+		$convSeasonD = $this->Conventionseasons->find()->where(['Conventionseasons.id' => $conventionseason_id])->first();
+		if ($convSeasonD && $convSeasonD->submissions_open == 0) {
+			$this->Flash->error('Sorry, submissions are currently closed for this convention season.');
+			$this->redirect('/users/dashboard');
+		}
+	}
+
+        function checkRegistrationStillOpen($convention_registration_id=NULL) {
         
 		$regAccepted = 0;
-        $this->Conventionregistrations = $this->fetchTable('Conventionregistrations');
+        $this->Conventionregistrations = $this->loadModel('Conventionregistrations');
 		
 		// to get conv reg details
         $convRegD = $this->Conventionregistrations->find()->where(['Conventionregistrations.id' => $convention_registration_id])->contain(['Conventionseasons'])->first();

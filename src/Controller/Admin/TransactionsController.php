@@ -9,12 +9,12 @@ use Cake\Mailer\Mailer;
 
 class TransactionsController extends AppController {
 
-    protected array $paginate = ['limit' => 50, 'order' => ['Transactions.name' => 'asc']];
+    public $paginate = ['limit' => 50, 'order' => ['Transactions.name' => 'asc']];
     public $components = array('PImage', 'PImageTest');
 
     //public $helpers = array('Javascript', 'Ajax');
 
-    public function initialize(): void {
+    public function initialize() {
         parent::initialize();
         $this->loadComponent('Flash');
         $action = $this->request->getParam('action');
@@ -25,13 +25,13 @@ class TransactionsController extends AppController {
             }
         }
 		
-		$this->Conventions = $this->fetchTable('Conventions');
-		$this->Events = $this->fetchTable('Events');
-		$this->Transactionstudents = $this->fetchTable('Transactionstudents');
-		$this->Settings = $this->fetchTable('Settings');
-		$this->Seasons = $this->fetchTable('Seasons');
-		$this->Emailtemplates = $this->fetchTable('Emailtemplates');
-		$this->Transactionteachers = $this->fetchTable('Transactionteachers');
+		$this->Conventions = $this->loadModel('Conventions');
+		$this->Events = $this->loadModel('Events');
+		$this->Transactionstudents = $this->loadModel('Transactionstudents');
+		$this->Settings = $this->loadModel('Settings');
+		$this->Seasons = $this->loadModel('Seasons');
+		$this->Emailtemplates = $this->loadModel('Emailtemplates');
+		$this->Transactionteachers = $this->loadModel('Transactionteachers');
     }
 
     public function index() {

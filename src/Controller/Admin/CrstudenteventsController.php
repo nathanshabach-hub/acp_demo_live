@@ -9,12 +9,12 @@ use Cake\Mailer\Mailer;
 
 class CrstudenteventsController extends AppController {
 
-    protected array $paginate = ['limit' => 50, 'order' => ['Conventionregistrations.name' => 'asc']];
+    public $paginate = ['limit' => 50, 'order' => ['Conventionregistrations.name' => 'asc']];
     public $components = array('PImage', 'PImageTest');
 
     //public $helpers = array('Javascript', 'Ajax');
 
-    public function initialize(): void {
+    public function initialize() {
         parent::initialize();
         $this->loadComponent('Flash');
         $action = $this->request->getParam('action');
@@ -25,12 +25,12 @@ class CrstudenteventsController extends AppController {
             }
         }
 		
-		$this->Conventions = $this->fetchTable('Conventions');
-		$this->Events = $this->fetchTable('Events');
-		$this->Settings = $this->fetchTable('Settings');
-		$this->Seasons = $this->fetchTable('Seasons');
-		$this->Emailtemplates = $this->fetchTable('Emailtemplates');
-		$this->Conventionregistrations = $this->fetchTable('Conventionregistrations');
+		$this->Conventions = $this->loadModel('Conventions');
+		$this->Events = $this->loadModel('Events');
+		$this->Settings = $this->loadModel('Settings');
+		$this->Seasons = $this->loadModel('Seasons');
+		$this->Emailtemplates = $this->loadModel('Emailtemplates');
+		$this->Conventionregistrations = $this->loadModel('Conventionregistrations');
     }
 	
 	public function groups($slug = null) {

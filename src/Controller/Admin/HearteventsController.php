@@ -10,12 +10,12 @@ use Cake\Mailer\Mailer;
 
 class HearteventsController extends AppController {
 
-    protected array $paginate = ['limit' => 50, 'order' => ['Conventions.name' => 'asc']];
+    public $paginate = ['limit' => 50, 'order' => ['Conventions.name' => 'asc']];
     public $components = array('PImage', 'PImageTest');
 
     //public $helpers = array('Javascript', 'Ajax');
 
-    public function initialize(): void {
+    public function initialize() {
         parent::initialize();
         $this->loadComponent('Flash');
         $action = $this->request->getParam('action');
@@ -26,14 +26,14 @@ class HearteventsController extends AppController {
             }
         }
 		
-		$this->Conventionseasons = $this->fetchTable('Conventionseasons');
-		$this->Seasons = $this->fetchTable('Seasons');
-		$this->Events = $this->fetchTable('Events');
-		$this->Conventionseasonevents = $this->fetchTable('Conventionseasonevents');
-		$this->Conventionregistrations = $this->fetchTable('Conventionregistrations');
-		$this->Conventionrooms = $this->fetchTable('Conventionrooms');
-		$this->Conventionseasonroomevents = $this->fetchTable('Conventionseasonroomevents');
-		$this->Conventionregistrationstudents = $this->fetchTable('Conventionregistrationstudents');
+		$this->Conventionseasons = $this->loadModel('Conventionseasons');
+		$this->Seasons = $this->loadModel('Seasons');
+		$this->Events = $this->loadModel('Events');
+		$this->Conventionseasonevents = $this->loadModel('Conventionseasonevents');
+		$this->Conventionregistrations = $this->loadModel('Conventionregistrations');
+		$this->Conventionrooms = $this->loadModel('Conventionrooms');
+		$this->Conventionseasonroomevents = $this->loadModel('Conventionseasonroomevents');
+		$this->Conventionregistrationstudents = $this->loadModel('Conventionregistrationstudents');
     }
 	
 	public function listheartevents($slug_convention_season = null,$slug_convention = null) {

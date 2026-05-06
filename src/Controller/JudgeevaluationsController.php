@@ -11,29 +11,29 @@ use Cake\I18n\I18n;
 
 class JudgeevaluationsController extends AppController {
 
-    protected array $paginate = ['limit' => 50];
+    public $paginate = ['limit' => 50];
     public $components = array('PImage', 'PImageTest');
 	
-	public function initialize(): void {
+	public function initialize() {
         parent::initialize();
 
         // Include the FlashComponent
         $this->loadComponent('Flash');
 
-        $this->Users = $this->fetchTable('Users'); 
-		$this->Emailtemplates = $this->fetchTable('Emailtemplates');
-		$this->Users = $this->fetchTable('Users');
-		$this->Conventionregistrations = $this->fetchTable('Conventionregistrations');
-		$this->Eventsubmissions = $this->fetchTable('Eventsubmissions');
-		$this->Events = $this->fetchTable('Events');
-		$this->Evaluationforms = $this->fetchTable('Evaluationforms');
-		$this->Judgeevaluations = $this->fetchTable('Judgeevaluations');
-		$this->Judgeevaluationmarks = $this->fetchTable('Judgeevaluationmarks');
-		$this->Settings = $this->fetchTable('Settings');
-		$this->Conventionseasonevents = $this->fetchTable('Conventionseasonevents');
-		$this->Crstudentevents = $this->fetchTable('Crstudentevents');
-		$this->Conventionregistrationstudents = $this->fetchTable('Conventionregistrationstudents');
-		$this->Resultpositions = $this->fetchTable('Resultpositions');
+        $this->Users = $this->loadModel('Users');
+		$this->Emailtemplates = $this->loadModel('Emailtemplates');
+		$this->Users = $this->loadModel('Users');
+		$this->Conventionregistrations = $this->loadModel('Conventionregistrations');
+		$this->Eventsubmissions = $this->loadModel('Eventsubmissions');
+		$this->Events = $this->loadModel('Events');
+		$this->Evaluationforms = $this->loadModel('Evaluationforms');
+		$this->Judgeevaluations = $this->loadModel('Judgeevaluations');
+		$this->Judgeevaluationmarks = $this->loadModel('Judgeevaluationmarks');
+		$this->Settings = $this->loadModel('Settings');
+		$this->Conventionseasonevents = $this->loadModel('Conventionseasonevents');
+		$this->Crstudentevents = $this->loadModel('Crstudentevents');
+		$this->Conventionregistrationstudents = $this->loadModel('Conventionregistrationstudents');
+		$this->Resultpositions = $this->loadModel('Resultpositions');
     }
 	
 	public function lowscoresave($conv_reg_slug=null,$event_submission_slug=null) {
@@ -132,7 +132,7 @@ class JudgeevaluationsController extends AppController {
 				
 				
 				// insert new record in judgeevaluations table
-				$judgeevaluations = $this->Judgeevaluations->newEmptyEntity();
+				$judgeevaluations = $this->Judgeevaluations->newEntity();
 				$dataJ = $this->Judgeevaluations->patchEntity($judgeevaluations, array());
 				
 				$dataJ->slug 							= "judge-event-evaluation-".$eventsubmissionD->id.'-'.time();
@@ -169,7 +169,7 @@ class JudgeevaluationsController extends AppController {
 					$totalMarksPossible 			= $totalMarksPossible + $question_marks_possible;
 					$totalMarksObtained 			= intval($totalMarksObtained) + intval($question_marks_obtained);
 					
-					$judgeevaluationmarks = $this->Judgeevaluationmarks->newEmptyEntity();
+					$judgeevaluationmarks = $this->Judgeevaluationmarks->newEntity();
 					$dataM = $this->Judgeevaluationmarks->patchEntity($judgeevaluationmarks, array());
 					
 					$dataM->judgeevaluation_id 			= $resultJ->id;
@@ -198,7 +198,7 @@ class JudgeevaluationsController extends AppController {
 					$negative_question_marks_possible 	= $request_data['negative_question_marks_possible'];
 					
 					// add this negative question in db table
-					$judgeevaluationmarks = $this->Judgeevaluationmarks->newEmptyEntity();
+					$judgeevaluationmarks = $this->Judgeevaluationmarks->newEntity();
 					$dataM = $this->Judgeevaluationmarks->patchEntity($judgeevaluationmarks, array());
 					
 					$dataM->judgeevaluation_id 			= $resultJ->id;
@@ -390,7 +390,7 @@ class JudgeevaluationsController extends AppController {
 				
 				
 				// insert new record in judgeevaluations table
-				$judgeevaluations = $this->Judgeevaluations->newEmptyEntity();
+				$judgeevaluations = $this->Judgeevaluations->newEntity();
 				$dataJ = $this->Judgeevaluations->patchEntity($judgeevaluations, $this->request->getData());
 				
 				$dataJ->slug 							= "judge-event-evaluation-".$eventsubmissionD->id.'-'.time();
@@ -427,7 +427,7 @@ class JudgeevaluationsController extends AppController {
 					$totalMarksPossible 			= $totalMarksPossible + $question_marks_possible;
 					$totalMarksObtained 			= intval($totalMarksObtained) + intval($question_marks_obtained);
 					
-					$judgeevaluationmarks = $this->Judgeevaluationmarks->newEmptyEntity();
+					$judgeevaluationmarks = $this->Judgeevaluationmarks->newEntity();
 					$dataM = $this->Judgeevaluationmarks->patchEntity($judgeevaluationmarks, $this->request->getData());
 					
 					$dataM->judgeevaluation_id 			= $resultJ->id;
@@ -456,7 +456,7 @@ class JudgeevaluationsController extends AppController {
 					$negative_question_marks_possible 	= $this->request->getData('negative_question_marks_possible');
 					
 					// add this negative question in db table
-					$judgeevaluationmarks = $this->Judgeevaluationmarks->newEmptyEntity();
+					$judgeevaluationmarks = $this->Judgeevaluationmarks->newEntity();
 					$dataM = $this->Judgeevaluationmarks->patchEntity($judgeevaluationmarks, $this->request->getData());
 					
 					$dataM->judgeevaluation_id 			= $resultJ->id;
@@ -546,7 +546,7 @@ class JudgeevaluationsController extends AppController {
 		}
 		
 		// insert new record in judgeevaluations table as dis not attent
-		$judgeevaluations = $this->Judgeevaluations->newEmptyEntity();
+		$judgeevaluations = $this->Judgeevaluations->newEntity();
 		$dataJ = $this->Judgeevaluations->patchEntity($judgeevaluations, $this->request->getData());
 		
 		$dataJ->slug 							= "judge-event-evaluation-".$eventsubmissionD->id.'-'.time();

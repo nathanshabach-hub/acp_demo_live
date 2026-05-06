@@ -8,12 +8,12 @@ use Cake\Core\Configure\Engine\PhpConfig;
 
 class SchedulingsController extends AppController {
 
-    protected array $paginate = ['limit' => 50, 'order' => ['Schedulings.name' => 'asc']];
+    public $paginate = ['limit' => 50, 'order' => ['Schedulings.name' => 'asc']];
     public $components = array('PImage', 'PImageTest');
 
     //public $helpers = array('Javascript', 'Ajax');
 
-    public function initialize(): void {
+    public function initialize() {
         parent::initialize();
         $this->loadComponent('Flash');
         $action = $this->request->getParam('action');
@@ -24,16 +24,16 @@ class SchedulingsController extends AppController {
             }
         }
 		
-		$this->Conventionseasons = $this->fetchTable('Conventionseasons');
-		$this->Conventions = $this->fetchTable('Conventions');
-		$this->Conventionseasonevents = $this->fetchTable('Conventionseasonevents');
-		$this->Conventionrooms = $this->fetchTable('Conventionrooms');
-		$this->Conventionseasonroomevents = $this->fetchTable('Conventionseasonroomevents');
-		$this->Conventionregistrations = $this->fetchTable('Conventionregistrations');
-		$this->Conventionregistrationstudents = $this->fetchTable('Conventionregistrationstudents');
-		$this->Events = $this->fetchTable('Events');
-		$this->Schedulingtimings = $this->fetchTable('Schedulingtimings');
-		$this->Crstudentevents = $this->fetchTable('Crstudentevents');
+		$this->Conventionseasons = $this->loadModel('Conventionseasons');
+		$this->Conventions = $this->loadModel('Conventions');
+		$this->Conventionseasonevents = $this->loadModel('Conventionseasonevents');
+		$this->Conventionrooms = $this->loadModel('Conventionrooms');
+		$this->Conventionseasonroomevents = $this->loadModel('Conventionseasonroomevents');
+		$this->Conventionregistrations = $this->loadModel('Conventionregistrations');
+		$this->Conventionregistrationstudents = $this->loadModel('Conventionregistrationstudents');
+		$this->Events = $this->loadModel('Events');
+		$this->Schedulingtimings = $this->loadModel('Schedulingtimings');
+		$this->Crstudentevents = $this->loadModel('Crstudentevents');
     }
 
     public function precheck($convention_season_slug=null) {
@@ -58,7 +58,7 @@ class SchedulingsController extends AppController {
 		if(!$checkSchedulingRecord)
 		{
 			// enter new record
-			$schedulings = $this->Schedulings->newEmptyEntity();
+			$schedulings = $this->Schedulings->newEntity();
 			$dataSch = $this->Schedulings->patchEntity($schedulings, array());
 
 			$dataSch->slug 						= "scheduling-conv-season-".$conventionSD->id.'-'.time();

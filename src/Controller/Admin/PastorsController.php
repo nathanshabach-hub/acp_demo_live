@@ -7,9 +7,9 @@ use Cake\Core\Configure;
 
 class PastorsController extends AppController {
 
-    protected array $paginate = ['limit' => 50, 'order' => ['Pastors.id' => 'desc']];
+    public $paginate = ['limit' => 50, 'order' => ['Pastors.id' => 'desc']];
 
-    public function initialize(): void {
+    public function initialize() {
         parent::initialize();
         $this->loadComponent('Flash');
         
@@ -90,7 +90,7 @@ class PastorsController extends AppController {
         $this->set('managePastors', '1');
         $this->set('addPastor', '1');
 
-        $pastor = $this->Pastors->newEmptyEntity();
+        $pastor = $this->Pastors->newEntity();
         
         if ($this->request->is('post')) {
             $pastor = $this->Pastors->patchEntity($pastor, $this->request->getData());

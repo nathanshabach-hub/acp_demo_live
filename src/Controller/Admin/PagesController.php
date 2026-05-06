@@ -6,11 +6,11 @@ use Cake\Core\Configure\Engine\PhpConfig;
 
 class PagesController extends AppController{
 
-    protected array $paginate = ['limit' => 50,'order' => ['Pages.name' => 'asc']];
+    public $paginate = ['limit' => 50,'order' => ['Pages.name' => 'asc']];
     public $components = array('PImage', 'PImageTest');
     //public $helpers = array('Javascript', 'Ajax');
    
-    public function initialize(): void {
+    public function initialize() {
         parent::initialize();
         $this->loadComponent('Flash');
         $action = $this->request->getParam('action');

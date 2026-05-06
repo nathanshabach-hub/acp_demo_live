@@ -10,12 +10,12 @@ use Cake\Datasource\ConnectionManager;
 
 class CombinerequestsController extends AppController {
 
-    protected array $paginate = ['limit' => 50, 'order' => ['Combinerequests.name' => 'asc']];
+    public $paginate = ['limit' => 50, 'order' => ['Combinerequests.name' => 'asc']];
     public $components = array('PImage', 'PImageTest');
 
     //public $helpers = array('Javascript', 'Ajax');
 
-    public function initialize(): void {
+    public function initialize() {
         parent::initialize();
         $this->loadComponent('Flash');
         $action = $this->request->getParam('action');
@@ -26,9 +26,9 @@ class CombinerequestsController extends AppController {
             }
         }
 		
-		$this->Conventions = $this->fetchTable('Conventions');
-		$this->Events = $this->fetchTable('Events');
-		$this->Emailtemplates = $this->fetchTable('Emailtemplates');
+		$this->Conventions = $this->loadModel('Conventions');
+		$this->Events = $this->loadModel('Events');
+		$this->Emailtemplates = $this->loadModel('Emailtemplates');
     }
 
     public function index() {

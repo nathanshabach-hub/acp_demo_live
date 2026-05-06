@@ -8,12 +8,12 @@ use Cake\Core\Configure\Engine\PhpConfig;
 
 class EvaluationareasController extends AppController {
 
-    protected array $paginate = ['limit' => 50, 'order' => ['Evaluationareas.name' => 'asc']];
+    public $paginate = ['limit' => 50, 'order' => ['Evaluationareas.name' => 'asc']];
     public $components = array('PImage', 'PImageTest');
 
     //public $helpers = array('Javascript', 'Ajax');
 
-    public function initialize(): void {
+    public function initialize() {
         parent::initialize();
         $this->loadComponent('Flash');
         $action = $this->request->getParam('action');
@@ -24,9 +24,9 @@ class EvaluationareasController extends AppController {
             }
         }
 		
-		$this->Evaluationforms = $this->fetchTable('Evaluationforms');
-		$this->Evaluationcategories = $this->fetchTable('Evaluationcategories');
-		$this->Evaluationquestions = $this->fetchTable('Evaluationquestions');
+		$this->Evaluationforms = $this->loadModel('Evaluationforms');
+		$this->Evaluationcategories = $this->loadModel('Evaluationcategories');
+		$this->Evaluationquestions = $this->loadModel('Evaluationquestions');
     }
 
     public function index($form_slug=null) {
@@ -151,7 +151,7 @@ class EvaluationareasController extends AppController {
 		$questionsDD = $this->Evaluationquestions->find()->where([])->order(['Evaluationquestions.question' => 'ASC'])->all()->combine('id', 'question')->toArray();
 		$this->set('questionsDD', $questionsDD);
 		
-        $evaluationareas = $this->Evaluationareas->newEmptyEntity();
+        $evaluationareas = $this->Evaluationareas->newEntity();
         if ($this->request->is('post')) {
 			
 			//$this->prx($this->request->getData());

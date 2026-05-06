@@ -11,27 +11,27 @@ use Cake\I18n\I18n;
 
 class TransactionsController extends AppController {
 
-    public function initialize(): void {
+    public function initialize() {
         parent::initialize();
 
         // Include the FlashComponent
         $this->loadComponent('Flash');
 
-        $this->Users = $this->fetchTable('Users'); 
-		$this->Emailtemplates = $this->fetchTable('Emailtemplates');
-		$this->Conventions = $this->fetchTable('Conventions');
-		$this->Conventionseasons = $this->fetchTable('Conventionseasons');
-		$this->Events = $this->fetchTable('Events');
-		$this->Divisions = $this->fetchTable('Divisions');
-		$this->Seasons = $this->fetchTable('Seasons');
-		$this->Conventionregistrations = $this->fetchTable('Conventionregistrations');
-		$this->Conventionregistrationteachers = $this->fetchTable('Conventionregistrationteachers');
-		$this->Conventionregistrationstudents = $this->fetchTable('Conventionregistrationstudents');
-		$this->Transactions = $this->fetchTable('Transactions');
-		$this->Transactionstudents = $this->fetchTable('Transactionstudents');
-		$this->Settings = $this->fetchTable('Settings');
-		$this->Crstudentevents = $this->fetchTable('Crstudentevents');
-		$this->Transactionteachers = $this->fetchTable('Transactionteachers');
+        $this->Users = $this->loadModel('Users');
+		$this->Emailtemplates = $this->loadModel('Emailtemplates');
+		$this->Conventions = $this->loadModel('Conventions');
+		$this->Conventionseasons = $this->loadModel('Conventionseasons');
+		$this->Events = $this->loadModel('Events');
+		$this->Divisions = $this->loadModel('Divisions');
+		$this->Seasons = $this->loadModel('Seasons');
+		$this->Conventionregistrations = $this->loadModel('Conventionregistrations');
+		$this->Conventionregistrationteachers = $this->loadModel('Conventionregistrationteachers');
+		$this->Conventionregistrationstudents = $this->loadModel('Conventionregistrationstudents');
+		$this->Transactions = $this->loadModel('Transactions');
+		$this->Transactionstudents = $this->loadModel('Transactionstudents');
+		$this->Settings = $this->loadModel('Settings');
+		$this->Crstudentevents = $this->loadModel('Crstudentevents');
+		$this->Transactionteachers = $this->loadModel('Transactionteachers');
     }
 	
 	public function paymentsummary() {
@@ -221,7 +221,7 @@ class TransactionsController extends AppController {
 			}
 			
 			// Step 1:: Add 1 record into transactions
-			$transactions = $this->Transactions->newEmptyEntity();
+			$transactions = $this->Transactions->newEntity();
 			$dataT = $this->Transactions->patchEntity($transactions, array());
 
 			$dataT->slug 										= "transaction-cr-".$sess_selected_convention_registration_id.'-'.time();
@@ -284,7 +284,7 @@ class TransactionsController extends AppController {
 					}
 					
 					// add new record to transactionstudents table
-					$transactionstudents = $this->Transactionstudents->newEmptyEntity();
+					$transactionstudents = $this->Transactionstudents->newEntity();
 					$dataTS = $this->Transactionstudents->patchEntity($transactionstudents, $this->request->getData());
 					
 					$dataTS->transaction_id							= $transaction_id;
@@ -325,7 +325,7 @@ class TransactionsController extends AppController {
 				if(!$checkTeacherF)
 				{
 					// add new record to Transactionteachers table
-					$transactionteachers = $this->Transactionteachers->newEmptyEntity();
+					$transactionteachers = $this->Transactionteachers->newEntity();
 					$dataTT = $this->Transactionteachers->patchEntity($transactionteachers, $this->request->getData());
 					
 					$dataTT->transaction_id							= $transaction_id;

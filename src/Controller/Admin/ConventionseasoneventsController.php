@@ -8,12 +8,12 @@ use Cake\Core\Configure\Engine\PhpConfig;
 
 class ConventionseasoneventsController extends AppController {
 
-    protected array $paginate = ['limit' => 50, 'order' => ['Events.name' => 'asc']];
+    public $paginate = ['limit' => 50, 'order' => ['Events.name' => 'asc']];
     public $components = array('PImage', 'PImageTest');
 
     //public $helpers = array('Javascript', 'Ajax');
 
-    public function initialize(): void {
+    public function initialize() {
         parent::initialize();
         $this->loadComponent('Flash');
         $action = $this->request->getParam('action');
@@ -24,7 +24,7 @@ class ConventionseasoneventsController extends AppController {
             }
         }
 		
-		$this->Divisions = $this->fetchTable('Divisions');
+		$this->Divisions = $this->loadModel('Divisions');
     }
 	
 	public function allevents() {

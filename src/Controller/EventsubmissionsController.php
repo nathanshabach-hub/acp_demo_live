@@ -11,25 +11,25 @@ use Cake\I18n\I18n;
 
 class EventsubmissionsController extends AppController {
 
-    protected array $paginate = ['limit' => 50];
+    public $paginate = ['limit' => 50];
     public $components = array('PImage', 'PImageTest');
 	
-	public function initialize(): void {
+	public function initialize() {
         parent::initialize();
 
         // Include the FlashComponent
         $this->loadComponent('Flash');
 
-        $this->Users = $this->fetchTable('Users'); 
-		$this->Emailtemplates = $this->fetchTable('Emailtemplates');
-		$this->Users = $this->fetchTable('Users');
-		$this->Conventionregistrations = $this->fetchTable('Conventionregistrations');
-		$this->Conventionregistrationstudents = $this->fetchTable('Conventionregistrationstudents');
-		$this->Conventionseasonevents = $this->fetchTable('Conventionseasonevents');
-		$this->Events = $this->fetchTable('Events');
-		$this->Books = $this->fetchTable('Books');
-		$this->Crstudentevents = $this->fetchTable('Crstudentevents');
-		$this->Judgeevaluations = $this->fetchTable('Judgeevaluations');
+        $this->Users = $this->loadModel('Users');
+		$this->Emailtemplates = $this->loadModel('Emailtemplates');
+		$this->Users = $this->loadModel('Users');
+		$this->Conventionregistrations = $this->loadModel('Conventionregistrations');
+		$this->Conventionregistrationstudents = $this->loadModel('Conventionregistrationstudents');
+		$this->Conventionseasonevents = $this->loadModel('Conventionseasonevents');
+		$this->Events = $this->loadModel('Events');
+		$this->Books = $this->loadModel('Books');
+		$this->Crstudentevents = $this->loadModel('Crstudentevents');
+		$this->Judgeevaluations = $this->loadModel('Judgeevaluations');
     }
 	
 	public function viewlist() {
@@ -104,10 +104,7 @@ class EventsubmissionsController extends AppController {
 			$this->set('conventionRegD', $conventionRegD);
 			
 			$this->checkRegistrationStillOpen($this->request->getSession()->read("sess_selected_convention_registration_id"));
-			
-			// to get the list of event ids chosen in this convention for this season
-			$arrConvSeasonEvents = array();
-			$arrConvSeasonEvents[] = 0;
+                        $this->checkSubmissionsOpen($conventionRegD->conventionseason_id);
 			$convSeasonEvents = $this->Conventionseasonevents->find()->where(["Conventionseasonevents.conventionseasons_id" => $conventionRegD->conventionseason_id])->order(['Conventionseasonevents.id' => 'ASC'])->all();
 			foreach($convSeasonEvents as $convsevent)
 			{
@@ -134,7 +131,7 @@ class EventsubmissionsController extends AppController {
 			$this->redirect(['controller' => 'users', 'action' => 'dashboard']);
 		}
 		
-        $eventsubmissions = $this->Eventsubmissions->newEmptyEntity();
+        $eventsubmissions = $this->Eventsubmissions->newEntity();
         if ($this->request->is('post')) {
             $data = $this->Eventsubmissions->patchEntity($eventsubmissions, $this->request->getData());
             if (count($data->getErrors()) == 0) {
@@ -343,6 +340,7 @@ class EventsubmissionsController extends AppController {
 			// to get convention registration details
 			$conventionRegD = $this->Conventionregistrations->find()->where(['Conventionregistrations.id' => $convRegStudentD->conventionregistration_id])->first();
 			$this->set('conventionRegD', $conventionRegD);
+			$this->checkSubmissionsOpen($conventionRegD->conventionseason_id);
 		}
 		else
 		{
@@ -351,7 +349,7 @@ class EventsubmissionsController extends AppController {
 		}
 		
 		
-        $eventsubmissions = $this->Eventsubmissions->newEmptyEntity();
+        $eventsubmissions = $this->Eventsubmissions->newEntity();
         if ($this->request->is('post')) {
             $data = $this->Eventsubmissions->patchEntity($eventsubmissions, $this->request->getData());
             if (count($data->getErrors()) == 0) {
@@ -499,11 +497,7 @@ class EventsubmissionsController extends AppController {
 			// to get convention registration details
 			$conventionRegD = $this->Conventionregistrations->find()->where(['Conventionregistrations.id' => $crstudentEventsD->conventionregistration_id])->first();
 			$this->set('conventionRegD', $conventionRegD);
-		}
-		else
-		{
-			$this->Flash->error('Invaid information.');
-			$this->redirect(['controller' => 'conventionregistrations', 'action' => 'packageregistration']);
+                        $this->checkSubmissionsOpen($conventionRegD->conventionseason_id);
 		}
 		
 		// to check submission already done for this group or not
@@ -535,7 +529,7 @@ class EventsubmissionsController extends AppController {
 		}
 		
 		
-        $eventsubmissions = $this->Eventsubmissions->newEmptyEntity();
+        $eventsubmissions = $this->Eventsubmissions->newEntity();
         if ($this->request->is('post')) {
             $data = $this->Eventsubmissions->patchEntity($eventsubmissions, $this->request->getData());
             if (count($data->getErrors()) == 0) {
@@ -746,7 +740,7 @@ class EventsubmissionsController extends AppController {
 				else
 				{
 					// insert new record
-					$judgeevaluations = $this->Judgeevaluations->newEmptyEntity();
+					$judgeevaluations = $this->Judgeevaluations->newEntity();
 					$dataJ = $this->Judgeevaluations->patchEntity($judgeevaluations, array());
 					
 					$dataJ->slug 							= "judge-times-event-evaluation-".$eventsubmissionD->id.'-'.time();
@@ -930,7 +924,7 @@ class EventsubmissionsController extends AppController {
 				else
 				{
 					// insert new record
-					$judgeevaluations = $this->Judgeevaluations->newEmptyEntity();
+					$judgeevaluations = $this->Judgeevaluations->newEntity();
 					$dataJ = $this->Judgeevaluations->patchEntity($judgeevaluations, array());
 					
 					$dataJ->slug 							= "judge-times-event-evaluation-".$eventsubmissionD->id.'-'.time();
@@ -1172,7 +1166,7 @@ class EventsubmissionsController extends AppController {
 				else
 				{
 					// insert new record
-					$judgeevaluations = $this->Judgeevaluations->newEmptyEntity();
+					$judgeevaluations = $this->Judgeevaluations->newEntity();
 					$dataJ = $this->Judgeevaluations->patchEntity($judgeevaluations, array());
 					
 					$dataJ->slug 							= "judge-times-event-evaluation-".$eventsubmissionD->id.'-'.time();
@@ -1366,7 +1360,7 @@ class EventsubmissionsController extends AppController {
 				else
 				{
 					// insert new record
-					$judgeevaluations = $this->Judgeevaluations->newEmptyEntity();
+					$judgeevaluations = $this->Judgeevaluations->newEntity();
 					$dataJ = $this->Judgeevaluations->patchEntity($judgeevaluations, array());
 					
 					$dataJ->slug 							= "judge-times-event-evaluation-".$eventsubmissionD->id.'-'.time();
@@ -1509,7 +1503,7 @@ class EventsubmissionsController extends AppController {
 				else
 				{
 					// insert new record
-					$judgeevaluations = $this->Judgeevaluations->newEmptyEntity();
+					$judgeevaluations = $this->Judgeevaluations->newEntity();
 					$dataJ = $this->Judgeevaluations->patchEntity($judgeevaluations, array());
 					
 					$dataJ->slug 							= "judge-times-event-evaluation-".$eventsubmissionD->id.'-'.time();

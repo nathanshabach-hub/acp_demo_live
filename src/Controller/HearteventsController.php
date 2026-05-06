@@ -11,20 +11,20 @@ use Cake\I18n\I18n;
 
 class HearteventsController extends AppController {
 
-    protected array $paginate = ['limit' => 50];
+    public $paginate = ['limit' => 50];
     public $components = array('PImage', 'PImageTest');
 	
-	public function initialize(): void {
+	public function initialize() {
         parent::initialize();
 
         // Include the FlashComponent
         $this->loadComponent('Flash');
 
-        $this->Users = $this->fetchTable('Users'); 
-		$this->Emailtemplates = $this->fetchTable('Emailtemplates');
-		$this->Users = $this->fetchTable('Users');
-		$this->Conventionregistrations = $this->fetchTable('Conventionregistrations');
-		$this->Conventionregistrationstudents = $this->fetchTable('Conventionregistrationstudents');
+        $this->Users = $this->loadModel('Users');
+		$this->Emailtemplates = $this->loadModel('Emailtemplates');
+		$this->Users = $this->loadModel('Users');
+		$this->Conventionregistrations = $this->loadModel('Conventionregistrations');
+		$this->Conventionregistrationstudents = $this->loadModel('Conventionregistrationstudents');
     }
 	
 	public function viewlist() {
@@ -178,7 +178,7 @@ class HearteventsController extends AppController {
 			$this->redirect(['controller' => 'users', 'action' => 'dashboard']);
 		}
 		
-        $heartevents = $this->Heartevents->newEmptyEntity();
+        $heartevents = $this->Heartevents->newEntity();
         if ($this->request->is('post')) {
             $data = $this->Heartevents->patchEntity($heartevents, $this->request->getData());
             if (count($data->getErrors()) == 0) {

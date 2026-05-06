@@ -8,12 +8,12 @@ use Cake\Core\Configure\Engine\PhpConfig;
 
 class EvaluationcategoriesController extends AppController {
 
-    protected array $paginate = ['limit' => 50, 'order' => ['Evaluationcategories.name' => 'asc']];
+    public $paginate = ['limit' => 50, 'order' => ['Evaluationcategories.name' => 'asc']];
     public $components = array('PImage', 'PImageTest');
 
     //public $helpers = array('Javascript', 'Ajax');
 
-    public function initialize(): void {
+    public function initialize() {
         parent::initialize();
         $this->loadComponent('Flash');
         $action = $this->request->getParam('action');
@@ -24,7 +24,7 @@ class EvaluationcategoriesController extends AppController {
             }
         }
 		
-		$this->Evaluationquestions = $this->fetchTable('Evaluationquestions');
+		$this->Evaluationquestions = $this->loadModel('Evaluationquestions');
     }
 
     public function index() {
@@ -97,7 +97,7 @@ class EvaluationcategoriesController extends AppController {
         $this->set('manageEvaluations', '1');
         $this->set('evalcategoriesList', '1');
 		
-        $evaluationcategories = $this->Evaluationcategories->newEmptyEntity();
+        $evaluationcategories = $this->Evaluationcategories->newEntity();
         if ($this->request->is('post')) {
 			
 			//$this->prx($this->request->getData());

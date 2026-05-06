@@ -9,7 +9,7 @@ class User extends Entity
 {
 
     // Make all fields mass assignable except for primary key field "id".
-    protected array $_accessible = [
+    protected $_accessible = [
         '*' => true,
         'id' => false
     ];

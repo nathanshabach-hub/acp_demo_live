@@ -17,25 +17,25 @@ class ConventionregistrationsController extends AppController {
         // Include the FlashComponent
         $this->loadComponent('Flash');
 
-        $this->Users = $this->fetchTable('Users'); 
-		$this->Emailtemplates = $this->fetchTable('Emailtemplates');
-		$this->Conventions = $this->fetchTable('Conventions');
-		$this->Conventionseasons = $this->fetchTable('Conventionseasons');
-		$this->Events = $this->fetchTable('Events');
-		$this->Divisions = $this->fetchTable('Divisions');
-		$this->Seasons = $this->fetchTable('Seasons');
-		$this->Admins = $this->fetchTable('Admins');
-		$this->Conventionregistrations = $this->fetchTable('Conventionregistrations');
-		$this->Conventionregistrationteachers = $this->fetchTable('Conventionregistrationteachers');
-		$this->Conventionregistrationstudents = $this->fetchTable('Conventionregistrationstudents');
-		$this->Settings = $this->fetchTable('Settings');
-		$this->Transactions = $this->fetchTable('Transactions');
-		$this->Crstudentevents = $this->fetchTable('Crstudentevents');
-		$this->Conventionseasonevents = $this->fetchTable('Conventionseasonevents');
-		$this->Eventsubmissions = $this->fetchTable('Eventsubmissions');
-		$this->Results = $this->fetchTable('Results');
-		$this->Resultpositions = $this->fetchTable('Resultpositions');
-		$this->Books = $this->fetchTable('Books');
+        $this->Users = $this->loadModel('Users');
+		$this->Emailtemplates = $this->loadModel('Emailtemplates');
+		$this->Conventions = $this->loadModel('Conventions');
+		$this->Conventionseasons = $this->loadModel('Conventionseasons');
+		$this->Events = $this->loadModel('Events');
+		$this->Divisions = $this->loadModel('Divisions');
+		$this->Seasons = $this->loadModel('Seasons');
+		$this->Admins = $this->loadModel('Admins');
+		$this->Conventionregistrations = $this->loadModel('Conventionregistrations');
+		$this->Conventionregistrationteachers = $this->loadModel('Conventionregistrationteachers');
+		$this->Conventionregistrationstudents = $this->loadModel('Conventionregistrationstudents');
+		$this->Settings = $this->loadModel('Settings');
+		$this->Transactions = $this->loadModel('Transactions');
+		$this->Crstudentevents = $this->loadModel('Crstudentevents');
+		$this->Conventionseasonevents = $this->loadModel('Conventionseasonevents');
+		$this->Eventsubmissions = $this->loadModel('Eventsubmissions');
+		$this->Results = $this->loadModel('Results');
+		$this->Resultpositions = $this->loadModel('Resultpositions');
+		$this->Books = $this->loadModel('Books');
     }
 	
 	public function myregistrations() {
@@ -265,7 +265,7 @@ class ConventionregistrationsController extends AppController {
 			
 			$teacher_id = $this->request->getData('Conventionregistrationteachers.teacher_id');
 			
-			$conventionregistrationteachers = $this->Conventionregistrationteachers->newEmptyEntity();
+			$conventionregistrationteachers = $this->Conventionregistrationteachers->newEntity();
 			$dataCRT = $this->Conventionregistrationteachers->patchEntity($conventionregistrationteachers, $this->request->getData());
 
 			$dataCRT->slug 								= "conv-reg-supervisor-".$sess_selected_convention_registration_id.'-'.$teacher_id.'-'.time();
@@ -525,7 +525,7 @@ class ConventionregistrationsController extends AppController {
 			$this->redirect(['controller' => 'users', 'action' => 'dashboard']);
 		}
 		
-        $conventionregistrationstudents = $this->Conventionregistrationstudents->newEmptyEntity();
+        $conventionregistrationstudents = $this->Conventionregistrationstudents->newEntity();
 		if ($this->request->is('post')) {
 			
 			$data = $this->Conventionregistrationstudents->patchEntity($conventionregistrationstudents, $this->request->getData());
@@ -656,7 +656,7 @@ class ConventionregistrationsController extends AppController {
 					else
 					{
 						// insert new record
-						$conventionregistrations = $this->Conventionregistrations->newEmptyEntity();
+						$conventionregistrations = $this->Conventionregistrations->newEntity();
 						$dataCR = $this->Conventionregistrations->patchEntity($conventionregistrations, array());
 
 						$dataCR->conventionseason_id 	= $convSeasonD->id;
@@ -1023,7 +1023,7 @@ class ConventionregistrationsController extends AppController {
 				
 				if($checkValidEvent && $checkValidEventGender && $studentAge<21)
 				{
-					$crstudentevents = $this->Crstudentevents->newEmptyEntity();
+					$crstudentevents = $this->Crstudentevents->newEntity();
 					$dataCRSE = $this->Crstudentevents->patchEntity($crstudentevents, $this->request->getData());
 
 					$dataCRSE->slug								= "conv-student-event-".$event_id.'-'.$student_id.'-'.time();
@@ -1167,7 +1167,7 @@ class ConventionregistrationsController extends AppController {
 				
 				if($checkValidEvent && $checkValidEventGender && $studentAge<21)
 				{
-					$crstudentevents = $this->Crstudentevents->newEmptyEntity();
+					$crstudentevents = $this->Crstudentevents->newEntity();
 					$dataCRSE = $this->Crstudentevents->patchEntity($crstudentevents, $this->request->getData());
 
 					$dataCRSE->slug								= "conv-student-event-".$event_id.'-'.$student_id.'-'.time();
@@ -1330,7 +1330,7 @@ class ConventionregistrationsController extends AppController {
 					else
 					{
 						// insert new record
-						$conventionregistrations = $this->Conventionregistrations->newEmptyEntity();
+						$conventionregistrations = $this->Conventionregistrations->newEntity();
 						$dataCR = $this->Conventionregistrations->patchEntity($conventionregistrations, array());
 
 						$dataCR->conventionseason_id 	= $convSeasonD->id;

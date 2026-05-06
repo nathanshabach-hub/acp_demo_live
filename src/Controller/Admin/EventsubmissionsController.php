@@ -9,12 +9,12 @@ use Cake\Datasource\ConnectionManager;
 
 class EventsubmissionsController extends AppController {
 
-    protected array $paginate = ['limit' => 50, 'order' => ['Conventions.name' => 'asc']];
+    public $paginate = ['limit' => 50, 'order' => ['Conventions.name' => 'asc']];
     public $components = array('PImage', 'PImageTest');
 
     //public $helpers = array('Javascript', 'Ajax');
 
-    public function initialize(): void {
+    public function initialize() {
         parent::initialize();
         $this->loadComponent('Flash');
         $action = $this->request->getParam('action');
@@ -25,12 +25,12 @@ class EventsubmissionsController extends AppController {
             }
         }
 		
-		$this->Conventionseasons = $this->fetchTable('Conventionseasons');
-		$this->Seasons = $this->fetchTable('Seasons');
-		$this->Events = $this->fetchTable('Events');
-		$this->Conventionseasonevents = $this->fetchTable('Conventionseasonevents');
-		$this->Conventionregistrations = $this->fetchTable('Conventionregistrations');
-		$this->Judgeevaluations = $this->fetchTable('Judgeevaluations');
+		$this->Conventionseasons = $this->loadModel('Conventionseasons');
+		$this->Seasons = $this->loadModel('Seasons');
+		$this->Events = $this->loadModel('Events');
+		$this->Conventionseasonevents = $this->loadModel('Conventionseasonevents');
+		$this->Conventionregistrations = $this->loadModel('Conventionregistrations');
+		$this->Judgeevaluations = $this->loadModel('Judgeevaluations');
     }
 	
 	public function index($slug=null) {
@@ -43,7 +43,7 @@ class EventsubmissionsController extends AppController {
 		$separator = array();
         $condition = array();
 
-		$conventionsDD = $this->fetchTable('Conventions')->find()->where([])->order(['Conventions.name' => 'ASC'])->all()->combine('id', 'name')->toArray();
+		$conventionsDD = $this->loadModel('Conventions')->find()->where([])->order(['Conventions.name' => 'ASC'])->all()->combine('id', 'name')->toArray();
 		$this->set('conventionsDD', $conventionsDD);
 
 		$seasonsDD = $this->Seasons->find()->where([])->order(['Seasons.season_year' => 'DESC'])->all()->combine('season_year', 'season_year')->toArray();

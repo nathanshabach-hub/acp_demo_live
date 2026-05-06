@@ -5,7 +5,7 @@ use Cake\ORM\Entity;
 
 class Pastor extends Entity
 {
-    protected array $_accessible = [
+    protected $_accessible = [
         'first_name' => true,
         'last_name' => true,
         'contact_details' => true,

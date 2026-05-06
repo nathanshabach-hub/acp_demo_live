@@ -5,10 +5,8 @@ use Cake\Cache\Cache;
 use Cake\Core\Configure;
 use Cake\Core\Configure\Engine\PhpConfig;
 use Cake\Datasource\ConnectionManager;
-use Cake\Error\ErrorTrap;
-use Cake\Error\ExceptionTrap;
 use Cake\Log\Log;
-use Cake\Mailer\Mailer;
+use Cake\Mailer\Email;
 use Cake\Mailer\TransportFactory;
 use Cake\Utility\Security;
 use Cake\Http\ServerRequest;
@@ -16,10 +14,55 @@ use Detection\MobileDetect;
 
 require __DIR__ . '/paths.php';
 require ROOT . DS . 'vendor' . DS . 'autoload.php';
-require ROOT . DS . 'vendor' . DS . 'cakephp' . DS . 'cakephp' . DS . 'src' . DS . 'Core' . DS . 'functions.php';
-require ROOT . DS . 'vendor' . DS . 'cakephp' . DS . 'cakephp' . DS . 'src' . DS . 'Core' . DS . 'functions_global.php';
-require_once ROOT . DS . 'vendor' . DS . 'cakephp' . DS . 'cakephp' . DS . 'src' . DS . 'I18n' . DS . 'functions.php';
-require_once ROOT . DS . 'vendor' . DS . 'cakephp' . DS . 'cakephp' . DS . 'src' . DS . 'I18n' . DS . 'functions_global.php';
+
+$coreFunctions = [
+    ROOT . DS . 'vendor' . DS . 'cakephp' . DS . 'cakephp' . DS . 'src' . DS . 'Core' . DS . 'functions.php',
+    CORE_PATH . 'src' . DS . 'Core' . DS . 'functions.php',
+    ROOT . DS . 'vendors' . DS . 'cakephp' . DS . 'cakephp' . DS . 'src' . DS . 'Core' . DS . 'functions.php',
+];
+foreach ($coreFunctions as $coreFunctionFile) {
+    if (file_exists($coreFunctionFile)) {
+        require_once $coreFunctionFile;
+        break;
+    }
+}
+
+$coreGlobalFunctions = [
+    ROOT . DS . 'vendor' . DS . 'cakephp' . DS . 'cakephp' . DS . 'src' . DS . 'Core' . DS . 'functions_global.php',
+    CORE_PATH . 'src' . DS . 'Core' . DS . 'functions_global.php',
+    ROOT . DS . 'vendors' . DS . 'cakephp' . DS . 'cakephp' . DS . 'src' . DS . 'Core' . DS . 'functions_global.php',
+];
+foreach ($coreGlobalFunctions as $coreGlobalFunctionsFile) {
+    if (file_exists($coreGlobalFunctionsFile)) {
+        require_once $coreGlobalFunctionsFile;
+        break;
+    }
+}
+
+$i18nFunctions = [
+    ROOT . DS . 'vendor' . DS . 'cakephp' . DS . 'cakephp' . DS . 'src' . DS . 'I18n' . DS . 'functions.php',
+    CORE_PATH . 'src' . DS . 'I18n' . DS . 'functions.php',
+    ROOT . DS . 'vendors' . DS . 'cakephp' . DS . 'cakephp' . DS . 'src' . DS . 'I18n' . DS . 'functions.php',
+];
+foreach ($i18nFunctions as $i18nFunctionsFile) {
+    if (file_exists($i18nFunctionsFile)) {
+        require_once $i18nFunctionsFile;
+        break;
+    }
+}
+
+$i18nGlobalFunctions = [
+    ROOT . DS . 'vendor' . DS . 'cakephp' . DS . 'cakephp' . DS . 'src' . DS . 'I18n' . DS . 'functions_global.php',
+    CORE_PATH . 'src' . DS . 'I18n' . DS . 'functions_global.php',
+    ROOT . DS . 'vendors' . DS . 'cakephp' . DS . 'cakephp' . DS . 'src' . DS . 'I18n' . DS . 'functions_global.php',
+];
+foreach ($i18nGlobalFunctions as $i18nGlobalFunctionsFile) {
+    if (file_exists($i18nGlobalFunctionsFile)) {
+        require_once $i18nGlobalFunctionsFile;
+        break;
+    }
+}
+
 require CORE_PATH . 'config' . DS . 'bootstrap.php';
 
 try {
@@ -42,10 +85,14 @@ mb_internal_encoding(Configure::read('App.encoding'));
 ini_set('intl.default_locale', Configure::read('App.defaultLocale'));
 
 $errorConfig = (array)Configure::read('Error');
-(new ErrorTrap($errorConfig))->register();
-(new ExceptionTrap($errorConfig))->register();
 
 $isCli = PHP_SAPI === 'cli';
+
+if ($isCli) {
+    (new \Cake\Console\ConsoleErrorHandler($errorConfig))->register();
+} else {
+    (new \Cake\Error\ErrorHandler($errorConfig))->register();
+}
 
 if ($isCli) {
     require __DIR__ . '/bootstrap_cli.php';
@@ -59,7 +106,7 @@ if ($transports) {
 }
 $mailers = (array)Configure::consume('Email');
 if ($mailers) {
-    Mailer::setConfig($mailers);
+    Email::setConfig($mailers);
 }
 Log::setConfig((array)Configure::consume('Log'));
 Security::setSalt((string)Configure::consume('Security.salt'));

@@ -8,12 +8,12 @@ use Cake\Core\Configure\Engine\PhpConfig;
 
 class SeasonsController extends AppController {
 
-    protected array $paginate = ['limit' => 50, 'order' => ['Seasons.name' => 'asc']];
+    public $paginate = ['limit' => 50, 'order' => ['Seasons.name' => 'asc']];
     public $components = array('PImage', 'PImageTest');
 
     //public $helpers = array('Javascript', 'Ajax');
 
-    public function initialize(): void {
+    public function initialize() {
         parent::initialize();
         $this->loadComponent('Flash');
         $action = $this->request->getParam('action');
@@ -24,8 +24,8 @@ class SeasonsController extends AppController {
             }
         }
 		
-		$this->Conventionseasons = $this->fetchTable('Conventionseasons');
-		$this->Conventionseasonevents = $this->fetchTable('Conventionseasonevents');
+		$this->Conventionseasons = $this->loadModel('Conventionseasons');
+		$this->Conventionseasonevents = $this->loadModel('Conventionseasonevents');
     }
 
     public function index() {
@@ -139,7 +139,7 @@ class SeasonsController extends AppController {
         $this->set('manageSeasons', '1');
         $this->set('seasonAdd', '1');
 		
-        $seasons = $this->Seasons->newEmptyEntity();
+        $seasons = $this->Seasons->newEntity();
         if ($this->request->is('post')) {
 			
 			//$this->prx($this->request->getData());

@@ -11,27 +11,27 @@ use Cake\I18n\I18n;
 
 class HomesController extends AppController {
 
-    public function initialize(): void {
+    public function initialize() {
         parent::initialize();
 
         // Include the FlashComponent
         $this->loadComponent('Flash');
 
         // Load Files model
-		$this->Users = $this->fetchTable('Users'); 
-		$this->Emailtemplates = $this->fetchTable('Emailtemplates');
-		$this->Conventions = $this->fetchTable('Conventions');
-		$this->Conventionseasons = $this->fetchTable('Conventionseasons');
-		$this->Events = $this->fetchTable('Events');
-		$this->Divisions = $this->fetchTable('Divisions');
-		$this->Seasons = $this->fetchTable('Seasons');
-		$this->Conventionregistrations = $this->fetchTable('Conventionregistrations');
-		$this->Conventionregistrationstudents = $this->fetchTable('Conventionregistrationstudents');
-		$this->Crstudentevents = $this->fetchTable('Crstudentevents');
-		$this->Evaluationquestions = $this->fetchTable('Evaluationquestions');
-		$this->Books = $this->fetchTable('Books');
-		$this->Settings = $this->fetchTable('Settings');
-		$this->Eventcategories = $this->fetchTable('Eventcategories');
+		$this->Users = $this->loadModel('Users');
+		$this->Emailtemplates = $this->loadModel('Emailtemplates');
+		$this->Conventions = $this->loadModel('Conventions');
+		$this->Conventionseasons = $this->loadModel('Conventionseasons');
+		$this->Events = $this->loadModel('Events');
+		$this->Divisions = $this->loadModel('Divisions');
+		$this->Seasons = $this->loadModel('Seasons');
+		$this->Conventionregistrations = $this->loadModel('Conventionregistrations');
+		$this->Conventionregistrationstudents = $this->loadModel('Conventionregistrationstudents');
+		$this->Crstudentevents = $this->loadModel('Crstudentevents');
+		$this->Evaluationquestions = $this->loadModel('Evaluationquestions');
+		$this->Books = $this->loadModel('Books');
+		$this->Settings = $this->loadModel('Settings');
+		$this->Eventcategories = $this->loadModel('Eventcategories');
 
         // Set the layout
         // $this->layout = 'frontend';
@@ -74,7 +74,7 @@ class HomesController extends AppController {
 		$condConvention = array();
 		$condConvention[] = "(Conventions.id IN ($conventionIDSImploded))";
 		$condConvention[] = "(Conventions.status  = '1')";
-		$conventionDD = $this->Conventions->find('list', keyField: 'id', valueField: 'name')->where($condConvention)->order(['Conventions.name' => 'ASC'])->toArray();
+		$conventionDD = $this->Conventions->find('list', ['keyField' => 'id', 'valueField' => 'name'])->where($condConvention)->order(['Conventions.name' => 'ASC'])->toArray();
 		$this->set('conventionDD', $conventionDD);
 		
     }
@@ -211,7 +211,7 @@ class HomesController extends AppController {
 						else
 						{
 							// insert new record
-							$conventionregistrations = $this->Conventionregistrations->newEmptyEntity();
+							$conventionregistrations = $this->Conventionregistrations->newEntity();
 							$dataCR = $this->Conventionregistrations->patchEntity($conventionregistrations, array());
 
 							$dataCR->conventionseason_id 	= $convSeasonD->id;
@@ -299,7 +299,7 @@ class HomesController extends AppController {
 				// .. then send link to verify account and create password
 				$schoolD = $this->Users->find()->where(['Users.id' => $conventionRegD->user_id])->first();
 				
-				$users = $this->Users->newEmptyEntity();
+				$users = $this->Users->newEntity();
 				$dataUT = $this->Users->patchEntity($users, array());
 
 				$dataUT->slug 					= $this->getSlug($schoolD->middle_name.'-'.rand(100,1000000). time(), 'Users');
@@ -891,7 +891,7 @@ class HomesController extends AppController {
 					
 					// to get division id
 					
-					$events = $this->Events->newEmptyEntity();
+					$events = $this->Events->newEntity();
 					$dataE 	= $this->Events->patchEntity($events, array());
 
 					$dataE->event_id_number					= trim($data[0]);
@@ -1057,7 +1057,7 @@ class HomesController extends AppController {
 					{
 						// add new record
 						
-						$events = $this->Events->newEmptyEntity();
+						$events = $this->Events->newEntity();
 						$dataE 	= $this->Events->patchEntity($events, array());
 
 						$dataE->event_id_number					= $arrEventsData['event_id_number'];

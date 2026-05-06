@@ -12,23 +12,23 @@ use Cake\I18n\I18n;
 
 class GroupsController extends AppController {
 
-    protected array $paginate = ['limit' => 50];
+    public $paginate = ['limit' => 50];
     public $components = array('PImage', 'PImageTest');
 	
-	public function initialize(): void {
+	public function initialize() {
         parent::initialize();
 
         // Include the FlashComponent
         $this->loadComponent('Flash');
 
-        $this->Users = $this->fetchTable('Users'); 
-		$this->Emailtemplates = $this->fetchTable('Emailtemplates');
-		$this->Conventionregistrations = $this->fetchTable('Conventionregistrations');
-		$this->Conventionregistrationstudents = $this->fetchTable('Conventionregistrationstudents');
-		$this->Conventionseasonevents = $this->fetchTable('Conventionseasonevents');
-		$this->Events = $this->fetchTable('Events');
-		$this->Crstudentevents = $this->fetchTable('Crstudentevents');
-		$this->Eventsubmissions = $this->fetchTable('Eventsubmissions');
+        $this->Users = $this->loadModel('Users');
+		$this->Emailtemplates = $this->loadModel('Emailtemplates');
+		$this->Conventionregistrations = $this->loadModel('Conventionregistrations');
+		$this->Conventionregistrationstudents = $this->loadModel('Conventionregistrationstudents');
+		$this->Conventionseasonevents = $this->loadModel('Conventionseasonevents');
+		$this->Events = $this->loadModel('Events');
+		$this->Crstudentevents = $this->loadModel('Crstudentevents');
+		$this->Eventsubmissions = $this->loadModel('Eventsubmissions');
     }
 
     public function viewlist() {
@@ -199,7 +199,7 @@ class GroupsController extends AppController {
 					if(!$checkSubmission)
 					{
 						// submit event
-						$eventsubmissions = $this->Eventsubmissions->newEmptyEntity();
+						$eventsubmissions = $this->Eventsubmissions->newEntity();
 						$dataES = $this->Eventsubmissions->patchEntity($eventsubmissions, array());
 
 						$dataES->slug 						= 'event-submission-'.$conventionRegD->id.'-'.time().'-'.rand(100,1000000);

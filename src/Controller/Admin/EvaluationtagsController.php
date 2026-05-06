@@ -8,12 +8,12 @@ use Cake\Core\Configure\Engine\PhpConfig;
 
 class EvaluationtagsController extends AppController {
 
-    protected array $paginate = ['limit' => 50, 'order' => ['Evaluationtags.name' => 'asc']];
+    public $paginate = ['limit' => 50, 'order' => ['Evaluationtags.name' => 'asc']];
     public $components = array('PImage', 'PImageTest');
 
     //public $helpers = array('Javascript', 'Ajax');
 
-    public function initialize(): void {
+    public function initialize() {
         parent::initialize();
         $this->loadComponent('Flash');
         $action = $this->request->getParam('action');
@@ -24,7 +24,7 @@ class EvaluationtagsController extends AppController {
             }
         }
 		
-		$this->Evaluationforms = $this->fetchTable('Evaluationforms');
+		$this->Evaluationforms = $this->loadModel('Evaluationforms');
     }
 
     public function index() {
@@ -97,7 +97,7 @@ class EvaluationtagsController extends AppController {
         $this->set('manageEvaluations', '1');
         $this->set('tagsList', '1');
 		
-        $evaluationtags = $this->Evaluationtags->newEmptyEntity();
+        $evaluationtags = $this->Evaluationtags->newEntity();
         if ($this->request->is('post')) {
 			
 			//$this->prx($this->request->getData());

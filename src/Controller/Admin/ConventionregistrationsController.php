@@ -9,12 +9,12 @@ use Cake\Mailer\Mailer;
 
 class ConventionregistrationsController extends AppController {
 
-    protected array $paginate = ['limit' => 50, 'order' => ['Conventionregistrations.name' => 'asc']];
+    public $paginate = ['limit' => 50, 'order' => ['Conventionregistrations.name' => 'asc']];
     public $components = array('PImage', 'PImageTest');
 
     //public $helpers = array('Javascript', 'Ajax');
 
-    public function initialize(): void {
+    public function initialize() {
         parent::initialize();
         $this->loadComponent('Flash');
         $action = $this->request->getParam('action');
@@ -25,16 +25,16 @@ class ConventionregistrationsController extends AppController {
             }
         }
 		
-		$this->Conventions = $this->fetchTable('Conventions');
-		$this->Events = $this->fetchTable('Events');
-		$this->Settings = $this->fetchTable('Settings');
-		$this->Seasons = $this->fetchTable('Seasons');
-		$this->Emailtemplates = $this->fetchTable('Emailtemplates');
-		$this->Conventionregistrationteachers = $this->fetchTable('Conventionregistrationteachers');
-		$this->Conventionregistrationstudents = $this->fetchTable('Conventionregistrationstudents');
-		$this->Heartevents = $this->fetchTable('Heartevents');
-		$this->Conventionseasonevents = $this->fetchTable('Conventionseasonevents');
-		$this->Conventionseasons = $this->fetchTable('Conventionseasons');
+		$this->Conventions = $this->loadModel('Conventions');
+		$this->Events = $this->loadModel('Events');
+		$this->Settings = $this->loadModel('Settings');
+		$this->Seasons = $this->loadModel('Seasons');
+		$this->Emailtemplates = $this->loadModel('Emailtemplates');
+		$this->Conventionregistrationteachers = $this->loadModel('Conventionregistrationteachers');
+		$this->Conventionregistrationstudents = $this->loadModel('Conventionregistrationstudents');
+		$this->Heartevents = $this->loadModel('Heartevents');
+		$this->Conventionseasonevents = $this->loadModel('Conventionseasonevents');
+		$this->Conventionseasons = $this->loadModel('Conventionseasons');
     }
 
     public function index() {

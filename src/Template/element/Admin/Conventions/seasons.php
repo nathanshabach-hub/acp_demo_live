@@ -68,6 +68,8 @@
 									
 									echo $this->Html->link('<i class="fa fa-gavel"></i>', ['controller' => 'conventions', 'action' => 'brokenrecordcertificate',$datarecord->slug,$slug], [ 'escape' => false, 'title' => 'Broken record certificate', 'class'=>'btn btn-primary btn-xs']);
 									
+									echo $this->Html->link('<i class="fa fa-certificate"></i>', ['controller' => 'conventions', 'action' => 'certificates',$datarecord->slug,$slug], [ 'escape' => false, 'title' => 'Certificates', 'class'=>'btn btn-primary btn-xs']);
+									
 									echo '<br />';
 									echo '<br />';
 									
@@ -87,6 +89,12 @@
 									echo $this->Html->link('<i class="fa fa-registered"></i>', ['controller' => 'conventions', 'action' => 'roomevents',$datarecord->slug], [ 'escape' => false, 'title' => 'Room Events', 'class'=>'btn btn-primary btn-xs']);
 									
 									echo $this->Html->link('<i class="fa fa-clock-o"></i>', ['controller' => 'schedulings', 'action' => 'precheck',$datarecord->slug], [ 'escape' => false, 'title' => 'Scheduling Pre-check', 'class'=>'btn btn-primary btn-xs']);
+
+									if ($datarecord->submissions_open == 1) {
+										echo $this->Html->link('<i class="fa fa-lock"></i>', ['controller' => 'conventions', 'action' => 'locksubmissions',$datarecord->slug,$slug], [ 'escape' => false, 'title' => 'Lock Submissions (currently open)', 'class'=>'btn btn-warning btn-xs', 'confirm' => 'Are you sure you want to lock submissions? Users will not be able to submit or upload.']);
+									} else {
+										echo $this->Html->link('<i class="fa fa-unlock"></i>', ['controller' => 'conventions', 'action' => 'unlocksubmissions',$datarecord->slug,$slug], [ 'escape' => false, 'title' => 'Unlock Submissions (currently locked)', 'class'=>'btn btn-success btn-xs', 'confirm' => 'Are you sure you want to unlock submissions?']);
+									}
 									
                                     echo $this->Html->link('<i class="fa fa-trash-o"></i>', ['controller' => 'conventions', 'action' => 'deleteconventionsseason',$datarecord->slug,$slug], [ 'escape' => false, 'title' => 'Delete', 'class'=>'btn btn-danger btn-xs action-list delete-list', 'confirm' => 'Are you sure you want to Delete ?']);
 									

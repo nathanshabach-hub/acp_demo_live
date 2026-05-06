@@ -8,12 +8,12 @@ use Cake\Core\Configure\Engine\PhpConfig;
 
 class BooksController extends AppController {
 
-    protected array $paginate = ['limit' => 50, 'order' => ['Books.name' => 'asc']];
+    public $paginate = ['limit' => 50, 'order' => ['Books.name' => 'asc']];
     public $components = array('PImage', 'PImageTest');
 
     //public $helpers = array('Javascript', 'Ajax');
 
-    public function initialize(): void {
+    public function initialize() {
         parent::initialize();
         $this->loadComponent('Flash');
         $action = $this->request->getParam('action');
@@ -24,8 +24,8 @@ class BooksController extends AppController {
             }
         }
 		
-		$this->Conventionbooks = $this->fetchTable('Conventionbooks');
-		$this->Conventionbookevents = $this->fetchTable('Conventionbookevents');
+		$this->Conventionbooks = $this->loadModel('Conventionbooks');
+		$this->Conventionbookevents = $this->loadModel('Conventionbookevents');
     }
 
     public function index() {
@@ -98,7 +98,7 @@ class BooksController extends AppController {
         $this->set('manageBooks', '1');
         $this->set('bookAdd', '1');
 		
-        $books = $this->Books->newEmptyEntity();
+        $books = $this->Books->newEntity();
         if ($this->request->is('post')) {
 			
 			//$this->prx($this->request->getData());

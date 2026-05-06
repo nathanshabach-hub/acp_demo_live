@@ -9,12 +9,12 @@ use Cake\Mailer\Mailer;
 
 class NametagsController extends AppController {
 
-    protected array $paginate = ['limit' => 50, 'order' => ['Conventionregistrations.name' => 'asc']];
+    public $paginate = ['limit' => 50, 'order' => ['Conventionregistrations.name' => 'asc']];
     public $components = array('PImage', 'PImageTest');
 
     //public $helpers = array('Javascript', 'Ajax');
 
-    public function initialize(): void {
+    public function initialize() {
         parent::initialize();
         $this->loadComponent('Flash');
         $action = $this->request->getParam('action');
@@ -25,15 +25,15 @@ class NametagsController extends AppController {
             }
         }
 		
-		$this->Conventions = $this->fetchTable('Conventions');
-		$this->Settings = $this->fetchTable('Settings');
-		$this->Seasons = $this->fetchTable('Seasons');
-		$this->Emailtemplates = $this->fetchTable('Emailtemplates');
-		$this->Conventionregistrationstudents = $this->fetchTable('Conventionregistrationstudents');
-		$this->Conventionregistrationteachers = $this->fetchTable('Conventionregistrationteachers');
-		$this->Conventionseasonevents = $this->fetchTable('Conventionseasonevents');
-		$this->Conventionseasons = $this->fetchTable('Conventionseasons');
-		$this->Visitors = $this->fetchTable('Visitors');
+		$this->Conventions = $this->loadModel('Conventions');
+		$this->Settings = $this->loadModel('Settings');
+		$this->Seasons = $this->loadModel('Seasons');
+		$this->Emailtemplates = $this->loadModel('Emailtemplates');
+		$this->Conventionregistrationstudents = $this->loadModel('Conventionregistrationstudents');
+		$this->Conventionregistrationteachers = $this->loadModel('Conventionregistrationteachers');
+		$this->Conventionseasonevents = $this->loadModel('Conventionseasonevents');
+		$this->Conventionseasons = $this->loadModel('Conventionseasons');
+		$this->Visitors = $this->loadModel('Visitors');
     }
 
     public function students() {
@@ -222,7 +222,7 @@ class NametagsController extends AppController {
 			$condition[] = "(Visitors.conventionseason_id = '".$sess_admin_header_season_id."')";
 		}
 		
-        $visitors = $this->Visitors->newEmptyEntity();
+        $visitors = $this->Visitors->newEntity();
         if ($this->request->is('post')) {
 			
 			//$this->prx($this->request->getData());

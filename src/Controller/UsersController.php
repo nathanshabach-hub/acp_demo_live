@@ -24,18 +24,18 @@ class UsersController extends AppController {
 		// Include the FlashComponent
         $this->loadComponent('Flash');
 
-		$this->Emailtemplates = $this->fetchTable('Emailtemplates');
-		$this->Conventions = $this->fetchTable('Conventions');
-		$this->Conventionseasons = $this->fetchTable('Conventionseasons');
-		$this->Events = $this->fetchTable('Events');
-		$this->Divisions = $this->fetchTable('Divisions');
-		$this->Seasons = $this->fetchTable('Seasons');
-		$this->Conventionregistrations = $this->fetchTable('Conventionregistrations');
-		$this->Conventionregistrationteachers = $this->fetchTable('Conventionregistrationteachers');
-		$this->Conventionregistrationstudents = $this->fetchTable('Conventionregistrationstudents');
+		$this->Emailtemplates = $this->loadModel('Emailtemplates');
+		$this->Conventions = $this->loadModel('Conventions');
+		$this->Conventionseasons = $this->loadModel('Conventionseasons');
+		$this->Events = $this->loadModel('Events');
+		$this->Divisions = $this->loadModel('Divisions');
+		$this->Seasons = $this->loadModel('Seasons');
+		$this->Conventionregistrations = $this->loadModel('Conventionregistrations');
+		$this->Conventionregistrationteachers = $this->loadModel('Conventionregistrationteachers');
+		$this->Conventionregistrationstudents = $this->loadModel('Conventionregistrationstudents');
 		
-		$this->Evaluationforms = $this->fetchTable('Evaluationforms');
-		$this->Settings = $this->fetchTable('Settings');
+		$this->Evaluationforms = $this->loadModel('Evaluationforms');
+		$this->Settings = $this->loadModel('Settings');
     }
 	
 	public function login($convention_slug=null,$season_id=null) {
@@ -154,7 +154,7 @@ class UsersController extends AppController {
 								if(!$checkRegExists)
 								{
 									// insert new record
-									$conventionregistrations = $this->Conventionregistrations->newEmptyEntity();
+									$conventionregistrations = $this->Conventionregistrations->newEntity();
 									$dataCR = $this->Conventionregistrations->patchEntity($conventionregistrations, array());
 
 									$dataCR->slug 					= "convention-registration-".$convention_id.'-'.$user_id.'-'.$season_id.'-'.time();
@@ -516,6 +516,33 @@ class UsersController extends AppController {
 		
 		$settingsD = $this->Settings->find()->where(['Settings.id' => 1])->first();
 		$this->set('settingsD', $settingsD);
+
+		$dashboardVideoIds = [
+			'bT-KQAlpMOI',
+			'yGAzDK7xHrs',
+			'I9kG75X_obA',
+			'VUX7n29uqfo',
+			'JDG3Uxcow_c',
+			'GZ3vINjZ7sY',
+			'X-MUFvvQNCQ',
+			'G4vxpK0kzPQ',
+			'uysBVmzqGXU'
+		];
+
+		$videosConfigPath = CONFIG . 'dashboard_videos.json';
+		if (file_exists($videosConfigPath)) {
+			$rawConfig = @file_get_contents($videosConfigPath);
+			$decodedConfig = json_decode((string)$rawConfig, true);
+			if (is_array($decodedConfig) && isset($decodedConfig['video_ids']) && is_array($decodedConfig['video_ids'])) {
+				$dashboardVideoIds = [];
+				for ($i = 0; $i < 9; $i++) {
+					$videoId = isset($decodedConfig['video_ids'][$i]) ? trim((string)$decodedConfig['video_ids'][$i]) : '';
+					$dashboardVideoIds[] = preg_match('/^[A-Za-z0-9_-]{11}$/', $videoId) ? $videoId : '';
+				}
+			}
+		}
+
+		$this->set('dashboardVideoIds', $dashboardVideoIds);
 		
     }
 	
@@ -570,7 +597,7 @@ class UsersController extends AppController {
 		$userDetails = $this->Users->find()->where(['Users.id' => $user_id])->first();
         $this->set('userDetails', $userDetails);
 		
-        $users = $this->Users->newEmptyEntity();
+        $users = $this->Users->newEntity();
 
         if ($this->request->is('post')) {
             //die;
@@ -751,7 +778,7 @@ class UsersController extends AppController {
 		global $yesNoDD;
 		$this->set('yesNoDD', $yesNoDD);
 		
-        $users = $this->Users->newEmptyEntity();
+        $users = $this->Users->newEntity();
         if ($this->request->is('post')) {
 			
 			//$this->prx($this->request->getData());
@@ -983,7 +1010,7 @@ class UsersController extends AppController {
 		global $genderDD;
 		$this->set('genderDD', $genderDD);
 		
-        $users = $this->Users->newEmptyEntity();
+        $users = $this->Users->newEntity();
         if ($this->request->is('post')) {
 			
 			//$this->prx($this->request->getData());
@@ -1155,7 +1182,7 @@ class UsersController extends AppController {
 		
 		$this->set('header_menu_judgesreg_active', 'active');
 		
-		$users = $this->Users->newEmptyEntity();
+		$users = $this->Users->newEntity();
         if ($this->request->is('post')) {
             
 			$data = $this->Users->patchEntity($users, $this->request->getData());
@@ -1478,9 +1505,9 @@ class UsersController extends AppController {
 
 		$student_id = $this->request->getSession()->read('user_id');
 
-		$this->Schedulingtimings = $this->fetchTable('Schedulingtimings');
-		$this->Conventionregistrationstudents = $this->fetchTable('Conventionregistrationstudents');
-		$this->Crstudentevents = $this->fetchTable('Crstudentevents');
+		$this->Schedulingtimings = $this->loadModel('Schedulingtimings');
+		$this->Conventionregistrationstudents = $this->loadModel('Conventionregistrationstudents');
+		$this->Crstudentevents = $this->loadModel('Crstudentevents');
 
 		$studentD = $this->Users->find()->where(['Users.id' => $student_id])->first();
 		$this->set('studentD', $studentD);
@@ -1526,8 +1553,8 @@ class UsersController extends AppController {
 
 		$student_id = $this->request->getSession()->read('user_id');
 
-		$this->Conventionregistrationstudents = $this->fetchTable('Conventionregistrationstudents');
-		$this->Crstudentevents = $this->fetchTable('Crstudentevents');
+		$this->Conventionregistrationstudents = $this->loadModel('Conventionregistrationstudents');
+		$this->Crstudentevents = $this->loadModel('Crstudentevents');
 
 		$studentD = $this->Users->find()->where(['Users.id' => $student_id])->first();
 		$this->set('studentD', $studentD);

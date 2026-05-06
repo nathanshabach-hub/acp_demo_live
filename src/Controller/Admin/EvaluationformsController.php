@@ -8,12 +8,12 @@ use Cake\Core\Configure\Engine\PhpConfig;
 
 class EvaluationformsController extends AppController {
 
-    protected array $paginate = ['limit' => 50, 'order' => ['Evaluationforms.name' => 'asc']];
+    public $paginate = ['limit' => 50, 'order' => ['Evaluationforms.name' => 'asc']];
     public $components = array('PImage', 'PImageTest');
 
     //public $helpers = array('Javascript', 'Ajax');
 
-    public function initialize(): void {
+    public function initialize() {
         parent::initialize();
         $this->loadComponent('Flash');
         $action = $this->request->getParam('action');
@@ -24,9 +24,9 @@ class EvaluationformsController extends AppController {
             }
         }
 		
-		$this->Events = $this->fetchTable('Events');
-		$this->Evaluationtags = $this->fetchTable('Evaluationtags');
-		$this->Evaluationareas = $this->fetchTable('Evaluationareas');
+		$this->Events = $this->loadModel('Events');
+		$this->Evaluationtags = $this->loadModel('Evaluationtags');
+		$this->Evaluationareas = $this->loadModel('Evaluationareas');
     }
 
     public function index() {
@@ -112,7 +112,7 @@ class EvaluationformsController extends AppController {
 		}
 		$this->set('eventNameIDDD', $eventNameIDDD);
 		
-        $evaluationforms = $this->Evaluationforms->newEmptyEntity();
+        $evaluationforms = $this->Evaluationforms->newEntity();
         if ($this->request->is('post')) {
 			
 			//$this->prx($this->request->getData());

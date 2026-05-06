@@ -8,6 +8,9 @@
 			<!-- dashboard-section-1 start-->
 			<div class="dasboard-section">
 				<div class="dashboard-text">
+					<?php
+					$videoIds = isset($dashboardVideoIds) && is_array($dashboardVideoIds) ? $dashboardVideoIds : [];
+					?>
 					<h2>Welcome <?php echo $userDetails->first_name; ?> (<?php echo $userDetails->email_address; ?>)</h2>
 					
 					
@@ -32,33 +35,15 @@
 					<p>Please see instructional videos below for navigation of the Convention Portal. For any other questions, please contact the events team. 
 					</p>
 					
+					<?php for ($i = 0; $i < count($videoIds); $i += 2) { ?>
 					<p>
-						<iframe width="560" height="315" src="https://www.youtube.com/embed/bT-KQAlpMOI" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
-						
-						<iframe width="560" height="315" src="https://www.youtube.com/embed/yGAzDK7xHrs" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
+						<?php for ($j = $i; $j < $i + 2 && $j < count($videoIds); $j++) { ?>
+							<?php if (!empty($videoIds[$j])) { ?>
+							<iframe width="560" height="315" src="https://www.youtube.com/embed/<?php echo h($videoIds[$j]); ?>" title="YouTube video player <?php echo (int)($j + 1); ?>" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
+							<?php } ?>
+						<?php } ?>
 					</p>
-						
-					<p>
-						<iframe width="560" height="315" src="https://www.youtube.com/embed/I9kG75X_obA" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
-						
-						<iframe width="560" height="315" src="https://www.youtube.com/embed/VUX7n29uqfo" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
-					</p>
-					
-					<p>
-						<iframe width="560" height="315" src="https://www.youtube.com/embed/JDG3Uxcow_c" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
-						
-						<iframe width="560" height="315" src="https://www.youtube.com/embed/GZ3vINjZ7sY" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
-					</p>
-					
-					<p>
-						<iframe width="560" height="315" src="https://www.youtube.com/embed/X-MUFvvQNCQ" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
-						
-						<iframe width="560" height="315" src="https://www.youtube.com/embed/G4vxpK0kzPQ" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
-					</p>
-					
-					<p>
-						<iframe width="560" height="315" src="https://www.youtube.com/embed/uysBVmzqGXU" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
-					</p>
+					<?php } ?>
 					
 					<p>&nbsp;</p>
 					<p>&nbsp;</p>

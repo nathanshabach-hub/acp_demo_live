@@ -11,7 +11,7 @@ use Cake\I18n\I18n;
 
 class ConventionsController extends AppController {
 
-    public function initialize(): void {
+    public function initialize() {
         parent::initialize();
 
         // Include the FlashComponent
@@ -19,8 +19,8 @@ class ConventionsController extends AppController {
 
         // Load Files model
 		 
-		$this->Users = $this->fetchTable('Users'); 
-		$this->Emailtemplates = $this->fetchTable('Emailtemplates');
+		$this->Users = $this->loadModel('Users');
+		$this->Emailtemplates = $this->loadModel('Emailtemplates');
 		
 
         // Set the layout

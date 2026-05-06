@@ -8,12 +8,12 @@ use Cake\Core\Configure\Engine\PhpConfig;
 
 class CitiesController extends AppController {
 
-    protected array $paginate = ['limit' => 50, 'order' => ['Cities.name' => 'asc']];
+    public $paginate = ['limit' => 50, 'order' => ['Cities.name' => 'asc']];
     public $components = array('PImage', 'PImageTest');
 
     //public $helpers = array('Javascript', 'Ajax');
 
-    public function initialize(): void {
+    public function initialize() {
         parent::initialize();
         $this->loadComponent('Flash');
         $action = $this->request->getParam('action');
@@ -126,7 +126,7 @@ class CitiesController extends AppController {
         $this->set('manageCities', '1');
         $this->set('locationAdd', '1');
 
-        $cities = $this->Cities->newEmptyEntity();
+        $cities = $this->Cities->newEntity();
 
         if ($this->request->is('post')) {
 			

@@ -10,13 +10,13 @@ use Cake\Datasource\ConnectionManager;
 
 class SchedulingtimingsController extends AppController {
 
-    protected array $paginate = ['limit' => 50, 'order' => ['Schedulings.name' => 'asc']];
+    public $paginate = ['limit' => 50, 'order' => ['Schedulings.name' => 'asc']];
     public $components = array('PImage', 'PImageTest');
-	private bool $scheduleWindowWarningShown = false;
+private $scheduleWindowWarningShown = false;
 
     //public $helpers = array('Javascript', 'Ajax');
 
-    public function initialize(): void {
+    public function initialize() {
         parent::initialize();
         $this->loadComponent('Flash');
         $action = $this->request->getParam('action');
@@ -27,15 +27,15 @@ class SchedulingtimingsController extends AppController {
             }
         }
 		
-		$this->Conventionseasons = $this->fetchTable('Conventionseasons');
-		$this->Conventionseasonevents = $this->fetchTable('Conventionseasonevents');
-		$this->Events = $this->fetchTable('Events');
-		$this->Conventionregistrations = $this->fetchTable('Conventionregistrations');
-		$this->Crstudentevents = $this->fetchTable('Crstudentevents');
-		$this->Schedulingtimings = $this->fetchTable('Schedulingtimings');
-		$this->Conventionseasonroomevents = $this->fetchTable('Conventionseasonroomevents');
-		$this->Schedulings = $this->fetchTable('Schedulings');
-		$this->Conventionregistrationstudents = $this->fetchTable('Conventionregistrationstudents');
+		$this->Conventionseasons = $this->loadModel('Conventionseasons');
+		$this->Conventionseasonevents = $this->loadModel('Conventionseasonevents');
+		$this->Events = $this->loadModel('Events');
+		$this->Conventionregistrations = $this->loadModel('Conventionregistrations');
+		$this->Crstudentevents = $this->loadModel('Crstudentevents');
+		$this->Schedulingtimings = $this->loadModel('Schedulingtimings');
+		$this->Conventionseasonroomevents = $this->loadModel('Conventionseasonroomevents');
+		$this->Schedulings = $this->loadModel('Schedulings');
+		$this->Conventionregistrationstudents = $this->loadModel('Conventionregistrationstudents');
     }
 	
 	/* public function viewscheduling($convention_season_slug=null) {
@@ -403,7 +403,7 @@ class SchedulingtimingsController extends AppController {
 						$fetchUserType = $this->fetchUserType($stData[7]);
 						
 						//now enter schedule timings
-						$schedulingtimings = $this->Schedulingtimings->newEmptyEntity();
+						$schedulingtimings = $this->Schedulingtimings->newEntity();
 						$dataST = $this->Schedulingtimings->patchEntity($schedulingtimings, array());
 
 						$dataST->schedule_category				= 1;
@@ -593,7 +593,7 @@ class SchedulingtimingsController extends AppController {
 					$fetchUserType = $this->fetchUserType($byeStudentID);
 					
 					//now save bye player in database, opponent of bye player id will be 0
-					$schedulingtimings = $this->Schedulingtimings->newEmptyEntity();
+					$schedulingtimings = $this->Schedulingtimings->newEntity();
 					$dataBye = $this->Schedulingtimings->patchEntity($schedulingtimings, array());
 
 					$dataBye->schedule_category				= 2;
@@ -655,7 +655,7 @@ class SchedulingtimingsController extends AppController {
 				$fetchUserType = $this->fetchUserType($first_student_id);
 				
 				//now save remaining player in database with opponent user id
-				$schedulingtimings = $this->Schedulingtimings->newEmptyEntity();
+				$schedulingtimings = $this->Schedulingtimings->newEntity();
 				$dataBye = $this->Schedulingtimings->patchEntity($schedulingtimings, array());
 
 				$dataBye->schedule_category				= 2;
@@ -743,7 +743,7 @@ class SchedulingtimingsController extends AppController {
 					
 					
 					//now save remaining player in database with opponent user id
-					$schedulingtimings = $this->Schedulingtimings->newEmptyEntity();
+					$schedulingtimings = $this->Schedulingtimings->newEntity();
 					$dataBye = $this->Schedulingtimings->patchEntity($schedulingtimings, array());
 
 					$dataBye->schedule_category				= 2;
@@ -1200,7 +1200,7 @@ class SchedulingtimingsController extends AppController {
 						
 						
 						//now save bye player in database, opponent of bye player id will be 0
-						$schedulingtimings = $this->Schedulingtimings->newEmptyEntity();
+						$schedulingtimings = $this->Schedulingtimings->newEntity();
 						$dataBye = $this->Schedulingtimings->patchEntity($schedulingtimings, array());
 
 						$dataBye->schedule_category				= 3;
@@ -1260,7 +1260,7 @@ class SchedulingtimingsController extends AppController {
 					$fetchUserType = $this->fetchUserType($dataGExplodeFirst[7]);
 					
 					//now save remaining player in database with opponent user id
-					$schedulingtimings = $this->Schedulingtimings->newEmptyEntity();
+					$schedulingtimings = $this->Schedulingtimings->newEntity();
 					$dataBye = $this->Schedulingtimings->patchEntity($schedulingtimings, array());
 
 					$dataBye->schedule_category				= 3;
@@ -1349,7 +1349,7 @@ class SchedulingtimingsController extends AppController {
 					
 					
 					//now save remaining player in database with opponent user id
-					$schedulingtimings = $this->Schedulingtimings->newEmptyEntity();
+					$schedulingtimings = $this->Schedulingtimings->newEntity();
 					$dataBye = $this->Schedulingtimings->patchEntity($schedulingtimings, array());
 
 					$dataBye->schedule_category				= 3;
@@ -1716,7 +1716,7 @@ class SchedulingtimingsController extends AppController {
 				$fetchUserType = $this->fetchUserType($student_id);
 				
 				//now enter schedule timings
-				$schedulingtimings = $this->Schedulingtimings->newEmptyEntity();
+				$schedulingtimings = $this->Schedulingtimings->newEntity();
 				$dataST = $this->Schedulingtimings->patchEntity($schedulingtimings, array());
 
 				$dataST->schedule_category				= 4;

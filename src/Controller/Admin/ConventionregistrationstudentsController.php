@@ -8,12 +8,12 @@ use Cake\Core\Configure\Engine\PhpConfig;
 
 class ConventionregistrationstudentsController extends AppController {
 
-    protected array $paginate = ['limit' => 50, 'order' => ['Events.name' => 'asc']];
+    public $paginate = ['limit' => 50, 'order' => ['Events.name' => 'asc']];
     public $components = array('PImage', 'PImageTest');
 
     //public $helpers = array('Javascript', 'Ajax');
 
-    public function initialize(): void {
+    public function initialize() {
         parent::initialize();
         $this->loadComponent('Flash');
         $action = $this->request->getParam('action');
@@ -24,15 +24,15 @@ class ConventionregistrationstudentsController extends AppController {
             }
         }
 		
-		$this->Divisions = $this->fetchTable('Divisions');
-		$this->Books = $this->fetchTable('Books');
-		$this->Events = $this->fetchTable('Events');
-		$this->Users = $this->fetchTable('Users');
-		$this->Conventionregistrations = $this->fetchTable('Conventionregistrations');
-		$this->Conventionseasons = $this->fetchTable('Conventionseasons');
-		$this->Conventionregistrationstudents = $this->fetchTable('Conventionregistrationstudents');
-		$this->Eventsubmissions = $this->fetchTable('Eventsubmissions');
-		$this->Crstudentevents = $this->fetchTable('Crstudentevents');
+		$this->Divisions = $this->loadModel('Divisions');
+		$this->Books = $this->loadModel('Books');
+		$this->Events = $this->loadModel('Events');
+		$this->Users = $this->loadModel('Users');
+		$this->Conventionregistrations = $this->loadModel('Conventionregistrations');
+		$this->Conventionseasons = $this->loadModel('Conventionseasons');
+		$this->Conventionregistrationstudents = $this->loadModel('Conventionregistrationstudents');
+		$this->Eventsubmissions = $this->loadModel('Eventsubmissions');
+		$this->Crstudentevents = $this->loadModel('Crstudentevents');
     }
 	
 	public function allstudents() {

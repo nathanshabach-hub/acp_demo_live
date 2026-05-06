@@ -8,12 +8,12 @@ use Cake\Core\Configure\Engine\PhpConfig;
 
 class DivisionsController extends AppController {
 
-    protected array $paginate = ['limit' => 50, 'order' => ['Divisions.name' => 'asc']];
+    public $paginate = ['limit' => 50, 'order' => ['Divisions.name' => 'asc']];
     public $components = array('PImage', 'PImageTest');
 
     //public $helpers = array('Javascript', 'Ajax');
 
-    public function initialize(): void {
+    public function initialize() {
         parent::initialize();
         $this->loadComponent('Flash');
         $action = $this->request->getParam('action');
@@ -24,9 +24,9 @@ class DivisionsController extends AppController {
             }
         }
 		
-		$this->Conventions = $this->fetchTable('Conventions');
-		$this->Events = $this->fetchTable('Events');
-		$this->Eventcategories = $this->fetchTable('Eventcategories');
+		$this->Conventions = $this->loadModel('Conventions');
+		$this->Events = $this->loadModel('Events');
+		$this->Eventcategories = $this->loadModel('Eventcategories');
     }
 
     public function index() {
@@ -140,7 +140,7 @@ class DivisionsController extends AppController {
 		$eventCatDD = $this->Eventcategories->find()->where([])->order(['Eventcategories.name' => 'ASC'])->all()->combine('id', 'name')->toArray();
 		$this->set('eventCatDD', $eventCatDD);
 		
-        $divisions = $this->Divisions->newEmptyEntity();
+        $divisions = $this->Divisions->newEntity();
         if ($this->request->is('post')) {
 			
 			//$this->prx($this->request->getData());
