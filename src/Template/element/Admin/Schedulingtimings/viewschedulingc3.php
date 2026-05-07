@@ -38,7 +38,7 @@ $this->Schedulingtimings = TableRegistry::getTableLocator()->get('Schedulingtimi
                             <?php //pr($datarecord); exit;?> 
                             <tr>
                                 <td data-title="DB ID"><?php echo $datarecord->id;?></td>
-								<td data-title="Room"><?php echo $datarecord->Conventionrooms?->room_name ?? '';?></td>
+								<td data-title="Room"><?php echo (isset($datarecord->Conventionrooms) ? $datarecord->Conventionrooms->room_name : '');?></td>
                                 <td data-title="Day"><?php echo $datarecord->day;?></td>
                                 <td data-title="Start">
 								<?php 
@@ -50,7 +50,7 @@ $this->Schedulingtimings = TableRegistry::getTableLocator()->get('Schedulingtimi
 								echo $datarecord->finish_time!=NULL ? date("h:i A",strtotime($datarecord->finish_time)) : '';
 								?>
 								</td>
-								<td data-title="Event"><?php echo $datarecord->Events?->event_name ?? '';?> (<?php echo $datarecord->Events?->event_id_number ?? '';?>)</td>
+								<td data-title="Event"><?php echo (isset($datarecord->Events) ? $datarecord->Events->event_name : '');?> (<?php echo (isset($datarecord->Events) ? $datarecord->Events->event_id_number : '');?>)</td>
 								<td data-title="Round No.">Round-<?php echo $datarecord->round_number;?></td>
 								<td data-title="Match No.">Match-<?php echo $datarecord->match_number;?></td>
                                 <td data-title="Match">
@@ -72,13 +72,13 @@ $this->Schedulingtimings = TableRegistry::getTableLocator()->get('Schedulingtimi
 								{
 									if($datarecord->user_id>0 && ($datarecord->user_id_opponent == 0 || $datarecord->user_id_opponent == NULL))
 									{
-										echo ($datarecord->Users?->first_name ?? '').' (Group-'.$datarecord->group_name.')(<b>BYE</b>)';
+										echo (isset($datarecord->Users) ? $datarecord->Users->first_name : '').' (Group-'.$datarecord->group_name.')(<b>BYE</b>)';
 									}
 									else
 									{
-										echo ($datarecord->Users?->first_name ?? '').' (Group-'.$datarecord->group_name.')';
+										echo (isset($datarecord->Users) ? $datarecord->Users->first_name : '').' (Group-'.$datarecord->group_name.')';
 										echo ' <b>VS</b> ';
-										echo ($datarecord->Opponentuser?->first_name ?? '').'(Group-'.$datarecord->group_name_opponent.')';
+										echo (isset($datarecord->Opponentuser) ? $datarecord->Opponentuser->first_name : '').'(Group-'.$datarecord->group_name_opponent.')';
 									}
 								}
 								

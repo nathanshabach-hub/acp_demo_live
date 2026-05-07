@@ -116,6 +116,10 @@ $this->Users = TableRegistry::getTableLocator()->get('Users');
 							if($datarecord->schedule_category == 4)
 							{
 								echo $datarecord->Users['first_name'].' '.$datarecord->Users['middle_name'].' '.$datarecord->Users['last_name'];
+								$schoolForStudent = $studentSchoolMap[(int)$datarecord->user_id] ?? '';
+								if ($schoolForStudent !== '') {
+									echo ' <small class="text-muted">('.h($schoolForStudent).')</small>';
+								}
 							}							
 							?>
 							</td>

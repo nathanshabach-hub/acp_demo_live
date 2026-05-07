@@ -780,11 +780,21 @@ class SchedulingsController extends AppController {
 			
 			$schedulingTimingsD = $this->Schedulingtimings->find()->where(['Schedulingtimings.id' => $schedulingId])->first();
 			
-			//$scheduling = findSchedulingTiming($pdo, $schedulingId);
-			$groupUserIds = explode(',', $schedulingTimingsD->group_name_user_ids);
-			$opponentIds = explode(',', $schedulingTimingsD->group_name_opponent_user_ids);
+			// Record no longer exists — purge the stale conflict ID and move on
+			if (!$schedulingTimingsD) {
+				$nextSchIDSConflict = array_values(array_diff($schIDSConflict, [$schedulingId]));
+				$this->Schedulings->updateAll(
+					['conflict_user_ids_group' => count($nextSchIDSConflict) ? implode(',', $nextSchIDSConflict) : null],
+					['id' => $schedulingD->id]
+				);
+				return $this->redirect(['controller' => 'schedulings', 'action' => 'resolveconflictsgroup', $convention_season_slug]);
+			}
 
-			$allUserIds = array_merge($groupUserIds, $opponentIds);
+			//$scheduling = findSchedulingTiming($pdo, $schedulingId);
+			$groupUserIds = array_filter(explode(',', (string)$schedulingTimingsD->group_name_user_ids), 'strlen');
+			$opponentIds  = array_filter(explode(',', (string)$schedulingTimingsD->group_name_opponent_user_ids), 'strlen');
+
+			$allUserIds = array_values(array_merge($groupUserIds, $opponentIds));
 
 			$base_start_time = $schedulingTimingsD->start_time;
 			$base_finish_time = $schedulingTimingsD->finish_time;

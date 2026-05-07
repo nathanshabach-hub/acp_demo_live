@@ -36,6 +36,7 @@ private $scheduleWindowWarningShown = false;
 		$this->Conventionseasonroomevents = $this->loadModel('Conventionseasonroomevents');
 		$this->Schedulings = $this->loadModel('Schedulings');
 		$this->Conventionregistrationstudents = $this->loadModel('Conventionregistrationstudents');
+		$this->Schedulingeventtweaks = $this->loadModel('Schedulingeventtweaks');
     }
 	
 	/* public function viewscheduling($convention_season_slug=null) {
@@ -186,6 +187,16 @@ private $scheduleWindowWarningShown = false;
 			
 			
 			
+			// ---- Load event tweaks (A: pinned day, B: pinned room, C: pinned start time) ----
+			$eventTweak = $this->Schedulingeventtweaks->find()
+				->where(['Schedulingeventtweaks.conventionseasons_id' => $conventionSD->id,
+				         'Schedulingeventtweaks.event_id'             => $eventIDCS])
+				->first();
+			// B: override room list with the pinned room
+			if ($eventTweak && $eventTweak->pinned_room_id) {
+				$roomArrCSEvent = [(int)$eventTweak->pinned_room_id];
+			}
+			
 			// check if there is rooms assigned for this event
 			if(count((array)$roomArrCSEvent)>0)
 			{	
@@ -248,6 +259,40 @@ private $scheduleWindowWarningShown = false;
 					
 					$schStartDate = $start_date;
 					
+					// A: Pinned day — advance schStartDate/schDay to the first matching day in window
+					if ($eventTweak && !empty($eventTweak->pinned_day)) {
+						$weekArr  = ['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday'];
+						$pinnedDayName = $eventTweak->pinned_day;
+						$checkDate = new \DateTime($start_date);
+						$convEndDate = (new \DateTime($start_date))->modify('+' . ($schedulingsD->number_of_days - 1) . ' days');
+						$found = false;
+						$dayOffset = 0;
+						while ($checkDate <= $convEndDate) {
+							$dow = $checkDate->format('l'); // e.g. 'Monday'
+							if ($dow === $pinnedDayName) {
+								$schStartDate = $checkDate->format('Y-m-d');
+								$schDay       = $pinnedDayName;
+								$cntrDays     = $dayOffset + 1;
+								$found        = true;
+								break;
+							}
+							$checkDate->modify('+1 day');
+							$dayOffset++;
+						}
+						// If not found in window, skip this event tweak (fall back to normal)
+						if (!$found) {
+							$schDay = $first_day;
+							$schStartDate = $start_date;
+							$cntrDays = 1;
+						}
+					}
+					
+					// C: Pinned start time — override the normal starting time for this event
+					$effectiveStartingTime = $normal_starting_time;
+					if ($eventTweak && $eventTweak->pinned_start_time) {
+						$effectiveStartingTime = date('H:i:s', strtotime($eventTweak->pinned_start_time));
+					}
+					
 					$totalRoomsForThisEvent = count((array)$roomArrCSEvent);
 					// now firstly choose first room
 					$cntrRoomCSEvent = 0;
@@ -280,14 +325,15 @@ private $scheduleWindowWarningShown = false;
 							if($cntrDays == 1 && $cntrEVSCH == 0)
 							{
 								// check if there is a different time for first day
-								if($starting_different_time_first_day_yes_no == 1)
+								if($starting_different_time_first_day_yes_no == 1 && !($eventTweak && $eventTweak->pinned_start_time))
 								{
 									$normal_starting_time 	= $different_first_day_start_time;
 									$normal_finish_time 	= $different_first_day_end_time;
 								}
 							}
 							
-							$start_time 	= $normal_starting_time;
+							// C: use pinned start time for the very first slot only
+							$start_time 	= ($cntrEVSCH == 0) ? $effectiveStartingTime : $normal_starting_time;
 							$finish_time 	= date("H:i:s", strtotime('+ '.$eventSetupRoundJudTime.' minutes', strtotime($start_time)));
 						}
 						else
@@ -378,7 +424,7 @@ private $scheduleWindowWarningShown = false;
 						
 						
 						/* Validate slot against all break periods (lunch, judging, sports) with loop to prevent blind jumps */
-						$validSlot = $this->findValidSlot($start_time, $finish_time, $schDay, $schStartDate, $cntrDays, $normal_starting_time, $normal_finish_time, $eventSetupRoundJudTime, $schedulingsD, $lunch_time_start, $lunch_time_end);
+						$validSlot = $this->findValidSlot($start_time, $finish_time, $schDay, $schStartDate, $cntrDays, $normal_starting_time, $normal_finish_time, $eventSetupRoundJudTime, $schedulingsD, $lunch_time_start, $lunch_time_end, $roomID);
 						if (!empty($validSlot['window_exhausted'])) {
 							$windowExceeded = true;
 							$this->flashConventionWindowExceeded($schedulingsD);
@@ -710,74 +756,106 @@ private $scheduleWindowWarningShown = false;
 			
 			$lastMatchNumber = $lastMatchNumber+1;
 			
-			$loopNumber = $countTotalMatR1Event/2;
-			
-			for($cntrOR=0;$cntrOR<$loopNumber;$cntrOR++)
-			{
-				$roundNumber = $cntrOR+1;
-				
-				// fetch matches of this round and save schedule
+			/* Generate all subsequent rounds until only the Final remains.
+			   Odd-round leftovers get a bye into the next round so no player
+			   is dropped from the bracket. */
+			$currentRound  = 1;
+			$safetyLimit   = 0;
+			$roomIdForRound = isset($roomArrCSEvent[0]) ? $roomArrCSEvent[0] : NULL;
+			while (true) {
+				$safetyLimit++;
+				if ($safetyLimit > 15) break;
+
 				$arrNR = array();
-				$nextRounds = $this->Schedulingtimings->find()->where(['Schedulingtimings.schedule_category' => 2,'Schedulingtimings.conventionseasons_id' => $conventionSD->id,'Schedulingtimings.convention_id' => $conventionSD->convention_id,'Schedulingtimings.season_id' => $conventionSD->season_id,'Schedulingtimings.season_year' => $conventionSD->season_year,'Schedulingtimings.event_id' => $event_id_c2,'Schedulingtimings.round_number' => $roundNumber])->all();
-				foreach($nextRounds as $nextRound)
-				{
+				$nextRounds = $this->Schedulingtimings->find()->where([
+					'Schedulingtimings.schedule_category'   => 2,
+					'Schedulingtimings.conventionseasons_id' => $conventionSD->id,
+					'Schedulingtimings.convention_id'       => $conventionSD->convention_id,
+					'Schedulingtimings.season_id'           => $conventionSD->season_id,
+					'Schedulingtimings.season_year'         => $conventionSD->season_year,
+					'Schedulingtimings.event_id'            => $event_id_c2,
+					'Schedulingtimings.round_number'        => $currentRound
+				])->all();
+				foreach ($nextRounds as $nextRound) {
 					$arrNR[] = $nextRound->id;
 				}
-				
-				//$this->prx($arrNR);
-				
-				$inLoopR = floor(count($arrNR)/2);
-				
-				//now run loop on this array and schedule
-				for($cntrIn=0;$cntrIn<$inLoopR;$cntrIn++)
-				{
-					// to get first id
-					$randFirstID 				= rand(0,count($arrNR)-1);
-					$first_id 					= $arrNR[$randFirstID];
-					array_splice($arrNR, $randFirstID, 1);
-					
-					// to get opponent user id
-					$randSecondID 				= rand(0,count($arrNR)-1);
-					$second_id 			= $arrNR[$randSecondID];
-					array_splice($arrNR, $randSecondID, 1);
-					
-					
-					//now save remaining player in database with opponent user id
+
+				// 0 or 1 records means this round IS the Final (or empty) — stop
+				if (count($arrNR) <= 1) break;
+
+				$tempNR = $arrNR;
+
+				// Pair matches for the next round
+				while (count($tempNR) >= 2) {
+					$randFirstID = rand(0, count($tempNR) - 1);
+					$first_id    = $tempNR[$randFirstID];
+					array_splice($tempNR, $randFirstID, 1);
+
+					$randSecondID = rand(0, count($tempNR) - 1);
+					$second_id    = $tempNR[$randSecondID];
+					array_splice($tempNR, $randSecondID, 1);
+
 					$schedulingtimings = $this->Schedulingtimings->newEntity();
 					$dataBye = $this->Schedulingtimings->patchEntity($schedulingtimings, array());
-
-					$dataBye->schedule_category				= 2;
-					$dataBye->conventionseasons_id			= $conventionSD->id;
-					$dataBye->convention_id					= $conventionSD->convention_id;
-					$dataBye->season_id						= $conventionSD->season_id;
-					$dataBye->season_year 					= $conventionSD->season_year;
-					$dataBye->conventionregistration_id 	= NULL;
-					$dataBye->event_id 						= $event_id_c2;
-					$dataBye->event_id_number 				= $eventD->event_id_number;
-					$dataBye->user_id 						= 0;
-					$dataBye->group_name 					= NULL;
-					$dataBye->room_id 						= $roomArrCSEvent[$cntrRoomCSEvent];
-					$dataBye->day 							= NULL;
-					$dataBye->start_time 					= NULL;
-					$dataBye->finish_time 					= NULL;
-					$dataBye->user_id_opponent 				= 0;
-					$dataBye->schtimeautoid1 				= $first_id;
-					$dataBye->schtimeautoid2 				= $second_id;
-					$dataBye->round_number 					= $roundNumber+1;
-					$dataBye->match_number 					= $lastMatchNumber;
-					$dataBye->is_bye 						= 0;
-					$dataBye->created 						= date('Y-m-d H:i:s');
-					
-					$dataBye->sch_date_time 				= $start_date.' 00:00:00';
-
-					$resultBye = $this->Schedulingtimings->save($dataBye);
-					
+					$dataBye->schedule_category			= 2;
+					$dataBye->conventionseasons_id		= $conventionSD->id;
+					$dataBye->convention_id				= $conventionSD->convention_id;
+					$dataBye->season_id					= $conventionSD->season_id;
+					$dataBye->season_year				= $conventionSD->season_year;
+					$dataBye->conventionregistration_id	= NULL;
+					$dataBye->event_id					= $event_id_c2;
+					$dataBye->event_id_number			= $eventD->event_id_number;
+					$dataBye->user_id					= 0;
+					$dataBye->group_name				= NULL;
+					$dataBye->room_id					= $roomIdForRound;
+					$dataBye->day						= NULL;
+					$dataBye->start_time				= NULL;
+					$dataBye->finish_time				= NULL;
+					$dataBye->user_id_opponent			= 0;
+					$dataBye->schtimeautoid1			= $first_id;
+					$dataBye->schtimeautoid2			= $second_id;
+					$dataBye->round_number				= $currentRound + 1;
+					$dataBye->match_number				= $lastMatchNumber;
+					$dataBye->is_bye					= 0;
+					$dataBye->created					= date('Y-m-d H:i:s');
+					$dataBye->sch_date_time				= $start_date.' 00:00:00';
+					$this->Schedulingtimings->save($dataBye);
 					$lastMatchNumber++;
-					
 					$cntrEVSCH++;
-					
 				}
-				
+
+				// Odd player out — give them a bye into the next round
+				if (count($tempNR) === 1) {
+					$byeMatchId = $tempNR[0];
+					$schedulingtimings = $this->Schedulingtimings->newEntity();
+					$dataBye = $this->Schedulingtimings->patchEntity($schedulingtimings, array());
+					$dataBye->schedule_category			= 2;
+					$dataBye->conventionseasons_id		= $conventionSD->id;
+					$dataBye->convention_id				= $conventionSD->convention_id;
+					$dataBye->season_id					= $conventionSD->season_id;
+					$dataBye->season_year				= $conventionSD->season_year;
+					$dataBye->conventionregistration_id	= NULL;
+					$dataBye->event_id					= $event_id_c2;
+					$dataBye->event_id_number			= $eventD->event_id_number;
+					$dataBye->user_id					= 0;
+					$dataBye->group_name				= NULL;
+					$dataBye->room_id					= $roomIdForRound;
+					$dataBye->day						= NULL;
+					$dataBye->start_time				= NULL;
+					$dataBye->finish_time				= NULL;
+					$dataBye->user_id_opponent			= 0;
+					$dataBye->schtimeautoid1			= $byeMatchId;
+					$dataBye->schtimeautoid2			= 0;
+					$dataBye->round_number				= $currentRound + 1;
+					$dataBye->match_number				= $lastMatchNumber;
+					$dataBye->is_bye					= 1;
+					$dataBye->created					= date('Y-m-d H:i:s');
+					$dataBye->sch_date_time				= $start_date.' 00:00:00';
+					$this->Schedulingtimings->save($dataBye);
+					$lastMatchNumber++;
+				}
+
+				$currentRound++;
 			}
 		}
 		
@@ -959,7 +1037,7 @@ private $scheduleWindowWarningShown = false;
 					
 					
 					/* Validate slot against all break periods (lunch, judging, sports) with loop to prevent blind jumps */
-					$validSlot = $this->findValidSlot($start_time, $finish_time, $schDay, $schStartDate, $cntrDays, $normal_starting_time, $normal_finish_time, $eventSetupRoundJudTime, $schedulingsD, $lunch_time_start, $lunch_time_end);
+					$validSlot = $this->findValidSlot($start_time, $finish_time, $schDay, $schStartDate, $cntrDays, $normal_starting_time, $normal_finish_time, $eventSetupRoundJudTime, $schedulingsD, $lunch_time_start, $lunch_time_end, $roomID);
 					if (!empty($validSlot['window_exhausted'])) {
 						$windowExceeded = true;
 						$this->flashConventionWindowExceeded($schedulingsD);
@@ -1314,74 +1392,104 @@ private $scheduleWindowWarningShown = false;
 			
 			$lastMatchNumber = $lastMatchNumber+1;
 			
-			$loopNumber = $countTotalMatR1Event/2;
-			
-			for($cntrOR=0;$cntrOR<$loopNumber;$cntrOR++)
-			{
-				$roundNumber = $cntrOR+1;
-				
-				// fetch matches of this round and save schedule
+			/* Generate all subsequent rounds until only the Final remains.
+			   Odd-round leftovers get a bye into the next round so no group
+			   is dropped from the bracket. */
+			$currentRound  = 1;
+			$safetyLimit   = 0;
+			while (true) {
+				$safetyLimit++;
+				if ($safetyLimit > 15) break;
+
 				$arrNR = array();
-				$nextRounds = $this->Schedulingtimings->find()->where(['Schedulingtimings.schedule_category' => 3,'Schedulingtimings.conventionseasons_id' => $conventionSD->id,'Schedulingtimings.convention_id' => $conventionSD->convention_id,'Schedulingtimings.season_id' => $conventionSD->season_id,'Schedulingtimings.season_year' => $conventionSD->season_year,'Schedulingtimings.event_id' => $event_id_c3,'Schedulingtimings.round_number' => $roundNumber])->all();
-				foreach($nextRounds as $nextRound)
-				{
+				$nextRounds = $this->Schedulingtimings->find()->where([
+					'Schedulingtimings.schedule_category'   => 3,
+					'Schedulingtimings.conventionseasons_id' => $conventionSD->id,
+					'Schedulingtimings.convention_id'       => $conventionSD->convention_id,
+					'Schedulingtimings.season_id'           => $conventionSD->season_id,
+					'Schedulingtimings.season_year'         => $conventionSD->season_year,
+					'Schedulingtimings.event_id'            => $event_id_c3,
+					'Schedulingtimings.round_number'        => $currentRound
+				])->all();
+				foreach ($nextRounds as $nextRound) {
 					$arrNR[] = $nextRound->id;
 				}
-				
-				//$this->prx($arrNR);
-				
-				$inLoopR = floor(count($arrNR)/2);
-				
-				//echo $inLoopR;exit;
-				
-				//now run loop on this array and schedule
-				for($cntrIn=0;$cntrIn<$inLoopR;$cntrIn++)
-				{
-					// to get first id
-					$randFirstID 				= rand(0,count($arrNR)-1);
-					$first_id 					= $arrNR[$randFirstID];
-					array_splice($arrNR, $randFirstID, 1);
-					
-					// to get opponent user id
-					$randSecondID 				= rand(0,count($arrNR)-1);
-					$second_id 			= $arrNR[$randSecondID];
-					array_splice($arrNR, $randSecondID, 1);
-					
-					
-					//now save remaining player in database with opponent user id
+
+				// 0 or 1 records means this round IS the Final (or empty) — stop
+				if (count($arrNR) <= 1) break;
+
+				$tempNR = $arrNR;
+
+				// Pair matches for the next round
+				while (count($tempNR) >= 2) {
+					$randFirstID = rand(0, count($tempNR) - 1);
+					$first_id    = $tempNR[$randFirstID];
+					array_splice($tempNR, $randFirstID, 1);
+
+					$randSecondID = rand(0, count($tempNR) - 1);
+					$second_id    = $tempNR[$randSecondID];
+					array_splice($tempNR, $randSecondID, 1);
+
 					$schedulingtimings = $this->Schedulingtimings->newEntity();
 					$dataBye = $this->Schedulingtimings->patchEntity($schedulingtimings, array());
-
-					$dataBye->schedule_category				= 3;
-					$dataBye->conventionseasons_id			= $conventionSD->id;
-					$dataBye->convention_id					= $conventionSD->convention_id;
-					$dataBye->season_id						= $conventionSD->season_id;
-					$dataBye->season_year 					= $conventionSD->season_year;
-					$dataBye->conventionregistration_id 	= NULL;
-					$dataBye->event_id 						= $eventD->id;
-					$dataBye->event_id_number 				= $eventD->event_id_number;
-					$dataBye->user_id 						= 0;
-					$dataBye->group_name 					= NULL;
-					$dataBye->room_id 						= NULL;
-					$dataBye->day 							= NULL;
-					$dataBye->start_time 					= NULL;
-					$dataBye->finish_time 					= NULL;
-					$dataBye->user_id_opponent 				= 0;
-					$dataBye->schtimeautoid1 				= $first_id;
-					$dataBye->schtimeautoid2 				= $second_id;
-					$dataBye->round_number 					= $roundNumber+1;
-					$dataBye->match_number 					= $lastMatchNumber;
-					$dataBye->is_bye 						= 0;
-					$dataBye->created 						= date('Y-m-d H:i:s');
-					
-					$dataBye->sch_date_time 				= $start_date.' 00:00:00';
-
-					$resultBye = $this->Schedulingtimings->save($dataBye);
-					
+					$dataBye->schedule_category			= 3;
+					$dataBye->conventionseasons_id		= $conventionSD->id;
+					$dataBye->convention_id				= $conventionSD->convention_id;
+					$dataBye->season_id					= $conventionSD->season_id;
+					$dataBye->season_year				= $conventionSD->season_year;
+					$dataBye->conventionregistration_id	= NULL;
+					$dataBye->event_id					= $eventD->id;
+					$dataBye->event_id_number			= $eventD->event_id_number;
+					$dataBye->user_id					= 0;
+					$dataBye->group_name				= NULL;
+					$dataBye->room_id					= NULL;
+					$dataBye->day						= NULL;
+					$dataBye->start_time				= NULL;
+					$dataBye->finish_time				= NULL;
+					$dataBye->user_id_opponent			= 0;
+					$dataBye->schtimeautoid1			= $first_id;
+					$dataBye->schtimeautoid2			= $second_id;
+					$dataBye->round_number				= $currentRound + 1;
+					$dataBye->match_number				= $lastMatchNumber;
+					$dataBye->is_bye					= 0;
+					$dataBye->created					= date('Y-m-d H:i:s');
+					$dataBye->sch_date_time				= $start_date.' 00:00:00';
+					$this->Schedulingtimings->save($dataBye);
 					$lastMatchNumber++;
-					
 				}
-				
+
+				// Odd group out — give them a bye into the next round
+				if (count($tempNR) === 1) {
+					$byeMatchId = $tempNR[0];
+					$schedulingtimings = $this->Schedulingtimings->newEntity();
+					$dataBye = $this->Schedulingtimings->patchEntity($schedulingtimings, array());
+					$dataBye->schedule_category			= 3;
+					$dataBye->conventionseasons_id		= $conventionSD->id;
+					$dataBye->convention_id				= $conventionSD->convention_id;
+					$dataBye->season_id					= $conventionSD->season_id;
+					$dataBye->season_year				= $conventionSD->season_year;
+					$dataBye->conventionregistration_id	= NULL;
+					$dataBye->event_id					= $eventD->id;
+					$dataBye->event_id_number			= $eventD->event_id_number;
+					$dataBye->user_id					= 0;
+					$dataBye->group_name				= NULL;
+					$dataBye->room_id					= NULL;
+					$dataBye->day						= NULL;
+					$dataBye->start_time				= NULL;
+					$dataBye->finish_time				= NULL;
+					$dataBye->user_id_opponent			= 0;
+					$dataBye->schtimeautoid1			= $byeMatchId;
+					$dataBye->schtimeautoid2			= 0;
+					$dataBye->round_number				= $currentRound + 1;
+					$dataBye->match_number				= $lastMatchNumber;
+					$dataBye->is_bye					= 1;
+					$dataBye->created					= date('Y-m-d H:i:s');
+					$dataBye->sch_date_time				= $start_date.' 00:00:00';
+					$this->Schedulingtimings->save($dataBye);
+					$lastMatchNumber++;
+				}
+
+				$currentRound++;
 			}
 			
 			
@@ -1569,7 +1677,7 @@ private $scheduleWindowWarningShown = false;
 					
 					
 					/* Validate slot against all break periods (lunch, judging, sports) with loop to prevent blind jumps */
-					$validSlot = $this->findValidSlot($start_time, $finish_time, $schDay, $schStartDate, $cntrDays, $normal_starting_time, $normal_finish_time, $eventSetupRoundJudTime, $schedulingsD, $lunch_time_start, $lunch_time_end);
+					$validSlot = $this->findValidSlot($start_time, $finish_time, $schDay, $schStartDate, $cntrDays, $normal_starting_time, $normal_finish_time, $eventSetupRoundJudTime, $schedulingsD, $lunch_time_start, $lunch_time_end, $roomID);
 					if (!empty($validSlot['window_exhausted'])) {
 						$windowExceeded = true;
 						$this->flashConventionWindowExceeded($schedulingsD);
@@ -1777,6 +1885,15 @@ private $scheduleWindowWarningShown = false;
 			}
 			//$this->prx($roomArrCSEvent);
 			
+			// ---- Load event tweaks (A: pinned day, B: pinned room, C: pinned start time) ----
+			$eventTweak4 = $this->Schedulingeventtweaks->find()
+				->where(['Schedulingeventtweaks.conventionseasons_id' => $conventionSD->id,
+				         'Schedulingeventtweaks.event_id'             => $event_id])
+				->first();
+			// B: override room assignment
+			if ($eventTweak4 && $eventTweak4->pinned_room_id) {
+				$roomArrCSEvent = [(int)$eventTweak4->pinned_room_id];
+			}
 			
 			// check if there is rooms assigned for this event
 			if(count((array)$roomArrCSEvent))
@@ -1795,13 +1912,53 @@ private $scheduleWindowWarningShown = false;
 				
 				$schStartDate = $start_date;
 				
+				// A: Pinned day — advance schStartDate/schDay to the matching day in window
+				if ($eventTweak4 && !empty($eventTweak4->pinned_day)) {
+					$weekArr4  = ['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday'];
+					$checkDate4 = new \DateTime($start_date);
+					$convEnd4   = (new \DateTime($start_date))->modify('+' . ($schedulingsD->number_of_days - 1) . ' days');
+					$found4 = false;
+					$dayOff4 = 0;
+					while ($checkDate4 <= $convEnd4) {
+						if ($checkDate4->format('l') === $eventTweak4->pinned_day) {
+							$schStartDate = $checkDate4->format('Y-m-d');
+							$schDay       = $eventTweak4->pinned_day;
+							$cntrDays     = $dayOff4 + 1;
+							$found4 = true;
+							break;
+						}
+						$checkDate4->modify('+1 day');
+						$dayOff4++;
+					}
+				}
+				
+				// C: Pinned start time
+				$effectiveStartingTime4 = $normal_starting_time;
+				if ($eventTweak4 && $eventTweak4->pinned_start_time) {
+					$effectiveStartingTime4 = date('H:i:s', strtotime($eventTweak4->pinned_start_time));
+				}
+				
+				$batchSizeC4 = $this->getCategory4ConcurrentBatchSize($eventD);
+				
 				$totalRoomsForThisEvent = count((array)$roomArrCSEvent);
 				// now firstly choose first room
 				$cntrRoomCSEvent 	= 0;
 				$cntrEVSCH 			= 0;
-				
-				foreach($schedulingT as $schdata)
+
+				$pendingRows = [];
+				foreach ($schedulingT as $schdata) {
+					$pendingRows[] = $schdata;
+				}
+
+				$slotGuard = 0;
+				while (count($pendingRows) > 0)
 				{
+					$slotGuard++;
+					if ($slotGuard > 10000) {
+						$this->Flash->warning('Category 4 scheduler stopped early for event '.$eventD->event_id_number.' to avoid an infinite loop while placing participants.');
+						break;
+					}
+
 					if($totalRoomsForThisEvent == 1)
 					{
 						$roomID = $roomArrCSEvent[0];
@@ -1867,14 +2024,15 @@ private $scheduleWindowWarningShown = false;
 							if($cntrDays == 1 && $cntrEVSCH == 0)
 							{
 								// check if there is a different time for first day
-								if($starting_different_time_first_day_yes_no == 1)
+								if($starting_different_time_first_day_yes_no == 1 && !($eventTweak4 && $eventTweak4->pinned_start_time))
 								{
 									$normal_starting_time 	= $different_first_day_start_time;
 									$normal_finish_time 	= $different_first_day_end_time;
 								}
 							}
 							
-							$start_time 	= $normal_starting_time;
+							// C: use pinned start time for the very first slot only
+							$start_time 	= ($cntrEVSCH == 0) ? $effectiveStartingTime4 : $normal_starting_time;
 							$finish_time 	= date("H:i:s", strtotime('+ '.$eventSetupRoundJudTime.' minutes', strtotime($start_time)));
 						}
 						else
@@ -1921,7 +2079,7 @@ private $scheduleWindowWarningShown = false;
 					
 					
 					/* Validate slot against all break periods (lunch, judging, sports) with loop to prevent blind jumps */
-					$validSlot = $this->findValidSlot($start_time, $finish_time, $schDay, $schStartDate, $cntrDays, $normal_starting_time, $normal_finish_time, $eventSetupRoundJudTime, $schedulingsD, $lunch_time_start, $lunch_time_end);
+					$validSlot = $this->findValidSlot($start_time, $finish_time, $schDay, $schStartDate, $cntrDays, $normal_starting_time, $normal_finish_time, $eventSetupRoundJudTime, $schedulingsD, $lunch_time_start, $lunch_time_end, $roomID);
 					if (!empty($validSlot['window_exhausted'])) {
 						$windowExceeded = true;
 						$this->flashConventionWindowExceeded($schedulingsD);
@@ -1934,38 +2092,81 @@ private $scheduleWindowWarningShown = false;
 					$cntrDays = $validSlot['cntrDays'];
 					$normal_starting_time = $validSlot['normal_starting_time'];
 					$normal_finish_time = $validSlot['normal_finish_time'];
-					
-					
-					
-					$arrP = [
-					'room_id' 		=> $roomArrCSEvent[$cntrRoomCSEvent],
-					'day' 			=> $schDay,
-					'start_time' 	=> $start_time,
-					'finish_time' 	=> $finish_time,
-					
-					'sch_date_time' 	=> $schStartDate.' '.date("H:i:s", strtotime($start_time)),
-					
-					'modified' 		=> date("Y-m-d H:i:s")
-					];
-					//$this->pr($arrP);
-					//echo '<hr>';
-					
-					// update day, start time and end time
+
+					$slotStartDate = $schStartDate;
+					$slotStartTime = $start_time;
+					$slotFinishTime = $finish_time;
+
+					$assignIds = [];
+					$remainingRows = [];
+					$assignedInThisSlot = 0;
+					foreach ($pendingRows as $pendingRow) {
+						if ($assignedInThisSlot < $batchSizeC4 && !$this->hasUserSchedulingConflict($conventionSD, (int)$pendingRow->user_id, $slotStartDate, $slotStartTime, $slotFinishTime)) {
+							$assignIds[] = $pendingRow->id;
+							$assignedInThisSlot++;
+						} else {
+							$remainingRows[] = $pendingRow;
+						}
+					}
+
+					if (count($assignIds) === 0) {
+						$start_time = date("H:i:s", strtotime('+0 minutes', strtotime($slotFinishTime)));
+						$finish_time = date("H:i:s", strtotime('+ '.$eventSetupRoundJudTime.' minutes', strtotime($start_time)));
+
+						if (strtotime($finish_time) >= strtotime($normal_finish_time)) {
+							if($cntrRoomCSEvent < $totalRoomsForThisEvent - 1)
+							{
+								$cntrRoomCSEvent++;
+							}
+							else
+							{
+								$cntrRoomCSEvent = 0;
+								if (!$this->applyNextConventionDay($schDay, $schStartDate, $cntrDays, $schedulingsD)) {
+									$windowExceeded = true;
+									$this->flashConventionWindowExceeded($schedulingsD);
+									break;
+								}
+							}
+							$normal_starting_time 	= date("H:i:s",strtotime($schedulingsD->normal_starting_time));
+							$normal_finish_time 	= date("H:i:s",strtotime($schedulingsD->normal_finish_time));
+							$start_time 	= $normal_starting_time;
+							$finish_time 	= date("H:i:s", strtotime('+ '.$eventSetupRoundJudTime.' minutes', strtotime($normal_starting_time)));
+						}
+
+						$validSlot = $this->findValidSlot($start_time, $finish_time, $schDay, $schStartDate, $cntrDays, $normal_starting_time, $normal_finish_time, $eventSetupRoundJudTime, $schedulingsD, $lunch_time_start, $lunch_time_end, $roomID);
+						if (!empty($validSlot['window_exhausted'])) {
+							$windowExceeded = true;
+							$this->flashConventionWindowExceeded($schedulingsD);
+							break;
+						}
+						$schDay = $validSlot['schDay'];
+						$schStartDate = $validSlot['schStartDate'];
+						$cntrDays = $validSlot['cntrDays'];
+						$normal_starting_time = $validSlot['normal_starting_time'];
+						$normal_finish_time = $validSlot['normal_finish_time'];
+						$start_time = $validSlot['start_time'];
+						$finish_time = $validSlot['finish_time'];
+
+						continue;
+					}
+
 					$this->Schedulingtimings->updateAll(
 					[
 					'room_id' 		=> $roomArrCSEvent[$cntrRoomCSEvent],
 					'day' 			=> $schDay,
-					'start_time' 	=> $start_time,
-					'finish_time' 	=> $finish_time,
-					
-					'sch_date_time' 	=> $schStartDate.' '.date("H:i:s", strtotime($start_time)),
-					
+					'start_time' 	=> $slotStartTime,
+					'finish_time' 	=> $slotFinishTime,
+					'sch_date_time' 	=> $slotStartDate.' '.date("H:i:s", strtotime($slotStartTime)),
 					'modified' 		=> date("Y-m-d H:i:s")
 					],
-					["id" => $schdata->id]);
-					
-					$cntrEVSCH++;
-					
+					['id IN' => $assignIds]
+					);
+
+					$pendingRows = $remainingRows;
+					$cntrEVSCH += count($assignIds);
+					$resetTime = 0;
+					$finish_time = $slotFinishTime;
+					$start_time = $slotStartTime;
 				}
 
 				if ($windowExceeded) {
@@ -2529,6 +2730,32 @@ private $scheduleWindowWarningShown = false;
 		$this->scheduleWindowWarningShown = true;
 		$session->write('Scheduling.windowWarningShown', true);
 	}
+
+	private function getCategory4ConcurrentBatchSize($eventD): int
+	{
+		$eventIdNumber = (string)($eventD->event_id_number ?? '');
+		if (in_array($eventIdNumber, ['003', '053'], true)) {
+			return 40;
+		}
+
+		return 1;
+	}
+
+	private function hasUserSchedulingConflict($conventionSD, int $userId, string $slotDate, string $slotStartTime, string $slotFinishTime): bool
+	{
+		if ($userId <= 0 || $slotDate === '') {
+			return false;
+		}
+
+		$condConflict = [];
+		$condConflict[] = "(Schedulingtimings.conventionseasons_id = '".$conventionSD->id."' AND Schedulingtimings.convention_id = '".$conventionSD->convention_id."' AND Schedulingtimings.season_id = '".$conventionSD->season_id."' AND Schedulingtimings.season_year = '".$conventionSD->season_year."')";
+		$condConflict[] = "(Schedulingtimings.user_id = '".$userId."' AND Schedulingtimings.start_time IS NOT NULL AND Schedulingtimings.finish_time IS NOT NULL)";
+		$condConflict[] = "(DATE(Schedulingtimings.sch_date_time) = '".$slotDate."')";
+		$condConflict[] = "(Schedulingtimings.finish_time > '".$slotStartTime."' AND Schedulingtimings.start_time < '".$slotFinishTime."')";
+
+		$conflictCount = $this->Schedulingtimings->find()->where($condConflict)->count();
+		return $conflictCount > 0;
+	}
 	
 	
 	/**
@@ -2536,11 +2763,25 @@ private $scheduleWindowWarningShown = false;
 	 * Loops until the slot is clean — fixes the "blind jump" bug where sequential break checks
 	 * could skip over a break after being pushed past another one.
 	 */
-	private function findValidSlot($start_time, $finish_time, $schDay, $schStartDate, $cntrDays, $normal_starting_time, $normal_finish_time, $eventSetupRoundJudTime, $schedulingsD, $lunch_time_start, $lunch_time_end)
+	private function findValidSlot($start_time, $finish_time, $schDay, $schStartDate, $cntrDays, $normal_starting_time, $normal_finish_time, $eventSetupRoundJudTime, $schedulingsD, $lunch_time_start, $lunch_time_end, $roomID = null)
 	{
 		$maxIterations = 20;
 		$iteration = 0;
 		$windowExhausted = false;
+		$roomAvailableFrom = null;
+		$roomAvailableTo = null;
+
+		if (!empty($roomID)) {
+			$roomD = $this->Conventionrooms->find()->where(['Conventionrooms.id' => $roomID])->first();
+			if ($roomD) {
+				if (!empty($roomD->available_from)) {
+					$roomAvailableFrom = date('H:i:s', strtotime($roomD->available_from));
+				}
+				if (!empty($roomD->available_to)) {
+					$roomAvailableTo = date('H:i:s', strtotime($roomD->available_to));
+				}
+			}
+		}
 		
 		do {
 			$slotChanged = false;
@@ -2682,6 +2923,30 @@ private $scheduleWindowWarningShown = false;
 						$finish_time 	= date("H:i:s", strtotime('+ '.$eventSetupRoundJudTime.' minutes', strtotime($normal_starting_time)));
 						$slotChanged = true;
 					}
+				}
+			}
+
+			/* Room availability window check */
+			if (!empty($roomID) && ($roomAvailableFrom || $roomAvailableTo)) {
+				$effectiveRoomStart = $roomAvailableFrom ?: $normal_starting_time;
+				$effectiveRoomEnd = $roomAvailableTo ?: $normal_finish_time;
+
+				if (strtotime($start_time) < strtotime($effectiveRoomStart)) {
+					$start_time = $effectiveRoomStart;
+					$finish_time = date("H:i:s", strtotime('+ '.$eventSetupRoundJudTime.' minutes', strtotime($start_time)));
+					$slotChanged = true;
+				}
+
+				if (strtotime($finish_time) > strtotime($effectiveRoomEnd)) {
+					if (!$this->applyNextConventionDay($schDay, $schStartDate, $cntrDays, $schedulingsD)) {
+						$windowExhausted = true;
+						break;
+					}
+					$normal_starting_time = date("H:i:s", strtotime($schedulingsD->normal_starting_time));
+					$normal_finish_time = date("H:i:s", strtotime($schedulingsD->normal_finish_time));
+					$start_time = (strtotime($effectiveRoomStart) > strtotime($normal_starting_time)) ? $effectiveRoomStart : $normal_starting_time;
+					$finish_time = date("H:i:s", strtotime('+ '.$eventSetupRoundJudTime.' minutes', strtotime($start_time)));
+					$slotChanged = true;
 				}
 			}
 			

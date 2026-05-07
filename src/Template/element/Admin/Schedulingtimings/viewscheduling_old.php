@@ -48,30 +48,30 @@ $this->Events = TableRegistry::getTableLocator()->get('Events');
                             <?php //pr($datarecord); exit;?> 
                             <tr>
                                 <td data-title="DB ID"><?php echo $datarecord->id;?></td>
-                                <td data-title="Room"><?php echo $datarecord->Conventionrooms?->room_name ?? '';?></td>
+                                <td data-title="Room"><?php echo (isset($datarecord->Conventionrooms) ? $datarecord->Conventionrooms->room_name : '');?></td>
                                 <td data-title="Day"><?php echo $datarecord->day;?></td>
                                 <td data-title="Start"><?php echo date("h:i A",strtotime($datarecord->start_time));?></td>
                                 <td data-title="Finish"><?php echo date("h:i A",strtotime($datarecord->finish_time));?></td>
-                                <td data-title="Event"><?php echo $datarecord->Events?->event_name ?? '';?> (<?php echo $datarecord->Events?->event_id_number ?? '';?>)</td>
+                                <td data-title="Event"><?php echo (isset($datarecord->Events) ? $datarecord->Events->event_name : '');?> (<?php echo (isset($datarecord->Events) ? $datarecord->Events->event_id_number : '');?>)</td>
                                 <td data-title="Match">
 								<?php
 								if($datarecord->schedule_category == 1)
 								{
 									echo 'Group '.$datarecord->group_name;
-                                    echo ' (<b>'.($datarecord->Users?->first_name ?? '').'</b>)';
+                                    echo ' (<b>'.(isset($datarecord->Users) ? $datarecord->Users->first_name : '').'</b>)';
 								}
 								
 								if($datarecord->schedule_category == 2)
 								{
 									if($datarecord->user_id>0 && ($datarecord->user_id_opponent == 0 || $datarecord->user_id_opponent == NULL))
 									{
-                                        echo trim((string)($datarecord->Users?->first_name ?? '').' '.(string)($datarecord->Users?->middle_name ?? '').' '.(string)($datarecord->Users?->last_name ?? '')).' (<b>BYE</b>)';
+                                        echo trim((string)(isset($datarecord->Users) ? $datarecord->Users->first_name : '').' '.(string)(isset($datarecord->Users) ? $datarecord->Users->middle_name : '').' '.(string)(isset($datarecord->Users) ? $datarecord->Users->last_name : '')).' (<b>BYE</b>)';
 									}
 									else
 									{
-                                        echo trim((string)($datarecord->Users?->first_name ?? '').' '.(string)($datarecord->Users?->middle_name ?? '').' '.(string)($datarecord->Users?->last_name ?? ''));
+                                        echo trim((string)(isset($datarecord->Users) ? $datarecord->Users->first_name : '').' '.(string)(isset($datarecord->Users) ? $datarecord->Users->middle_name : '').' '.(string)(isset($datarecord->Users) ? $datarecord->Users->last_name : ''));
 										echo ' <b>VS</b> ';
-                                        echo trim((string)($datarecord->Opponentuser?->first_name ?? '').' '.(string)($datarecord->Opponentuser?->middle_name ?? '').' '.(string)($datarecord->Opponentuser?->last_name ?? ''));
+                                        echo trim((string)(isset($datarecord->Opponentuser) ? $datarecord->Opponentuser->first_name : '').' '.(string)(isset($datarecord->Opponentuser) ? $datarecord->Opponentuser->middle_name : '').' '.(string)(isset($datarecord->Opponentuser) ? $datarecord->Opponentuser->last_name : ''));
 									}
 								}
 								

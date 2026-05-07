@@ -53,6 +53,8 @@ class AppController extends Controller{
 		$this->Conventionregistrationteachers = $this->loadModel('Conventionregistrationteachers');
 		$this->Eventsubmissions = $this->loadModel('Eventsubmissions');
 		$this->Schedulingtimings = $this->loadModel('Schedulingtimings');
+		$this->Conventionrooms = $this->loadModel('Conventionrooms');
+		$this->Schedulingeventtweaks = $this->loadModel('Schedulingeventtweaks');
     }
 	
 	public function beforeRender(EventInterface $event) {
@@ -440,6 +442,71 @@ class AppController extends Controller{
     }
 	
 	/////////////////////////////////
+	private function applySlotConstraintsForConflict($conventionSD, $schedulingD, $eventId, $roomId, $playTime, $candidateDate, $candidateStartTime)
+	{
+		$normal_finish_time   = date("H:i:s", strtotime($schedulingD->normal_finish_time));
+		$normal_starting_time = date("H:i:s", strtotime($schedulingD->normal_starting_time));
+		$convStartDate        = date('Y-m-d', strtotime($schedulingD->start_date));
+		$numberOfDays         = max(1, (int)($schedulingD->number_of_days ?? 1));
+		$convEndDate          = date('Y-m-d', strtotime($convStartDate . ' +' . ($numberOfDays - 1) . ' day'));
+
+		$eventTweak = $this->Schedulingeventtweaks->find()->where([
+			'Schedulingeventtweaks.conventionseasons_id' => $conventionSD->id,
+			'Schedulingeventtweaks.event_id' => $eventId,
+		])->first();
+
+		$roomD = null;
+		if ((int)$roomId > 0) {
+			$roomD = $this->Conventionrooms->find()->where(['Conventionrooms.id' => $roomId])->first();
+		}
+
+		$guard = 0;
+		while ($guard < 60) {
+			$guard++;
+			if ($candidateDate > $convEndDate) {
+				return ['ok' => false];
+			}
+
+			if ($eventTweak && !empty($eventTweak->pinned_day) && date('l', strtotime($candidateDate)) !== $eventTweak->pinned_day) {
+				$candidateDate = date('Y-m-d', strtotime($candidateDate . ' +1 day'));
+				$candidateStartTime = $normal_starting_time;
+				continue;
+			}
+
+			$roomStart = $normal_starting_time;
+			$roomEnd = $normal_finish_time;
+			if ($roomD) {
+				if (!empty($roomD->available_from)) {
+					$roomStart = date('H:i:s', strtotime($roomD->available_from));
+				}
+				if (!empty($roomD->available_to)) {
+					$roomEnd = date('H:i:s', strtotime($roomD->available_to));
+				}
+			}
+
+			if (strtotime($candidateStartTime) < strtotime($roomStart)) {
+				$candidateStartTime = $roomStart;
+			}
+
+			$candidateFinishTime = date("H:i:s", strtotime($candidateStartTime . " +$playTime minute"));
+
+			if (strtotime($candidateFinishTime) > strtotime($normal_finish_time) || strtotime($candidateFinishTime) > strtotime($roomEnd)) {
+				$candidateDate = date('Y-m-d', strtotime($candidateDate . ' +1 day'));
+				$candidateStartTime = $normal_starting_time;
+				continue;
+			}
+
+			return [
+				'ok' => true,
+				'date' => $candidateDate,
+				'start' => $candidateStartTime,
+				'finish' => $candidateFinishTime,
+			];
+		}
+
+		return ['ok' => false];
+	}
+
 	public function nextBookings($convention_season_slug, $conflict, $base_start_time, $base_finish_time, $base_sch_date_time, $recordId = null)
 	{
 		if ($recordId === null) {
@@ -468,10 +535,45 @@ class AppController extends Controller{
 		$nextStartTime	= date("H:i:s", strtotime($finishTime . " +1 minute"));
 		$nextFinishTime	= date("H:i:s", strtotime($nextStartTime . " +$playTime minute"));
 
+		/* Day-boundary enforcement: if the slot overruns the daily finish time, roll to the next convention day */
+		$normal_finish_time   = date("H:i:s", strtotime($schedulingD->normal_finish_time));
+		$normal_starting_time = date("H:i:s", strtotime($schedulingD->normal_starting_time));
+		$convStartDate        = date('Y-m-d', strtotime($schedulingD->start_date));
+		$numberOfDays         = max(1, (int)($schedulingD->number_of_days ?? 1));
+		$convEndDate          = date('Y-m-d', strtotime($convStartDate . ' +' . ($numberOfDays - 1) . ' day'));
+
+		if (strtotime($nextFinishTime) > strtotime($normal_finish_time)) {
+			$nextDate = date('Y-m-d', strtotime($schDateTime . ' +1 day'));
+			if ($nextDate > $convEndDate) {
+				// Cannot place within the convention window; leave unresolved
+				return $conflict;
+			}
+			$schDateTime    = $nextDate;
+			$nextStartTime  = $normal_starting_time;
+			$nextFinishTime = date("H:i:s", strtotime($nextStartTime . " +$playTime minute"));
+		}
+
+		$constraint = $this->applySlotConstraintsForConflict(
+			$conventionSD,
+			$schedulingD,
+			(int)$schedulingTimingsD->event_id,
+			(int)$schedulingTimingsD->room_id,
+			(int)$playTime,
+			$schDateTime,
+			$nextStartTime
+		);
+		if (empty($constraint['ok'])) {
+			return $conflict;
+		}
+		$schDateTime = $constraint['date'];
+		$nextStartTime = $constraint['start'];
+		$nextFinishTime = $constraint['finish'];
+
 		$schDateTime				= $schDateTime . ' ' . $nextStartTime;
 		$conflict['sch_date_time']	= $schDateTime;
 		$conflict['start_time']		= $nextStartTime;
 		$conflict['finish_time']	= $nextFinishTime;
+		$conflict['day']			= date('l', strtotime($schDateTime));
 
 		$base_start_time			= $nextStartTime;
 		$base_finish_time			= $nextFinishTime;
@@ -776,6 +878,9 @@ class AppController extends Controller{
 	/* Group conflict resolve process */
 	public function findNextTime($conflict, $base_start_time, $base_finish_time, $base_sch_date_time, $allUserIds)
 	{
+		// Fetch scheduling config for day-boundary enforcement
+		$schedulingDFNT = $this->Schedulings->find()->where(['Schedulings.conventionseasons_id' => $conflict->conventionseasons_id])->first();
+
 		$schDate 					= date('Y-m-d', strtotime($base_sch_date_time));
 		$schDateTime 				= date('Y-m-d', strtotime($base_sch_date_time));
 		$starTime 					= $base_start_time;
@@ -786,10 +891,52 @@ class AppController extends Controller{
 		$nextStartTime 				= date("H:i:s", strtotime($finishTime . " +1 minute"));
 		$nextFinishTime 			= date("H:i:s", strtotime($nextStartTime . " +$playTime minute"));
 
+		/* Day-boundary enforcement: if the slot overruns the daily finish time, roll to the next convention day */
+		if ($schedulingDFNT) {
+			$fnt_normal_finish_time   = date("H:i:s", strtotime($schedulingDFNT->normal_finish_time));
+			$fnt_normal_starting_time = date("H:i:s", strtotime($schedulingDFNT->normal_starting_time));
+			$fnt_convStartDate        = date('Y-m-d', strtotime($schedulingDFNT->start_date));
+			$fnt_numberOfDays         = max(1, (int)($schedulingDFNT->number_of_days ?? 1));
+			$fnt_convEndDate          = date('Y-m-d', strtotime($fnt_convStartDate . ' +' . ($fnt_numberOfDays - 1) . ' day'));
+
+			if (strtotime($nextFinishTime) > strtotime($fnt_normal_finish_time)) {
+				$fnt_nextDate = date('Y-m-d', strtotime($schDate . ' +1 day'));
+				if ($fnt_nextDate > $fnt_convEndDate) {
+					// Cannot place within the convention window; leave unresolved
+					return $conflict;
+				}
+				$schDate        = $fnt_nextDate;
+				$schDateTime    = $fnt_nextDate;
+				$nextStartTime  = $fnt_normal_starting_time;
+				$nextFinishTime = date("H:i:s", strtotime($nextStartTime . " +$playTime minute"));
+			}
+		}
+
+		$conventionSDForConstraint = $this->Conventionseasons->find()->where(['Conventionseasons.id' => $conflict->conventionseasons_id])->first();
+		if ($conventionSDForConstraint) {
+			$constraint = $this->applySlotConstraintsForConflict(
+				$conventionSDForConstraint,
+				$schedulingDFNT,
+				(int)$conflict->event_id,
+				(int)$conflict->room_id,
+				(int)$playTime,
+				$schDate,
+				$nextStartTime
+			);
+			if (empty($constraint['ok'])) {
+				return $conflict;
+			}
+			$schDate = $constraint['date'];
+			$schDateTime = $constraint['date'];
+			$nextStartTime = $constraint['start'];
+			$nextFinishTime = $constraint['finish'];
+		}
+
 		$schDateTime 				= $schDateTime . ' ' . $nextStartTime;
 		$conflict->sch_date_time 	= $schDateTime;
 		$conflict->start_time 		= $nextStartTime;
 		$conflict->finish_time 		= $nextFinishTime;
+		$conflict->day              = date('l', strtotime($schDateTime));
 
 		$base_start_time 			= $nextStartTime;
 		$base_finish_time 			= $nextFinishTime;
@@ -798,6 +945,10 @@ class AppController extends Controller{
 		
 		foreach ($allUserIds as $userId)
 		{
+			// Skip empty/invalid user IDs to prevent malformed FIND_IN_SET SQL
+			$userId = (string)$userId;
+			if ($userId === '' || $userId === '0') continue;
+
 			$checkGBusy = $this->Schedulingtimings->find()
 				->where([
 					'Schedulingtimings.conventionseasons_id' => $conflict->conventionseasons_id,
@@ -833,7 +984,7 @@ class AppController extends Controller{
 		
 
 		$conventionSeasonsId = $conflict->conventionseasons_id;
-		$schedulingD = $this->Schedulings->find()->where(['Schedulings.conventionseasons_id' => $conventionSeasonsId])->first();
+		$schedulingD = $schedulingDFNT; // already fetched at top of function
 		
 		
 		//$scheduling = findScheduling($pdo, $conventionSeasonsId);
@@ -855,7 +1006,7 @@ class AppController extends Controller{
 				||
 				(strtotime($base_finish_time)>=strtotime($judging_breaks_morning_break_starting_time) &&  strtotime($base_finish_time)<=strtotime($judging_breaks_morning_break_finish_time))
 			) {
-			   return $this->findNextTime($conflict, $base_start_time, $base_finish_time, $base_sch_date_time);
+			   return $this->findNextTime($conflict, $base_start_time, $base_finish_time, $base_sch_date_time, $allUserIds);
 			}
 
 			$judging_breaks_afternoon_break_start_time = date("H:i:s", strtotime($schedulingD->judging_breaks_afternoon_break_start_time));
@@ -865,7 +1016,7 @@ class AppController extends Controller{
 				||
 				(strtotime($base_finish_time)>=strtotime($judging_breaks_afternoon_break_start_time) &&  strtotime($base_finish_time)<=strtotime($judging_breaks_afternoon_break_finish_time))
 			) {
-			   return $this->findNextTime($conflict, $base_start_time, $base_finish_time, $base_sch_date_time);
+			   return $this->findNextTime($conflict, $base_start_time, $base_finish_time, $base_sch_date_time, $allUserIds);
 			}
 		}
 		
@@ -883,7 +1034,7 @@ class AppController extends Controller{
 					||
 					(strtotime($base_finish_time)>=strtotime($sports_day_starting_time) &&  strtotime($base_finish_time)<=strtotime($sports_day_finish_time))
 				) {
-				   return $this->findNextTime($conflict, $base_start_time, $base_finish_time, $base_sch_date_time);
+				   return $this->findNextTime($conflict, $base_start_time, $base_finish_time, $base_sch_date_time, $allUserIds);
 				}
 			}
 		}
@@ -902,7 +1053,7 @@ class AppController extends Controller{
 					||
 					(strtotime($base_finish_time)>=strtotime($sports_day_other_starting_time) &&  strtotime($base_finish_time)<=strtotime($sports_day_other_finish_time))
 				) {
-				   return $this->findNextTime($conflict, $base_start_time, $base_finish_time, $base_sch_date_time);
+				   return $this->findNextTime($conflict, $base_start_time, $base_finish_time, $base_sch_date_time, $allUserIds);
 				}
 			}
 		}

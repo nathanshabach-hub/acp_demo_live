@@ -6,7 +6,7 @@ $seasonsDD = $seasonsDD ?? [];
 <div class="content-wrapper">
     <section class="content-header">
       <h1>
-            Manage Convention Registrations Students :: <?php echo $CRDetails->Conventions?->name ?? ''; ?>
+            Manage Convention Registrations Students :: <?php echo (isset($CRDetails->Conventions) ? $CRDetails->Conventions->name : ''); ?>
       </h1>
       <ol class="breadcrumb">
           <li><?php echo $this->Html->link('<i class="fa fa-dashboard"></i> <span>Dashboard</span> ', array('controller'=>'admins', 'action'=>'dashboard'), array('escape'=>false));?></li>

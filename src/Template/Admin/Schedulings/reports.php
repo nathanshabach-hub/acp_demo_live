@@ -68,6 +68,24 @@
                       </div>
                     </div>
 					
+					<div class="form-group">
+                      <label class="col-sm-2 control-label">&nbsp;</label>
+                      <div class="col-sm-10">
+						  <?php
+						  echo $this->Html->link('Report By Sponsor', ['controller'=>'schedulingreports', 'action' => 'bysponsors',$convention_season_slug], ['class'=>'btn btn-info canlcel_le','title'=>'Report By Sponsor','style' =>'width:200px;text-align:center;']);
+						  ?>
+                      </div>
+                    </div>
+
+					<div class="form-group">
+                      <label class="col-sm-2 control-label">&nbsp;</label>
+                      <div class="col-sm-10">
+						  <?php
+              echo $this->Html->link('Small Program', ['controller'=>'schedulingreports', 'action' => 'smallprogram',$convention_season_slug], ['class'=>'btn btn-info canlcel_le','title'=>'Small Program','style' =>'width:200px;text-align:center;']);
+						  ?>
+                      </div>
+                    </div>
+					
 					
                   </div>
                 </div>

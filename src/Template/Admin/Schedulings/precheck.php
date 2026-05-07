@@ -190,6 +190,8 @@ $this->Events = TableRegistry::getTableLocator()->get('Events');
 						
 						echo $this->Html->link('View/Start Scheduling', ['controller'=>'schedulings', 'action' => 'schedulecategory',$convention_season_slug], ['class'=>'btn btn-success canlcel_le','title'=>'View/Start Scheduling']);
 						
+						echo $this->Html->link('Scheduling Tweaks', ['controller'=>'schedulingtweaks', 'action' => 'index',$convention_season_slug], ['class'=>'btn btn-info canlcel_le','title'=>'Event Tweaks / Allocation Customization']);
+						
 						echo $this->Html->link('Overwrite Timings', ['controller'=>'schedulings', 'action' => 'overwritetimings',$convention_season_slug], ['class'=>'btn btn-warning canlcel_le','title'=>'Overwrite Timings']);
 						
 						echo $this->Html->link('Reports', ['controller'=>'schedulings', 'action' => 'reports',$convention_season_slug], ['class'=>'btn btn-info canlcel_le','title'=>'Generate Reports']);

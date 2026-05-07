@@ -46,13 +46,13 @@ $priceStructureCR = $priceStructureCR ?? [];
                             <?php //pr($datarecord); exit;?> 
                             <tr>
                                 <td data-title="ID"><?php echo $datarecord->id;?></td>
-                                <td data-title="Convention"><?php echo $datarecord->Conventions?->name ?? '';?></td>
-                                <td data-title="Email"><?php echo $datarecord->Users?->email_address ?? '';?></td>
+                                <td data-title="Convention"><?php echo (isset($datarecord->Conventions) ? $datarecord->Conventions->name : '');?></td>
+                                <td data-title="Email"><?php echo (isset($datarecord->Users) ? $datarecord->Users->email_address : '');?></td>
                                 <td data-title="School">
 									<?php 
-									if(($datarecord->Users?->user_type ?? null) == 'School')
+									if(((isset($datarecord->Users) ? $datarecord->Users->user_type : null)) == 'School')
 									{
-										echo $datarecord->Users?->first_name ?? '';
+										echo (isset($datarecord->Users) ? $datarecord->Users->first_name : '');
 									}
 									else
 									{
@@ -62,14 +62,14 @@ $priceStructureCR = $priceStructureCR ?? [];
 								</td>
                                 <td data-title="Judge">
 									<?php 
-                                    if(($datarecord->Users?->user_type ?? null) == 'Judge')
+                                    if(((isset($datarecord->Users) ? $datarecord->Users->user_type : null)) == 'Judge')
 									{
-                                        echo trim((string)($datarecord->Users?->first_name ?? '').' '.(string)($datarecord->Users?->last_name ?? ''));
+                                        echo trim((string)((isset($datarecord->Users) ? $datarecord->Users->first_name : '')).' '.(string)((isset($datarecord->Users) ? $datarecord->Users->last_name : '')));
 									}
 									else
-                                    if(($datarecord->Users?->user_type ?? null) == 'Teacher_Parent')
+                                    if(((isset($datarecord->Users) ? $datarecord->Users->user_type : null)) == 'Teacher_Parent')
 									{
-                                        echo trim((string)($datarecord->Users?->first_name ?? '').' '.(string)($datarecord->Users?->last_name ?? ''));
+                                        echo trim((string)((isset($datarecord->Users) ? $datarecord->Users->first_name : '')).' '.(string)((isset($datarecord->Users) ? $datarecord->Users->last_name : '')));
 									}
 									
 									else
@@ -100,7 +100,7 @@ $priceStructureCR = $priceStructureCR ?? [];
                                 <td data-title="Action">
                                     
                                     <?php
-                                    if(($datarecord->Users?->user_type ?? null) == 'School')
+                                    if(((isset($datarecord->Users) ? $datarecord->Users->user_type : null)) == 'School')
 									{
 										if($datarecord->status == 1)
 										{
@@ -129,7 +129,7 @@ $priceStructureCR = $priceStructureCR ?? [];
 										}
 									}
 									
-                                    if(($datarecord->Users?->user_type ?? null) == 'Teacher_Parent' || ($datarecord->Users?->user_type ?? null) == 'Judge')
+                                    if(((isset($datarecord->Users) ? $datarecord->Users->user_type : null)) == 'Teacher_Parent' || ((isset($datarecord->Users) ? $datarecord->Users->user_type : null)) == 'Judge')
 									{
 										//echo $this->Html->link('<i class="fa fa-puzzle-piece"></i>', ['controller' => 'conventionregistrations', 'action' => 'judgeevents',$datarecord->slug], [ 'escape' => false, 'title' => 'Judge Selected Events', 'class'=>'btn btn-primary btn-xs']);
 										
@@ -193,7 +193,7 @@ foreach ($conventionregistrations as $datarecord)
         <div class="nzwh-wrapper">
             <fieldset class="nzwh">
                 <legend class="head_pop">
-                Events Selected By: <?php echo trim((string)($datarecord->Users?->first_name ?? '').' '.(string)($datarecord->Users?->last_name ?? '')); ?>
+                Events Selected By: <?php echo trim((string)((isset($datarecord->Users) ? $datarecord->Users->first_name : '')).' '.(string)((isset($datarecord->Users) ? $datarecord->Users->last_name : ''))); ?>
                 </legend>
                 <div class="drt">
 					
