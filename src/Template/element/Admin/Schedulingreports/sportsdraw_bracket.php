@@ -70,8 +70,8 @@ if ($logoPath !== '' && is_file($logoPath)) {
     border-radius: 50%;
     border: 3px solid rgba(255,255,255,0.5);
     background: #fff;
-    object-fit: contain;
-    padding: 3px;
+    object-fit: cover;
+    padding: 0;
     flex-shrink: 0;
 }
 .sd-header-text .sd-org {

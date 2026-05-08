@@ -73,9 +73,9 @@ if (!empty($schedulingD->lunch_time_start) && !empty($schedulingD->lunch_time_en
     height: 100px;
     border-radius: 50%;
     border: 3px solid rgba(255,255,255,0.6);
-    object-fit: contain;
+    object-fit: cover;
     background: #fff;
-    padding: 4px;
+    padding: 0;
 }
 .sp-header-title {
     flex: 1;
