@@ -221,9 +221,31 @@ if($schedulings->sports_day_having_events_after_sport_yes_no)
 		background: #f4fbff;
 		border-radius: 6px;
 		padding: 12px 14px;
-		margin-bottom: 16px;
+		margin-bottom: 20px;
 		color: #1f4f66;
 		font-size: 13px;
+	}
+	.wizard-section-card {
+		border: 1px solid #e2e5e8;
+		border-left: 5px solid #27ae60;
+		border-radius: 6px;
+		padding: 16px;
+		margin-bottom: 18px;
+		background: #fff;
+		box-shadow: 0 1px 3px rgba(0,0,0,.06);
+	}
+	.wizard-section-heading {
+		margin: 0 0 14px;
+		font-size: 18px;
+		font-weight: 700;
+		color: #2c3e50;
+		display: flex;
+		align-items: center;
+		gap: 10px;
+	}
+	.wizard-section-heading i {
+		color: #27ae60;
+		font-size: 20px;
 	}
 	.wizard-shell .form-group {
 		margin-left: 0;
@@ -239,16 +261,11 @@ if($schedulings->sports_day_having_events_after_sport_yes_no)
 	.wizard-shell .col-sm-10 {
 		width: calc(100% - 230px);
 	}
-	.wizard-shell .control-label h3 {
-		margin: 10px 0 0;
-		font-size: 17px;
-		font-weight: 700;
-		color: #2c3e50;
-	}
 	.wizard-section-hint {
 		font-size: 13px;
 		line-height: 1.5;
 		color: #6c757d;
+		margin-bottom: 12px;
 	}
 	.wizard-preview {
 		background: #f7fafc;
@@ -261,6 +278,51 @@ if($schedulings->sports_day_having_events_after_sport_yes_no)
 		gap: 8px;
 		align-items: center;
 	}
+	.wizard-section-card {
+		border-left: 5px solid #999;
+		background: #fff;
+		border-radius: 3px;
+		padding: 16px 16px 12px 16px;
+		margin-bottom: 16px;
+		position: relative;
+	}
+	.wizard-section-card h3 {
+		margin: -8px 0 12px 0;
+		padding-left: 28px;
+		font-size: 15px;
+		font-weight: 600;
+		color: #2c3e50;
+	}
+	.wizard-section-card h3 i {
+		position: absolute;
+		left: 16px;
+		font-size: 16px;
+		color: #666;
+	}
+	.wizard-section-card.convention-days {
+		border-left-color: #3498db;
+	}
+	.wizard-section-card.convention-days h3 i {
+		color: #3498db;
+	}
+	.wizard-section-card.times {
+		border-left-color: #9b59b6;
+	}
+	.wizard-section-card.times h3 i {
+		color: #9b59b6;
+	}
+	.wizard-section-card.judging-breaks {
+		border-left-color: #e67e22;
+	}
+	.wizard-section-card.judging-breaks h3 i {
+		color: #e67e22;
+	}
+	.wizard-section-card.sports-day {
+		border-left-color: #e74c3c;
+	}
+	.wizard-section-card.sports-day h3 i {
+		color: #e74c3c;
+	}
 	@media (max-width: 991px) {
 		.wizard-shell .control-label,
 		.wizard-shell .col-sm-10 {
@@ -268,6 +330,9 @@ if($schedulings->sports_day_having_events_after_sport_yes_no)
 		}
 		.wizard-shell .control-label {
 			margin-bottom: 4px;
+		}
+		.wizard-section-heading {
+			font-size: 16px;
 		}
 	}
 </style>
@@ -300,8 +365,10 @@ if($schedulings->sports_day_having_events_after_sport_yes_no)
 							Configure convention days, daily times, judging breaks, and sports day timing in one place.
 						</div>
 					
+					<div class="wizard-section-card convention-days">
+						<h3 class="wizard-section-heading"><i class="fa fa-calendar"></i> Convention Days</h3>
 					
-					<!-- Convention Days Starts -->
+						<!-- Convention Days Starts -->
 					<div class="form-group">
                       <label class="col-sm-2 control-label"><h3>Convention Days </h3><span class="require"></span></label>
                       <div class="col-sm-10">
@@ -340,12 +407,12 @@ if($schedulings->sports_day_having_events_after_sport_yes_no)
 					  </div>
 					</div>
 					<!-- Convention Days Ends -->
-					
-					
+				</div>
+				
+				<div class="wizard-section-card times">
+					<h3 class="wizard-section-heading"><i class="fa fa-clock-o"></i> Times</h3>
 					
 					<!-- Times Starts -->
-					<div class="form-group">
-                      <label class="col-sm-2 control-label"><h3>Times </h3><span class="require"></span></label>
                       <div class="col-sm-10">
                           &nbsp;
                       </div>
@@ -397,17 +464,12 @@ if($schedulings->sports_day_having_events_after_sport_yes_no)
 						</div>
                     </div>
 					<!-- Times Ends -->
-					
-					
-					
-					
-					<!-- Judging Breaks Starts -->
-					<div class="form-group">
-                      <label class="col-sm-2 control-label"><h3>Judging Breaks </h3><span class="require"></span></label>
-				      <div class="col-sm-10 wizard-section-hint" style="padding-top:30px;">
-                          Check the box if you want to schedule breaks for music and platform judges. (They need it but the schedule might be so tight they can't fit one in). We recommend trying to generate the schedule with breaks first and take them out if it can't be done.
-                      </div>
-                    </div>
+				</div>
+				
+				<div class="wizard-section-card judging-breaks">
+					<h3 class="wizard-section-heading"><i class="fa fa-coffee"></i> Judging Breaks</h3>
+					<p class="wizard-section-hint">
+Check the box if you want to schedule breaks for music and platform judges. We recommend trying to generate the schedule with breaks first and removing them only if necessary.</p>
 					<div class="form-group">
                       <label class="col-sm-2 control-label">&nbsp;</label>
                       <div class="col-sm-10">
@@ -445,18 +507,12 @@ if($schedulings->sports_day_having_events_after_sport_yes_no)
 					
 					</div>
 					<!-- Judging Breaks Ends -->
-					
-					
-					
-					
-					
-					<!-- Sports Day Starts -->
-					<div class="form-group">
-                      <label class="col-sm-2 control-label"><h3>Sports Day </h3><span class="require"></span></label>
-				      <div class="col-sm-10 wizard-section-hint" style="padding-top:30px;">
-                          Check the box if you are having sports day (for track and field). And then choose the day from the list. If you're only having half the day for sport and you want other events in the afternoon then check the box and fill the times for other event.
-                      </div>
-                    </div>
+				</div>
+				
+				<div class="wizard-section-card sports-day">
+					<h3 class="wizard-section-heading"><i class="fa fa-futbol-o"></i> Sports Day</h3>
+					<p class="wizard-section-hint">
+Check the box if you are having sports day. If sports is only part of the day, enable extra events after sports and set those times too.</p>
 					<div class="form-group">
                       <label class="col-sm-2 control-label">&nbsp;</label>
                       <div class="col-sm-10">

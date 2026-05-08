@@ -173,7 +173,7 @@ $stuMsg     = $stuPassed ? 'student(s) eligible for scheduling' : 'No students f
                 <div style="display:grid; grid-template-columns:1fr 1fr; gap:14px; margin-bottom:24px;">
                     <?php $renderCard('Events',        'fa-calendar-check-o', $evPassed,  $evChecked,  $evStat,  $evMsg);  ?>
                     <?php $renderCard('Locations',     'fa-map-marker',       $locPassed, $locChecked, $locStat, $locMsg); ?>
-                    <?php $renderCard('Registrations', 'fa-id-card-o',        $regPassed, $regChecked, $regStat, $regMsg); ?>
+                    <?php $renderCard('Registrations', 'fa-user-plus',        $regPassed, $regChecked, $regStat, $regMsg); ?>
                     <?php $renderCard('Students',      'fa-users',            $stuPassed, $stuChecked, $stuStat, $stuMsg); ?>
                 </div>
             </div>
