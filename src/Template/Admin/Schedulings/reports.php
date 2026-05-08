@@ -85,6 +85,15 @@
 						  ?>
                       </div>
                     </div>
+
+					<div class="form-group">
+                      <label class="col-sm-2 control-label">&nbsp;</label>
+                      <div class="col-sm-10">
+						  <?php
+              echo $this->Html->link('Sports &amp; Elimination Draw', ['controller'=>'schedulingreports', 'action' => 'sportsdraw',$convention_season_slug], ['escape'=>false,'class'=>'btn btn-info canlcel_le','title'=>'Sports & Elimination Draw','style' =>'width:200px;text-align:center;']);
+						  ?>
+                      </div>
+                    </div>
 					
 					
                   </div>

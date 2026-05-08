@@ -32,6 +32,7 @@ class SchedulingreportsController extends AppController {
 		$this->Conventionregistrations = $this->loadModel('Conventionregistrations');
 		$this->Conventionregistrationstudents = $this->loadModel('Conventionregistrationstudents');
 		$this->Schedulingprogramnotes = $this->loadModel('Schedulingprogramnotes');
+		$this->Crstudentevents = $this->loadModel('Crstudentevents');
 		$this->Events = $this->loadModel('Events');
 		$this->Schedulings = $this->loadModel('Schedulings');
 		$this->Schedulingtimings = $this->loadModel('Schedulingtimings');
@@ -1256,10 +1257,256 @@ class SchedulingreportsController extends AppController {
 			'footer_note' => '',
 		);
 	}
-	
-	
-	
-	
+
+	/* ================================================================
+	 * SPORTS / ELIMINATION DRAW
+	 * Covers schedule_category 2 (individual elimination) and
+	 * schedule_category 3 (team sports elimination).
+	 * ================================================================ */
+
+	public function sportsdraw($convention_season_slug = null) {
+		$this->set('title', ADMIN_TITLE . 'Sports & Elimination Draw');
+		$this->viewBuilder()->setLayout('admin');
+		$this->set('manageConventions', '1');
+		$this->set('conventionList', '1');
+		$this->set('convention_season_slug', $convention_season_slug);
+
+		$conventionSD = $this->Conventionseasons->find()->where(['Conventionseasons.slug' => $convention_season_slug])->contain(['Conventions'])->first();
+		if (!$conventionSD) {
+			$this->Flash->error('Convention season not found.');
+			return $this->redirect(['controller' => 'conventions', 'action' => 'index']);
+		}
+		$this->set('conventionSD', $conventionSD);
+		$this->set('convention_slug', $conventionSD->Conventions['slug']);
+
+		$schedulingD = $this->Schedulings->find()->where(['Schedulings.conventionseasons_id' => $conventionSD->id])->first();
+		$this->set('schedulingD', $schedulingD);
+
+		// Get distinct event_ids that have elimination scheduling (cat 2 or 3)
+		$timingEventRows = $this->Schedulingtimings->find()
+			->select(['event_id', 'schedule_category'])
+			->where([
+				'Schedulingtimings.conventionseasons_id' => $conventionSD->id,
+				'Schedulingtimings.schedule_category IN' => [2, 3],
+			])
+			->distinct(['event_id', 'schedule_category'])
+			->all();
+
+		$eventIds = [];
+		$eventCategoryMap = [];
+		foreach ($timingEventRows as $r) {
+			$eid = (int)$r->event_id;
+			if ($eid > 0) {
+				$eventIds[] = $eid;
+				$eventCategoryMap[$eid] = (int)$r->schedule_category;
+			}
+		}
+		$eventIds = array_values(array_unique($eventIds));
+
+		$eventsDD = [];
+		if (count($eventIds)) {
+			$evRows = $this->Events->find()
+				->select(['id', 'event_name'])
+				->where(['Events.id IN' => $eventIds])
+				->order(['Events.event_name' => 'ASC'])
+				->all();
+			foreach ($evRows as $r) {
+				$cat = $eventCategoryMap[(int)$r->id] ?? 0;
+				$label = (string)$r->event_name . ($cat === 3 ? ' (Team)' : ' (Individual)');
+				$eventsDD[(int)$r->id] = $label;
+			}
+		}
+		$this->set('eventsDD', $eventsDD);
+
+		if ($this->request->is('post')) {
+			$eventId = (int)$this->request->getData('Schedulingreports.event_id');
+			return $this->redirect(['controller' => 'schedulingreports', 'action' => 'sportsdrawshow', $convention_season_slug, $eventId]);
+		}
+	}
+
+	public function sportsdrawshow($convention_season_slug = null, $event_id = null) {
+		$this->set('title', ADMIN_TITLE . 'Sports & Elimination Draw');
+		$this->viewBuilder()->setLayout('admin');
+		$this->set('manageConventions', '1');
+		$this->set('conventionList', '1');
+		$this->set('convention_season_slug', $convention_season_slug);
+		$this->set('event_id', $event_id);
+
+		$conventionSD = $this->Conventionseasons->find()->where(['Conventionseasons.slug' => $convention_season_slug])->contain(['Conventions'])->first();
+		if (!$conventionSD) {
+			$this->Flash->error('Convention season not found.');
+			return $this->redirect(['controller' => 'conventions', 'action' => 'index']);
+		}
+		$this->set('conventionSD', $conventionSD);
+		$this->set('convention_slug', $conventionSD->Conventions['slug']);
+
+		$schedulingD = $this->Schedulings->find()->where(['Schedulings.conventionseasons_id' => $conventionSD->id])->first();
+		$this->set('schedulingD', $schedulingD);
+
+		$eventD = $this->Events->find()->where(['Events.id' => $event_id])->first();
+		$this->set('eventD', $eventD);
+
+		// Load all timing rows for this event
+		$timingRows = $this->Schedulingtimings->find()
+			->where([
+				'Schedulingtimings.conventionseasons_id' => $conventionSD->id,
+				'Schedulingtimings.event_id' => $event_id,
+			])
+			->contain(['Conventionrooms'])
+			->order(['Schedulingtimings.round_number' => 'ASC', 'Schedulingtimings.match_number' => 'ASC'])
+			->all();
+
+		$schedCat = 0;
+		$bracketData = []; // [round_number => [match rows]]
+		$userIds = [];
+		foreach ($timingRows as $row) {
+			$round = (int)$row->round_number;
+			$schedCat = (int)$row->schedule_category;
+			if (!isset($bracketData[$round])) {
+				$bracketData[$round] = [];
+			}
+			$bracketData[$round][] = $row;
+			if ($schedCat === 2) {
+				if ((int)$row->user_id > 0) $userIds[] = (int)$row->user_id;
+				if ((int)$row->user_id_opponent > 0) $userIds[] = (int)$row->user_id_opponent;
+			}
+		}
+		$this->set('bracketData', $bracketData);
+		$this->set('schedCat', $schedCat);
+
+		// Build name maps
+		$teamNameMap = [];
+		if ($schedCat === 3) {
+			// Map group_name → school name via crstudentevents
+			$cseRows = $this->Crstudentevents->find()
+				->select(['group_name', 'user_id'])
+				->where([
+					'Crstudentevents.conventionseason_id' => $conventionSD->id,
+					'Crstudentevents.event_id' => $event_id,
+				])
+				->all();
+			$groupUserMap = [];
+			$schoolUserIds = [];
+			foreach ($cseRows as $r) {
+				$grp = trim((string)$r->group_name);
+				$uid = (int)$r->user_id;
+				if ($grp !== '' && $uid > 0 && !isset($groupUserMap[$grp])) {
+					$groupUserMap[$grp] = $uid;
+					$schoolUserIds[] = $uid;
+				}
+			}
+			$schoolUserIds = array_values(array_unique($schoolUserIds));
+			if (count($schoolUserIds)) {
+				$schoolRows = $this->Users->find()->select(['id','first_name'])->where(['Users.id IN' => $schoolUserIds])->all();
+				$schoolNameById = [];
+				foreach ($schoolRows as $u) {
+					$schoolNameById[(int)$u->id] = (string)$u->first_name;
+				}
+				foreach ($groupUserMap as $grp => $uid) {
+					$teamNameMap[(string)$grp] = $schoolNameById[$uid] ?? 'Team '.$grp;
+				}
+			}
+		} elseif ($schedCat === 2) {
+			$userIds = array_values(array_unique($userIds));
+			if (count($userIds)) {
+				$playerRows = $this->Users->find()->select(['id','first_name','last_name'])->where(['Users.id IN' => $userIds])->all();
+				foreach ($playerRows as $u) {
+					$teamNameMap[(string)(int)$u->id] = trim((string)$u->first_name.' '.(string)$u->last_name);
+				}
+			}
+		}
+		$this->set('teamNameMap', $teamNameMap);
+	}
+
+	public function sportsdrawprint($convention_season_slug = null, $event_id = null) {
+		$this->viewBuilder()->setLayout('print_reports');
+		$this->set('conventionList', '1');
+		$this->set('convention_season_slug', $convention_season_slug);
+		$this->set('event_id', $event_id);
+
+		$conventionSD = $this->Conventionseasons->find()->where(['Conventionseasons.slug' => $convention_season_slug])->contain(['Conventions'])->first();
+		if (!$conventionSD) {
+			return $this->redirect(['controller' => 'conventions', 'action' => 'index']);
+		}
+		$this->set('conventionSD', $conventionSD);
+		$this->set('convention_slug', $conventionSD->Conventions['slug']);
+
+		$schedulingD = $this->Schedulings->find()->where(['Schedulings.conventionseasons_id' => $conventionSD->id])->first();
+		$this->set('schedulingD', $schedulingD);
+
+		$eventD = $this->Events->find()->where(['Events.id' => $event_id])->first();
+		$this->set('eventD', $eventD);
+
+		$timingRows = $this->Schedulingtimings->find()
+			->where([
+				'Schedulingtimings.conventionseasons_id' => $conventionSD->id,
+				'Schedulingtimings.event_id' => $event_id,
+			])
+			->contain(['Conventionrooms'])
+			->order(['Schedulingtimings.round_number' => 'ASC', 'Schedulingtimings.match_number' => 'ASC'])
+			->all();
+
+		$schedCat = 0;
+		$bracketData = [];
+		$userIds = [];
+		foreach ($timingRows as $row) {
+			$round = (int)$row->round_number;
+			$schedCat = (int)$row->schedule_category;
+			if (!isset($bracketData[$round])) {
+				$bracketData[$round] = [];
+			}
+			$bracketData[$round][] = $row;
+			if ($schedCat === 2) {
+				if ((int)$row->user_id > 0) $userIds[] = (int)$row->user_id;
+				if ((int)$row->user_id_opponent > 0) $userIds[] = (int)$row->user_id_opponent;
+			}
+		}
+		$this->set('bracketData', $bracketData);
+		$this->set('schedCat', $schedCat);
+
+		$teamNameMap = [];
+		if ($schedCat === 3) {
+			$cseRows = $this->Crstudentevents->find()
+				->select(['group_name', 'user_id'])
+				->where([
+					'Crstudentevents.conventionseason_id' => $conventionSD->id,
+					'Crstudentevents.event_id' => $event_id,
+				])
+				->all();
+			$groupUserMap = [];
+			$schoolUserIds = [];
+			foreach ($cseRows as $r) {
+				$grp = trim((string)$r->group_name);
+				$uid = (int)$r->user_id;
+				if ($grp !== '' && $uid > 0 && !isset($groupUserMap[$grp])) {
+					$groupUserMap[$grp] = $uid;
+					$schoolUserIds[] = $uid;
+				}
+			}
+			$schoolUserIds = array_values(array_unique($schoolUserIds));
+			if (count($schoolUserIds)) {
+				$schoolRows = $this->Users->find()->select(['id','first_name'])->where(['Users.id IN' => $schoolUserIds])->all();
+				$schoolNameById = [];
+				foreach ($schoolRows as $u) {
+					$schoolNameById[(int)$u->id] = (string)$u->first_name;
+				}
+				foreach ($groupUserMap as $grp => $uid) {
+					$teamNameMap[(string)$grp] = $schoolNameById[$uid] ?? 'Team '.$grp;
+				}
+			}
+		} elseif ($schedCat === 2) {
+			$userIds = array_values(array_unique($userIds));
+			if (count($userIds)) {
+				$playerRows = $this->Users->find()->select(['id','first_name','last_name'])->where(['Users.id IN' => $userIds])->all();
+				foreach ($playerRows as $u) {
+					$teamNameMap[(string)(int)$u->id] = trim((string)$u->first_name.' '.(string)$u->last_name);
+				}
+			}
+		}
+		$this->set('teamNameMap', $teamNameMap);
+	}
+
+
 
 }
 
