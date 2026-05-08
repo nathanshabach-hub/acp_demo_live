@@ -1649,7 +1649,10 @@ class ConventionregistrationsController extends AppController {
 					$eventNameIDDD[$eventrec->id] = $eventrec->event_name.' ('.$eventrec->event_id_number.')';
 				}
 				$this->set('eventNameIDDD', $eventNameIDDD);
-				
+
+				// Always provide a new entity for the form (GET and POST new-record path)
+				$conventionregistrations = $this->Conventionregistrations->newEntity();
+				$this->set('conventionregistrations', $conventionregistrations);
 				
 				if ($this->request->is('post'))
 				{
