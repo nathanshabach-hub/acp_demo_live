@@ -1,12 +1,25 @@
 <?php echo $this->Html->script('facebox.js'); ?>
 <?php echo $this->Html->css('facebox.css'); ?>
+<style>
+  #facebox.breach-facebox .content { width: 460px; padding: 0; }
+  .breach-popup-header { background: #f7f7f7; border-bottom: 1px solid #ddd; padding: 14px 20px; font-size: 15px; font-weight: 600; color: #333; border-radius: 4px 4px 0 0; }
+  .breach-popup-body { background: #fff; padding: 20px 25px; font-size: 14px; color: #444; line-height: 1.6; border-radius: 0 0 4px 4px; }
+</style>
 <script type="text/javascript">
     $(document).ready(function ($) {
         $('.close_image').hide();
         $('a[rel*=facebox]').facebox({
-            loadingImage: '<?php echo HTTP_IMAGE ?>/loading.gif',
-            closeImage: '<?php echo HTTP_IMAGE ?>/close.png'
-        })
+            loadingImage: '<?php echo $this->Url->build("/img/loading.gif"); ?>',
+            closeImage: '<?php echo $this->Url->build("/img/close.png"); ?>'
+        });
+        $(document).on('reveal.facebox', function() {
+            $('#facebox').addClass('breach-facebox');
+            var left = $(window).width() / 2 - ($('#facebox .popup').outerWidth() / 2);
+            $('#facebox').css('left', left < 0 ? 0 : left);
+        });
+        $(document).on('close.facebox', function() {
+            $('#facebox').removeClass('breach-facebox');
+        });
     })            
 </script>
 <?php
@@ -55,9 +68,12 @@ $this->Judgeevaluations = TableRegistry::getTableLocator()->get('Judgeevaluation
                     <tbody>
                         <?php
 						$cntrS = 0;
+						$breachReasonDivs = '';
 						foreach ($eventsubmissions as $datarecord)
 						{
 							$cntrS++;
+						$reasonText = !empty($datarecord->breach_reason) ? h($datarecord->breach_reason) : '<em>No reason provided.</em>';
+						$breachReasonDivs .= '<div id="breach-reason-'.$datarecord->id.'" style="display:none;"><div class="breach-popup-header">Breach Reason</div><div class="breach-popup-body">'.$reasonText.'</div></div>';
 						?>
                             <tr>
                                 <td data-title="#ID"><?php echo $datarecord->id;?></td>
@@ -101,6 +117,7 @@ $this->Judgeevaluations = TableRegistry::getTableLocator()->get('Judgeevaluation
                                 <td data-title="Action">
 									
 									<?php
+                                    echo '<a rel="facebox" href="#breach-reason-'.$datarecord->id.'" title="View Breach Reason" class="btn btn-info btn-xs"><i class="fa fa-eye"></i></a>';
 									
 									if($datarecord->guideline_breach == 1)
 									{
@@ -128,6 +145,7 @@ $this->Judgeevaluations = TableRegistry::getTableLocator()->get('Judgeevaluation
                 </table>
             </div>
         </section>
+        <?php echo $breachReasonDivs; ?>
 
         <div class="search_frm" style="display:none;">
             <button type="button" name="chkRecordId" onclick="checkAll(true);"  class="btn btn-info">Select All</button>
@@ -156,6 +174,7 @@ $this->Judgeevaluations = TableRegistry::getTableLocator()->get('Judgeevaluation
 <?php }
 ?>
 
+<?php if (isset($conventionregistrationstudents) && !empty($conventionregistrationstudents)) { ?>
 <?php foreach ($conventionregistrationstudents as $datarecord) { ?>
     <div id="info<?php echo $datarecord->id; ?>" style="display: none;">
         <!-- Fieldset -->
@@ -217,6 +236,7 @@ $this->Judgeevaluations = TableRegistry::getTableLocator()->get('Judgeevaluation
             </fieldset>
         </div>
     </div>
+<?php } ?>
 <?php } ?>
 
 <script>

@@ -162,7 +162,7 @@ $this->Crstudentevents 		= TableRegistry::getTableLocator()->get('Crstudentevent
 							<?php
 							if($datarecord->guideline_breach == 0)
 							{
-								echo $this->Html->link('Mark Breach', ['controller' => 'judgeevaluations', 'action' => 'markbreach',$datarecord->slug], [ 'escape' => false, 'title' => 'Mark Guideline Breach', 'class'=>'', 'confirm' => 'Are you sure you want to mark this entry as guideline breach?', 'class' => 'btn btn-info']);
+								echo '<button type="button" class="btn btn-info btn-mark-breach" data-slug="'.h($datarecord->slug).'" data-bs-toggle="modal" data-bs-target="#markBreachModal">Mark Breach</button>';
 							}
 							else
 							if($datarecord->guideline_breach == 1)
@@ -251,6 +251,47 @@ $this->Crstudentevents 		= TableRegistry::getTableLocator()->get('Crstudentevent
         <?php echo $this->Form->end(); ?>
     
     </div>
+
+<!-- Mark Breach Modal -->
+<div class="modal fade" id="markBreachModal" tabindex="-1" aria-labelledby="markBreachModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="markBreachModalLabel">Mark Guideline Breach</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <?php echo $this->Form->create(null, ['id' => 'markBreachForm', 'method' => 'post', 'url' => ['controller' => 'judgeevaluations', 'action' => 'markbreach', 'PLACEHOLDER']]); ?>
+      <div class="modal-body">
+        <p>Please explain why you are marking this entry as a guideline breach:</p>
+        <textarea name="breach_reason" id="breach_reason" class="form-control" rows="4" required placeholder="Enter reason for breach..."></textarea>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+        <button type="submit" class="btn btn-danger">Submit Breach</button>
+      </div>
+      <?php echo $this->Form->end(); ?>
+    </div>
+  </div>
+</div>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  var markBreachModal = document.getElementById('markBreachModal');
+  if (markBreachModal) {
+    markBreachModal.addEventListener('show.bs.modal', function(e) {
+      var btn = e.relatedTarget;
+      var slug = btn.getAttribute('data-slug');
+      var form = document.getElementById('markBreachForm');
+      form.action = form.action.replace('PLACEHOLDER', slug);
+    });
+    markBreachModal.addEventListener('hide.bs.modal', function() {
+      var form = document.getElementById('markBreachForm');
+      form.action = form.action.replace(/\/[^\/]+$/, '/PLACEHOLDER');
+      document.getElementById('breach_reason').value = '';
+    });
+  }
+});
+</script>
+
 <?php } else { ?>
     <div id="listingJS" style="display: none;" class="alert alert-success alert-block fade in"></div>
     <div class="admin_no_record">No record found.</div>

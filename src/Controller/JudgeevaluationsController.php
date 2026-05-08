@@ -589,6 +589,11 @@ class JudgeevaluationsController extends AppController {
 		
 		$this->userLoginCheck();
 		
+		if (!$this->request->is('post')) {
+			$this->Flash->error('Invalid request.');
+			return $this->redirect($this->referer());
+		}
+		
         $user_id = $this->request->getSession()->read("user_id");
 		$userDetails = $this->Users->find()->where(['Users.id' => $user_id])->first();
 		
@@ -596,13 +601,14 @@ class JudgeevaluationsController extends AppController {
 		
 		if($checkExists)
 		{	 	
-			//$this->prx($checkExists);
+			$breach_reason = trim($this->request->getData('breach_reason'));
 			
 			// update event entry as guideline breach
-			$this->Eventsubmissions->updateAll(['guideline_breach' => '1','guideline_breach_by_judge_id' => $user_id,'modified' => date("Y-m-d H:i:s")], ["slug" => $eventsubmission_slug]);
+			$this->Eventsubmissions->updateAll(['guideline_breach' => '1','breach_reason' => $breach_reason,'guideline_breach_by_judge_id' => $user_id,'modified' => date("Y-m-d H:i:s")], ["slug" => $eventsubmission_slug]);
 			$this->Flash->success('Events entry successfully marked as guideline breach. Admin will review and approve/decline.');
 			
 			// now send email to admin & events team
+			try {
 			$settingsD	= $this->Settings->find()->where(['Settings.id' => 1])->first();
 			$emailId = $settingsD->accounts_team_email;
 						
@@ -645,6 +651,9 @@ class JudgeevaluationsController extends AppController {
 				->setSubject($subjectToSend)
 				->setViewVars(['content_for_layout' => $messageToSend])
 				->deliver();
+			} catch (\Exception $e) {
+				// Email failure should not block the breach from being recorded
+			}
 			
 			$this->redirect(['controller' => 'conventionregistrations', 'action' => 'judgeevententries',$checkExists->Conventionregistrations['slug'],$checkExists->Events['slug']]);
 			 
