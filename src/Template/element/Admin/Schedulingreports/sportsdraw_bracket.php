@@ -32,12 +32,12 @@ function getTeamDisplay($rawName, $teamNameMap, $schedCat) {
 }
 
 $totalRounds = count($bracketData);
-$logoPath = defined('WWW_ROOT') ? WWW_ROOT . 'img/front/main-logo-120px.png' : '';
+$logoPath = defined('WWW_ROOT') ? WWW_ROOT . 'img/front/accelerate-logo.jpg' : '';
 $logoSrc = '';
 if ($logoPath !== '' && is_file($logoPath)) {
     $logoData = @file_get_contents($logoPath);
     if ($logoData !== false) {
-        $logoSrc = 'data:image/png;base64,' . base64_encode($logoData);
+        $logoSrc = 'data:image/jpeg;base64,' . base64_encode($logoData);
     }
 }
 ?>

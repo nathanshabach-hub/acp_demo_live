@@ -24,12 +24,12 @@ $eveningRallyTime = trim((string)($smallProgramNotes['evening_rally_time'] ?? ''
 $eveningRallyLabel = trim((string)($smallProgramNotes['evening_rally_label'] ?? ''));
 $offsiteNote = trim((string)($smallProgramNotes['offsite_note'] ?? ''));
 $footerNote = trim((string)($smallProgramNotes['footer_note'] ?? ''));
-$logoPath = WWW_ROOT . 'img/front/main-logo-120px.png';
+$logoPath = WWW_ROOT . 'img/front/accelerate-logo.jpg';
 $logoSrc = '';
 if (is_file($logoPath)) {
     $logoData = @file_get_contents($logoPath);
     if ($logoData !== false) {
-        $logoSrc = 'data:image/png;base64,'.base64_encode($logoData);
+        $logoSrc = 'data:image/jpeg;base64,'.base64_encode($logoData);
     }
 }
 
