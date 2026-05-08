@@ -1178,6 +1178,9 @@ class ConventionsController extends AppController {
 		}
 		$this->set('convSeasEventDD', $convSeasEventDD);
 		
+		// Set empty entity and no pre-selected events for the add form
+		$this->set('conventionseasonroomevents', $this->Conventionseasonroomevents->newEntity());
+		$this->set('convRoomIDS', []);
 
         if ($this->request->is('post')) {
 			
