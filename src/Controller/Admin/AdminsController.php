@@ -209,20 +209,25 @@ class AdminsController extends AppController {
                 ->count();
             $this->set('total_schools', $total_schools);
 			
-			// to get total judges, this require process to check
-			$cntrJudges = 0;
-			$listCR = $this->Conventionregistrations->find()->where(["convention_id"=> $convSD->convention_id,"season_id"=> $convSD->season_id,"season_year"=> $convSD->season_year])->contain(['Users'])->all();
-			foreach($listCR as $judgcntr)
-			{
-				//echo $judgcntr->Users['user_type'];
-				//echo $judgcntr->Users['is_judge'];
-				//echo '<hr>';
-				if(isset($judgcntr->user) && ($judgcntr->user['user_type'] == "Judge" || $judgcntr->user['user_type'] == "Teacher_Parent") && $judgcntr->user['is_judge'] == 1)
-				{
-					$cntrJudges++;
-				}
-			}
-			$this->set('total_judges', $cntrJudges);
+            // Count distinct judges registered for the selected season.
+            $total_judges = $this->Conventionregistrations->find()
+                ->select(['Conventionregistrations.user_id'])
+                ->distinct(['Conventionregistrations.user_id'])
+                ->where([
+                    'Conventionregistrations.convention_id' => $convSD->convention_id,
+                    'Conventionregistrations.season_id' => $convSD->season_id,
+                    'Conventionregistrations.season_year' => $convSD->season_year,
+                ])
+                ->matching('Users', function ($q) {
+                    return $q->where([
+                        'OR' => [
+                            ['Users.user_type' => 'Judge'],
+                            ['Users.user_type' => 'Teacher_Parent', 'Users.is_judge' => 1],
+                        ],
+                    ]);
+                })
+                ->count();
+            $this->set('total_judges', $total_judges);
 			
 			$total_conv_seas_events = $this->Conventionseasonevents->find()->where(["conventionseasons_id"=> $convSD->id])->count();
 			$this->set('total_conv_seas_events', $total_conv_seas_events);
