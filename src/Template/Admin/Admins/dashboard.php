@@ -76,6 +76,19 @@
                     <?php echo $this->Html->link('More info <i class="fa fa-arrow-circle-right"></i>', ['controller' => 'conventionregistrations', 'action' => 'alljudges'], [ 'escape' => false, 'title' => 'More info', 'class' => 'small-box-footer']); ?>
                 </div>
             </div>
+
+			<div class="col-lg-3 col-xs-6">
+                <div class="small-box bg-olive">
+                    <div class="inner">
+                        <h3>&nbsp;</h3>
+                        <p>Judging List</p>
+                    </div>
+                    <div class="icon">
+                        <i class="fa fa-check-square-o"></i>
+                    </div>
+                    <?php echo $this->Html->link('More info <i class="fa fa-arrow-circle-right"></i>', ['controller' => 'conventionregistrations', 'action' => 'alljudges'], [ 'escape' => false, 'title' => 'Judging List', 'class' => 'small-box-footer']); ?>
+                </div>
+            </div>
 			
 			<div class="col-lg-3 col-xs-6"> 
                 <div class="small-box bg-yellow">
