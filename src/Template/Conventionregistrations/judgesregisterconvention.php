@@ -6,6 +6,16 @@
 .jrc-badge-you { display:inline-block; background:#d5f5e3; color:#1e8449; font-size:11px; padding:1px 7px; border-radius:10px; font-weight:700; margin-left:4px; }
 .jrc-table tr:hover td { background: #f9fbff; }
 .jrc-table input[type=checkbox] { width:18px; height:18px; cursor:pointer; }
+.jrc-slot-partial { background: #e9f8ef; border-left: 3px solid #27ae60; }
+.jrc-slot-full { background: #fdecea; border-left: 3px solid #c0392b; }
+.jrc-slot-full .jrc-assigned { color: #8e1b12; font-weight: 600; }
+.jrc-event-full td { background: #fff5f5; }
+.jrc-table tr:hover td.jrc-slot-partial { background: #e9f8ef; }
+.jrc-table tr:hover td.jrc-slot-full { background: #fdecea; }
+.jrc-legend { font-size: 12px; margin: 6px 0 10px; }
+.jrc-legend-chip { display:inline-block; padding:2px 8px; border-radius:10px; margin-right:8px; border:1px solid transparent; }
+.jrc-legend-open { background:#e9f8ef; border-color:#27ae60; color:#1e8449; }
+.jrc-legend-full { background:#fdecea; border-color:#c0392b; color:#8e1b12; }
 </style>
 <script type="text/javascript">
 	$(document).ready(function () {
@@ -37,6 +47,10 @@
 					<p class="text-muted" style="font-size:13px; margin-bottom:10px;">
 						Tick the events you are available to judge. Not all events will be allocated to you &mdash; events are assigned on a needs basis, taking workload into consideration.
 					</p>
+					<div class="jrc-legend">
+						<span class="jrc-legend-chip jrc-legend-open">Green = at least one judge already assigned, slots still open</span>
+						<span class="jrc-legend-chip jrc-legend-full">Red = all 3 judge slots are already filled</span>
+					</div>
 					<?php if (empty($eventsList)) { ?>
 						<div class="alert alert-warning">No events found for this season.</div>
 					<?php } else { ?>
@@ -61,27 +75,36 @@
 							$eid = (int)$ev->id;
 							$checked = isset($alreadySelectedIds[$eid]) ? ' checked' : '';
 							$panel = isset($seasonAssignments[$eid]) ? $seasonAssignments[$eid] : ['judge1'=>null,'judge2'=>null,'judge3'=>null];
+							$filledSlots = 0;
+							foreach(['judge1','judge2','judge3'] as $slot) {
+								if((int)$panel[$slot] > 0) {
+									$filledSlots++;
+								}
+							}
+							$isFullyAssigned = ($filledSlots === 3);
 							$slots = [];
+							$slotClasses = [];
 							foreach(['judge1','judge2','judge3'] as $slot) {
 								$uid = (int)$panel[$slot];
 								if($uid > 0) {
-									$name = isset($judgeNamesById[$uid]) ? h($judgeNamesById[$uid]) : 'Judge #'.$uid;
 									$badge = ($uid === $loggedUserId) ? ' <span class="jrc-badge-you">you</span>' : '';
-									$slots[] = '<span class="jrc-assigned">'.$name.$badge.'</span>';
+									$slots[] = '<span class="jrc-assigned">Judge Assigned'.$badge.'</span>';
+									$slotClasses[] = $isFullyAssigned ? 'jrc-slot-full' : 'jrc-slot-partial';
 								} else {
 									$slots[] = '<span class="jrc-slot-empty">&mdash;</span>';
+									$slotClasses[] = '';
 								}
 							}
 						?>
-							<tr style="cursor:pointer;">
+							<tr style="cursor:pointer;" class="<?php echo $isFullyAssigned ? 'jrc-event-full' : ''; ?>">
 								<td style="text-align:center;">
 									<input type="checkbox" name="Conventionregistrations[judges_event_ids][]" value="<?php echo $eid; ?>"<?php echo $checked; ?>>
 								</td>
 								<td><?php echo h($ev->event_id_number); ?></td>
 								<td><?php echo h($ev->event_name); ?></td>
-								<td><?php echo $slots[0]; ?></td>
-								<td><?php echo $slots[1]; ?></td>
-								<td><?php echo $slots[2]; ?></td>
+								<td class="<?php echo h($slotClasses[0]); ?>"><?php echo $slots[0]; ?></td>
+								<td class="<?php echo h($slotClasses[1]); ?>"><?php echo $slots[1]; ?></td>
+								<td class="<?php echo h($slotClasses[2]); ?>"><?php echo $slots[2]; ?></td>
 							</tr>
 						<?php endforeach; ?>
 						</tbody>
