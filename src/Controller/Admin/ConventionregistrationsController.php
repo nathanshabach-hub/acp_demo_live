@@ -626,6 +626,158 @@ class ConventionregistrationsController extends AppController {
         
     }
 	
+	public function judginglist() {
+
+        $this->set('title', ADMIN_TITLE . 'Judging List');
+        $this->viewBuilder()->setLayout('admin');
+        $this->set('dashboard', '1');
+
+		$sess_admin_header_season_id = $this->request->getSession()->read("sess_admin_header_season_id");
+		if($sess_admin_header_season_id <= 0)
+		{
+			$this->Flash->error('Please select a convention season first.');
+			return $this->redirect(['controller' => 'admins', 'action' => 'dashboard']);
+		}
+
+		$convSeasonD = $this->Conventionseasons->find()->where(['Conventionseasons.id' => $sess_admin_header_season_id])->first();
+		if(empty($convSeasonD))
+		{
+			$this->Flash->error('Selected convention season was not found.');
+			return $this->redirect(['controller' => 'admins', 'action' => 'dashboard']);
+		}
+
+		$events = $this->Conventionseasonevents->find()
+			->contain(['Events'])
+			->where(['Conventionseasonevents.conventionseasons_id' => $convSeasonD->id])
+			->order(['Conventionseasonevents.event_id' => 'ASC'])
+			->all();
+
+		$judgeRegistrations = $this->Conventionregistrations->find()
+			->contain(['Users'])
+			->where([
+				'Conventionregistrations.convention_id' => $convSeasonD->convention_id,
+				'Conventionregistrations.season_id' => $convSeasonD->season_id,
+				'Conventionregistrations.season_year' => $convSeasonD->season_year,
+			])
+			->order(['Conventionregistrations.id' => 'DESC'])
+			->all();
+
+		$judgePool = [];
+		foreach($judgeRegistrations as $registration)
+		{
+			$userData = null;
+			if(!empty($registration->Users))
+			{
+				$userData = $registration->Users;
+			}
+			elseif(!empty($registration->user))
+			{
+				$userData = $registration->user;
+			}
+
+			if(empty($userData))
+			{
+				continue;
+			}
+
+			$isJudge = ($userData['user_type'] == 'Judge') || ($userData['user_type'] == 'Teacher_Parent' && (int)$userData['is_judge'] === 1);
+			if(!$isJudge)
+			{
+				continue;
+			}
+
+			$selectedEventIds = [];
+			if(!empty($registration->judges_event_ids))
+			{
+				$rawIds = explode(',', (string)$registration->judges_event_ids);
+				foreach($rawIds as $rawId)
+				{
+					$eventId = (int)trim($rawId);
+					if($eventId > 0)
+					{
+						$selectedEventIds[$eventId] = $eventId;
+					}
+				}
+			}
+
+			$judgePool[] = [
+				'name' => trim($userData['first_name'].' '.$userData['last_name']),
+				'selected_event_ids' => $selectedEventIds,
+				'selected_count' => count($selectedEventIds),
+			];
+		}
+
+		$eventJudgeRows = [];
+		foreach($events as $eventRow)
+		{
+			$eventId = (int)$eventRow->event_id;
+
+			$eventName = 'Event #'.$eventId;
+			$eventIdNumber = '';
+			if(!empty($eventRow->Events))
+			{
+				if(!empty($eventRow->Events['event_name']))
+				{
+					$eventName = $eventRow->Events['event_name'];
+				}
+				if(!empty($eventRow->Events['event_id_number']))
+				{
+					$eventIdNumber = $eventRow->Events['event_id_number'];
+				}
+			}
+
+			$preferredJudges = [];
+			foreach($judgePool as $judge)
+			{
+				if(isset($judge['selected_event_ids'][$eventId]))
+				{
+					$preferredJudges[] = $judge;
+				}
+			}
+
+			usort($preferredJudges, function($a, $b) {
+				if($a['selected_count'] === $b['selected_count'])
+				{
+					return strcmp($a['name'], $b['name']);
+				}
+				return $a['selected_count'] <=> $b['selected_count'];
+			});
+
+			$panelTwo = array_slice($preferredJudges, 0, 2);
+			$panelThree = array_slice($preferredJudges, 0, 3);
+
+			$eventJudgeRows[] = [
+				'event_id' => $eventId,
+				'event_id_number' => $eventIdNumber,
+				'event_name' => $eventName,
+				'preferred_count' => count($preferredJudges),
+				'preferred_names' => array_values(array_map(function($judge){ return $judge['name']; }, $preferredJudges)),
+				'panel_two_names' => array_values(array_map(function($judge){ return $judge['name']; }, $panelTwo)),
+				'panel_three_names' => array_values(array_map(function($judge){ return $judge['name']; }, $panelThree)),
+			];
+		}
+
+		$eventsWithUnderTwo = 0;
+		$eventsWithUnderThree = 0;
+		foreach($eventJudgeRows as $row)
+		{
+			if($row['preferred_count'] < 2)
+			{
+				$eventsWithUnderTwo++;
+			}
+			if($row['preferred_count'] < 3)
+			{
+				$eventsWithUnderThree++;
+			}
+		}
+
+		$this->set('convSeasonD', $convSeasonD);
+		$this->set('eventJudgeRows', $eventJudgeRows);
+		$this->set('totalJudgesInPool', count($judgePool));
+		$this->set('eventsWithUnderTwo', $eventsWithUnderTwo);
+		$this->set('eventsWithUnderThree', $eventsWithUnderThree);
+    }
+
 	public function allschools($conv_season_slug=null) {
 
         $this->set('title', ADMIN_TITLE . 'Convention Registrations Schools');

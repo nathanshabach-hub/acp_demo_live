@@ -86,7 +86,7 @@
                     <div class="icon">
                         <i class="fa fa-check-square-o"></i>
                     </div>
-                    <?php echo $this->Html->link('More info <i class="fa fa-arrow-circle-right"></i>', ['controller' => 'conventionregistrations', 'action' => 'alljudges'], [ 'escape' => false, 'title' => 'Judging List', 'class' => 'small-box-footer']); ?>
+                    <?php echo $this->Html->link('More info <i class="fa fa-arrow-circle-right"></i>', ['controller' => 'conventionregistrations', 'action' => 'judginglist'], [ 'escape' => false, 'title' => 'Judging List', 'class' => 'small-box-footer']); ?>
                 </div>
             </div>
 			
