@@ -1,11 +1,20 @@
 <?php echo $this->Html->script('facebox.js'); ?>
 <?php echo $this->Html->css('facebox.css'); ?>
+<style>
+  #judge_eval_table td, #judge_eval_table th { vertical-align: middle !important; }
+  .judge-name { font-weight: 600; font-size: 13px; }
+  .badge-complete  { background: #5cb85c; color: #fff; padding: 3px 8px; border-radius: 3px; font-size: 11px; font-weight: 600; white-space: nowrap; }
+  .badge-progress  { background: #f0ad4e; color: #fff; padding: 3px 8px; border-radius: 3px; font-size: 11px; font-weight: 600; white-space: nowrap; }
+  .judged-count  { display: inline-block; background: #5cb85c; color: #fff; padding: 2px 7px; border-radius: 3px; font-size: 12px; font-weight: 600; min-width: 28px; text-align: center; }
+  .unjudged-count { display: inline-block; background: #f0ad4e; color: #fff; padding: 2px 7px; border-radius: 3px; font-size: 12px; font-weight: 600; min-width: 28px; text-align: center; }
+  .judged-sep { color: #bbb; margin: 0 3px; }
+</style>
 <script type="text/javascript">
     $(document).ready(function ($) {
         $('.close_image').hide();
         $('a[rel*=facebox]').facebox({
-            loadingImage: '<?php echo HTTP_IMAGE ?>/loading.gif',
-            closeImage: '<?php echo HTTP_IMAGE ?>/close.png'
+            loadingImage: '<?php echo $this->Url->build("/img/loading.gif"); ?>',
+            closeImage: '<?php echo $this->Url->build("/img/close.png"); ?>'
         })
     })            
 </script>
@@ -29,8 +38,8 @@ $this->Evaluationquestions = TableRegistry::getTableLocator()->get('Evaluationqu
                     <thead class="cf ajshort">
                         <tr>
                             <th class="sorting_paging">Judge</th>
-                            <th class="sorting_paging">Registered Events</th>
-                            <th class="sorting_paging">Judged / Not Judged</th>
+                            <th class="sorting_paging">Judged / Remaining</th>
+                            <th class="sorting_paging">Status</th>
                             <th class="sorting_paging">School</th>
 							<th class="sorting_paging">Student</th>
 							<th class="sorting_paging">Submitted</th>
@@ -46,9 +55,19 @@ $this->Evaluationquestions = TableRegistry::getTableLocator()->get('Evaluationqu
 							$datarecord = $row['evaluation'];
 						?>
                             <tr>
-                                <td data-title="Judge"><?php echo h($row['judge_name']); ?></td>
-                                <td data-title="Registered Events"><?php echo (int)$row['registered_events']; ?></td>
-                                <td data-title="Judged / Not Judged"><?php echo (int)$row['judged_events']; ?> / <?php echo (int)$row['not_judged_events']; ?></td>
+                                <td data-title="Judge"><span class="judge-name"><?php echo h($row['judge_name']); ?></span></td>
+                                <td data-title="Judged / Remaining">
+                                    <span class="judged-count"><?php echo (int)$row['judged_events']; ?></span>
+                                    <span class="judged-sep">/</span>
+                                    <span class="unjudged-count"><?php echo (int)$row['not_judged_events']; ?></span>
+                                </td>
+                                <td data-title="Status">
+                                    <?php if((int)$row['not_judged_events'] === 0): ?>
+                                        <span class="badge-complete">Complete</span>
+                                    <?php else: ?>
+                                        <span class="badge-progress">In Progress</span>
+                                    <?php endif; ?>
+                                </td>
                                 <td data-title="School"><?php echo h($row['school_name']); ?></td>
                                 <td data-title="Student"><?php echo h($row['student_name']); ?></td>
                                 <td data-title="Submitted Date"><?php echo !empty($row['submitted_date']) ? date('M d, Y', strtotime($row['submitted_date'])) : '-'; ?></td>
@@ -56,11 +75,10 @@ $this->Evaluationquestions = TableRegistry::getTableLocator()->get('Evaluationqu
 									<?php if(!empty($datarecord)) { ?>
 									<a href="#info<?php echo $datarecord->id; ?>" rel="facebox" title="Preview Evaluation" class="btn btn-info btn-xs eyee"><i class="fa fa-eye "></i></a>
 									<?php
-									echo $this->Html->link('<i class="fa fa-trash-o"></i>', ['controller' => 'judgeevaluations', 'action' => 'removejudgeevaluation',$datarecord->slug], [ 'escape' => false, 'title' => 'Delete', 'class'=>'btn btn-info btn-xs', 'confirm' => 'Are you sure you want to remove this judge evaluation?']);
+									echo $this->Html->link('<i class="fa fa-trash-o"></i>', ['controller' => 'judgeevaluations', 'action' => 'removejudgeevaluation',$datarecord->slug], [ 'escape' => false, 'title' => 'Delete', 'class'=>'btn btn-danger btn-xs', 'confirm' => 'Are you sure you want to remove this judge evaluation?']);
 									?>
-									<?php } else { echo '-'; } ?>
-									
-                                </td>
+									<?php } else { echo '<span style="color:#aaa;">-</span>'; } ?>
+								</td>
 								
                                 
                             </tr>
