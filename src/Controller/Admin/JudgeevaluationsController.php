@@ -33,6 +33,8 @@ class JudgeevaluationsController extends AppController {
 		$this->Conventionregistrations = $this->loadModel('Conventionregistrations');
 		$this->Eventsubmissions = $this->loadModel('Eventsubmissions');
 		$this->Judgeevaluationmarks = $this->loadModel('Judgeevaluationmarks');
+        $this->JudgingAssignments = $this->loadModel('JudgingAssignments');
+        $this->Users = $this->loadModel('Users');
     }
 	
 	public function index() {
@@ -61,10 +63,12 @@ class JudgeevaluationsController extends AppController {
 		
 		// to check if conv season selected from header then filter list
 		$sess_admin_header_season_id = $this->request->getSession()->read("sess_admin_header_season_id");
-		if($sess_admin_header_season_id>0)
-		{
-			$condition[] = "(Judgeevaluations.conventionseason_id = '".$sess_admin_header_season_id."')";
-		}
+        if($sess_admin_header_season_id<=0)
+        {
+            $this->Flash->error('Please select a Convention Season from the header first.');
+            return $this->redirect(['controller' => 'admins', 'action' => 'dashboard']);
+        }
+        $condition[] = "(Judgeevaluations.conventionseason_id = '".$sess_admin_header_season_id."')";
 		
 		if ($this->request->is('post')) {
             if ($this->request->getData('action') !== null) {
@@ -136,13 +140,121 @@ class JudgeevaluationsController extends AppController {
             $this->render('index');
         } */
 		
-        $query = $this->Judgeevaluations->find()
+        $latestEvalIdByJudge = [];
+        $latestEvalIdRows = $this->Judgeevaluations->find()
+            ->select(['Judgeevaluations.id', 'Judgeevaluations.uploaded_by_user_id'])
             ->where($condition)
-            ->contain(['Eventsubmissions','Conventionregistrations','Conventions','Events','Students','Schools','Judge','Judgeevaluationmarks'])
-            ->order(['Judgeevaluations.id' => 'DESC']);
+            ->order(['Judgeevaluations.created' => 'DESC'])
+            ->all();
+        foreach($latestEvalIdRows as $erow) {
+            $judgeId = (int)$erow->uploaded_by_user_id;
+            if($judgeId > 0 && !isset($latestEvalIdByJudge[$judgeId])) {
+                $latestEvalIdByJudge[$judgeId] = (int)$erow->id;
+            }
+        }
 
-        $this->paginate = ['limit' => 50];
-        $this->set('judgeevaluations', $this->paginate($query));
+        $assignedEventsByJudge = [];
+        $assignmentRows = $this->JudgingAssignments->find()
+            ->where(['JudgingAssignments.conventionseason_id' => $sess_admin_header_season_id])
+            ->all();
+        foreach($assignmentRows as $arow) {
+            $eventId = (int)$arow->event_id;
+            foreach(['judge1_user_id','judge2_user_id','judge3_user_id'] as $slotCol) {
+                $judgeId = (int)$arow->$slotCol;
+                if($judgeId > 0 && $eventId > 0) {
+                    if(!isset($assignedEventsByJudge[$judgeId])) {
+                        $assignedEventsByJudge[$judgeId] = [];
+                    }
+                    $assignedEventsByJudge[$judgeId][$eventId] = true;
+                }
+            }
+        }
+
+        $assignedCountByJudge = [];
+        foreach($assignedEventsByJudge as $judgeId => $eventsMap) {
+            $assignedCountByJudge[(int)$judgeId] = count($eventsMap);
+        }
+
+        $judgedCountByJudge = [];
+        $judgedAgg = $this->Judgeevaluations->find();
+        $judgedAgg = $judgedAgg
+            ->select([
+                'Judgeevaluations.uploaded_by_user_id',
+                'judged_events' => $judgedAgg->func()->count('DISTINCT Judgeevaluations.event_id')
+            ])
+            ->where($condition)
+            ->group(['Judgeevaluations.uploaded_by_user_id'])
+            ->all();
+        foreach($judgedAgg as $jrow) {
+            $judgeId = (int)$jrow->uploaded_by_user_id;
+            if($judgeId > 0) {
+                $judgedCountByJudge[$judgeId] = (int)$jrow->judged_events;
+            }
+        }
+
+        $latestEvaluationByJudge = [];
+        if(!empty($latestEvalIdByJudge)) {
+            $latestEvalIds = array_values($latestEvalIdByJudge);
+            $latestDetailedRows = $this->Judgeevaluations->find()
+                ->where(['Judgeevaluations.id IN' => $latestEvalIds])
+                ->contain(['Eventsubmissions','Conventions','Events','Students','Schools','Judge','Judgeevaluationmarks'])
+                ->all();
+            foreach($latestDetailedRows as $ldrow) {
+                $latestEvaluationByJudge[(int)$ldrow->uploaded_by_user_id] = $ldrow;
+            }
+        }
+
+        $judgeIds = array_unique(array_merge(array_keys($assignedCountByJudge), array_keys($judgedCountByJudge)));
+        sort($judgeIds);
+
+        $judgeNamesById = [];
+        if(!empty($judgeIds)) {
+            $judgeUsers = $this->Users->find()->where(['Users.id IN' => $judgeIds])->all();
+            foreach($judgeUsers as $ju) {
+                $judgeNamesById[(int)$ju->id] = trim($ju->first_name.' '.$ju->last_name);
+            }
+        }
+
+        $evaluationUpdateRows = [];
+        foreach($judgeIds as $judgeId) {
+            $assignedCount = isset($assignedCountByJudge[$judgeId]) ? (int)$assignedCountByJudge[$judgeId] : 0;
+            $judgedCount = isset($judgedCountByJudge[$judgeId]) ? (int)$judgedCountByJudge[$judgeId] : 0;
+            $notJudgedCount = max($assignedCount - $judgedCount, 0);
+
+            $latestEval = isset($latestEvaluationByJudge[$judgeId]) ? $latestEvaluationByJudge[$judgeId] : null;
+            $schoolName = '-';
+            $studentName = '-';
+            $submittedDate = null;
+            if(!empty($latestEval)) {
+                if(!empty($latestEval->Schools['first_name'])) {
+                    $schoolName = $latestEval->Schools['first_name'];
+                }
+                if(!empty($latestEval->Eventsubmissions['student_id']) && !empty($latestEval->Students)) {
+                    $studentName = trim($latestEval->Students['first_name'].' '.$latestEval->Students['middle_name'].' '.$latestEval->Students['last_name']);
+                } elseif(!empty($latestEval->Eventsubmissions['group_name'])) {
+                    $studentName = 'Group '.$latestEval->Eventsubmissions['group_name'];
+                }
+                $submittedDate = $latestEval->created;
+            }
+
+            $evaluationUpdateRows[] = [
+                'judge_id' => $judgeId,
+                'judge_name' => isset($judgeNamesById[$judgeId]) ? $judgeNamesById[$judgeId] : ('Judge #'.$judgeId),
+                'registered_events' => $assignedCount,
+                'judged_events' => $judgedCount,
+                'not_judged_events' => $notJudgedCount,
+                'school_name' => $schoolName,
+                'student_name' => $studentName,
+                'submitted_date' => $submittedDate,
+                'evaluation' => $latestEval,
+            ];
+        }
+
+        usort($evaluationUpdateRows, function($a, $b) {
+            return strcasecmp((string)$a['judge_name'], (string)$b['judge_name']);
+        });
+
+        $this->set('evaluationUpdateRows', $evaluationUpdateRows);
     }
 	
 	public function removejudgeevaluation($evaluation_slug=null) {

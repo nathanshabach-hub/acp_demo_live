@@ -14,13 +14,13 @@ use Cake\ORM\TableRegistry;
 $this->Evaluationquestions = TableRegistry::getTableLocator()->get('Evaluationquestions');
 ?>
 <div class="admin_loader" id="loaderID"><?php echo $this->Html->image('loader_large_blue.gif');?></div>
-<?php if (!$judgeevaluations->isEmpty()) { ?> 
+<?php if (!empty($evaluationUpdateRows)) { ?> 
     <div class="panel-body">
         <div class="ersu_message"> <?php echo $this->Flash->render() ?></div>
         <?php echo $this->Form->create(null, ['id'=>'actionFrom', "method" => "Post"]);  ?>
         <section id="no-more-tables" class="lstng-section">
             <div class="topn">
-                <div class="topn_left">Judge Evaluations</div>
+                <div class="topn_left">Evaluation Update</div>
                 
             </div>   
 
@@ -28,184 +28,37 @@ $this->Evaluationquestions = TableRegistry::getTableLocator()->get('Evaluationqu
                 <table id="judge_eval_table" class="table table-bordered table-striped table-condensed cf">
                     <thead class="cf ajshort">
                         <tr>
-                            <th class="sorting_paging">Convention</th>
-                            <th class="sorting_paging">Season Year</th>
-                            <th class="sorting_paging">Event Number</th>
-                            <th class="sorting_paging">Event Name</th>
-                            <th class="sorting_paging">Group Event?</th>
-                            <th class="sorting_paging">Group</th>
-                            <th class="sorting_paging">Student</th>
-                            <th class="sorting_paging">School</th>
                             <th class="sorting_paging">Judge</th>
-                            <th class="sorting_paging">Marks/Score</th>
-                            <th class="sorting_paging">Withdrawn</th>
+                            <th class="sorting_paging">Registered Events</th>
+                            <th class="sorting_paging">Judged / Not Judged</th>
+                            <th class="sorting_paging">School</th>
+							<th class="sorting_paging">Student</th>
 							<th class="sorting_paging">Submitted</th>
-							<th class="sorting_paging">File</th>
 							<th class="action_dvv"><i class=" fa fa-gavel"></i> Action</th>
                         </tr>
                     </thead>
                     <tbody>
                         <?php
 						$cntrS = 0;
-						foreach ($judgeevaluations as $datarecord)
+						foreach ($evaluationUpdateRows as $row)
 						{
 							$cntrS++;
+							$datarecord = $row['evaluation'];
 						?>
                             <tr>
-                                <td data-title="Convention"><?php echo $datarecord->Conventions['name'];?></td>
-                                <td data-title="Season Year"><?php echo $datarecord->season_year;?></td>
-								<td data-title="Event Number"><?php echo $datarecord->event_id_number;?></td>
-								<td data-title="Event Name"><?php echo $datarecord->Events['event_name'];?></td>
-								<td data-title="Group Event?"><?php echo ($datarecord->Events['group_event_yes_no'] == 1) ? "Yes" : "No"; ?></td>
-								<td data-title="Submitted For Group">
-								<?php
-								if(!empty($datarecord->Eventsubmissions['group_name']))
-								{
-									echo "Group ".$datarecord->Eventsubmissions['group_name'];
-								}
-								else
-								{
-									echo '-';
-								}
-								?>
-								</td>
-								<td data-title="Submitted For Student">
-								<?php
-								if($datarecord->Eventsubmissions['student_id'] > 0)
-								{
-									echo $datarecord->Students['first_name'].' '.$datarecord->Students['middle_name'].' '.$datarecord->Students['last_name'];
-								}
-								else
-								{
-									echo '-';
-								}
-								?>
-								</td>
-								<td data-title="School"><?php echo $datarecord->Schools['first_name']; ?></td>
-								<td data-title="Judge"><?php echo $datarecord->Judge['first_name'].' '.$datarecord->Judge['last_name'];?></td>
-								<td data-title="Marks">
-								<?php
-								// show marks/score based on event judging type
-								if($datarecord->Events['event_judging_type'] == 'times')
-								{
-									//
-									if($datarecord->time_score != NULL && !empty($datarecord->time_score))
-									{
-										$tScore = $datarecord->time_score;
-										$tScoreC = $tScore->format('H:i:s.u');
-										
-										// now remove padded zeros
-										if (strpos($tScoreC, '.') !== false) {
-										list($hms, $micro) = explode('.', $tScoreC);
-										$micro = rtrim($micro, '0'); // remove trailing zeros
-
-										if ($micro === '') {
-											$formattedTime = $hms;
-										} else {
-											$formattedTime = $hms . '.' . $micro;
-										}
-										} else {
-											$formattedTime = $tScoreC;
-										}
-										
-										echo $formattedTime;
-									}
-									//
-								}
-								else
-								if($datarecord->Events['event_judging_type'] == 'distances')
-								{
-									echo $datarecord->distance_score;
-								}
-								else
-								if($datarecord->Events['event_judging_type'] == 'scores')
-								{
-									echo $datarecord->all_pos_score;
-								}
-								else
-								if($datarecord->Events['event_judging_type'] == 'soccer_kick')
-								{
-									echo $datarecord->soccer_kick_best_kick.'m';
-								}
-								else
-								if($datarecord->Events['event_judging_type'] == 'spellings')
-								{
-									echo $datarecord->spelling_score;
-								}
-								else
-								if($datarecord->did_not_attend == 0)
-								{
-									echo "$datarecord->total_marks_obtained/$datarecord->total_marks_possible";
-								}
-								else
-								if($datarecord->did_not_attend == 1)
-								{
-									echo "Did not attend";
-								}
-								?>
-								</td>
-								
-								<td data-title="Withdrawn">
-								<?php
-								if($datarecord->withdraw_yes_no == 1)
-								{
-									echo 'W';
-								}
-								?>
-								</td>
-								
-                                <td data-title="Submitted Date"><?php echo date('M d, Y', strtotime($datarecord->created)); ?></td>
-								<td data-title="File">
-								<?php
-									$imgToShow = $datarecord->Eventsubmissions['mediafile_file_system_name'];
-									if(file_exists(UPLOAD_EVENTS_SUBMISSION_DOCUMENT_PATH.$imgToShow) && !empty($imgToShow))
-									{
-										echo '<a class="btn btn-info btn-xs" target="_blank" title="'.$datarecord->Events['upload_type'].'" href="'.DISPLAY_EVENTS_SUBMISSION_DOCUMENT_PATH.$imgToShow.'"><i class="fa fa-cloud-download"></i></a>';
-									}
-								?>
-								
-								<?php
-									$imgToShow = $datarecord->Eventsubmissions['report'];
-									if(file_exists(UPLOAD_EVENTS_SUBMISSION_DOCUMENT_PATH.$imgToShow) && !empty($imgToShow))
-									{
-										echo '<br /><a class="btn btn-info btn-xs" target="_blank" title="Report" href="'.DISPLAY_EVENTS_SUBMISSION_DOCUMENT_PATH.$imgToShow.'"><i class="fa fa-cloud-download"></i></a>';
-									}
-								?>
-								
-								<?php
-									$imgToShow = $datarecord->Eventsubmissions['score_sheet'];
-									if(file_exists(UPLOAD_EVENTS_SUBMISSION_DOCUMENT_PATH.$imgToShow) && !empty($imgToShow))
-									{
-										echo '<br /><a class="btn btn-info btn-xs" target="_blank" title="Score Sheet" href="'.DISPLAY_EVENTS_SUBMISSION_DOCUMENT_PATH.$imgToShow.'"><i class="fa fa-cloud-download"></i></a>';
-									}
-								?>
-								
-								<?php
-									$imgToShow = $datarecord->Eventsubmissions['additional_documents'];
-									if(file_exists(UPLOAD_EVENTS_SUBMISSION_DOCUMENT_PATH.$imgToShow) && !empty($imgToShow))
-									{
-										echo '<br /><a class="btn btn-info btn-xs" target="_blank" title="Additional Documents" href="'.DISPLAY_EVENTS_SUBMISSION_DOCUMENT_PATH.$imgToShow.'"><i class="fa fa-cloud-download"></i></a>';
-									}
-								?>
-								</td>
+                                <td data-title="Judge"><?php echo h($row['judge_name']); ?></td>
+                                <td data-title="Registered Events"><?php echo (int)$row['registered_events']; ?></td>
+                                <td data-title="Judged / Not Judged"><?php echo (int)$row['judged_events']; ?> / <?php echo (int)$row['not_judged_events']; ?></td>
+                                <td data-title="School"><?php echo h($row['school_name']); ?></td>
+                                <td data-title="Student"><?php echo h($row['student_name']); ?></td>
+                                <td data-title="Submitted Date"><?php echo !empty($row['submitted_date']) ? date('M d, Y', strtotime($row['submitted_date'])) : '-'; ?></td>
                                 <td data-title="Action">
-									
+									<?php if(!empty($datarecord)) { ?>
+									<a href="#info<?php echo $datarecord->id; ?>" rel="facebox" title="Preview Evaluation" class="btn btn-info btn-xs eyee"><i class="fa fa-eye "></i></a>
 									<?php
-									if($datarecord->Events['event_judging_type'] == 'times')
-									{
-										echo $this->Html->link('<i class="fa fa-pencil"></i>', ['controller' => 'judgeevaluations', 'action' => 'timesscoreedit',$datarecord->slug], [ 'escape' => false, 'title' => 'Edit Times Score', 'class'=>'btn btn-primary btn-xs']);
-									}
-									else
-									{
+									echo $this->Html->link('<i class="fa fa-trash-o"></i>', ['controller' => 'judgeevaluations', 'action' => 'removejudgeevaluation',$datarecord->slug], [ 'escape' => false, 'title' => 'Delete', 'class'=>'btn btn-info btn-xs', 'confirm' => 'Are you sure you want to remove this judge evaluation?']);
 									?>
-									<a href="#info<?php echo $datarecord->id; ?>" rel="facebox" title="View Evaluation Questions" class="btn btn-info btn-xs eyee"><i class="fa fa-eye "></i></a>
-									<?php
-									}
-									?>
-									
-									<?php
-									echo $this->Html->link('<i class="fa fa-trash-o"></i>', ['controller' => 'judgeevaluations', 'action' => 'removejudgeevaluation',$datarecord->slug], [ 'escape' => false, 'title' => 'Remove', 'class'=>'btn btn-info btn-xs', 'confirm' => 'Are you sure you want to remove this judge evaluation?']);
-									?>
+									<?php } else { echo '-'; } ?>
 									
                                 </td>
 								
@@ -244,7 +97,10 @@ $this->Evaluationquestions = TableRegistry::getTableLocator()->get('Evaluationqu
 <?php }
 ?>
 
-<?php foreach ($judgeevaluations as $datarecord) { ?>
+<?php foreach ($evaluationUpdateRows as $row) {
+	$datarecord = $row['evaluation'];
+	if(empty($datarecord)) { continue; }
+?>
     <div id="info<?php echo $datarecord->id; ?>" style="display: none;">
         <!-- Fieldset -->
         <div class="nzwh-wrapper">
@@ -452,7 +308,7 @@ $('#judge_eval_table').dataTable({
     //"bInfo": false,
     "bLengthChange": false,
 	"pageLength": 100,
-	order: [[0, 'desc']],
+	order: [[0, 'asc']],
     //"bFilter": true,
     //"bInfo": false,
     //"bAutoWidth": false
