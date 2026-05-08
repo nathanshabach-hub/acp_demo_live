@@ -242,10 +242,11 @@ class SchedulingsController extends AppController {
 				if(!in_array($eid, $roomEventsArr)) { $roomEventsArr[] = $eid; }
 			}
 		}
-		if($conventionRoomsTotal > 0 && count($roomEventsArr) >= $cntrConvSeasonTotalEvents) {
-			$this->Schedulings->updateAll(['precheck_locations' => 1,'total_locations_found' => $conventionRoomsTotal,'modified' => date('Y-m-d H:i:s')], ["conventionseasons_id" => $conventionSD->id]);
+		$locationsMissing = max(0, $cntrConvSeasonTotalEvents - count($roomEventsArr));
+		if($conventionRoomsTotal > 0 && $locationsMissing === 0) {
+			$this->Schedulings->updateAll(['precheck_locations' => 1,'total_locations_found' => $conventionRoomsTotal,'total_locations_missing' => 0,'modified' => date('Y-m-d H:i:s')], ["conventionseasons_id" => $conventionSD->id]);
 		} else {
-			$this->Schedulings->updateAll(['precheck_locations' => 0,'total_locations_found' => NULL,'modified' => date('Y-m-d H:i:s')], ["conventionseasons_id" => $conventionSD->id]);
+			$this->Schedulings->updateAll(['precheck_locations' => 0,'total_locations_found' => NULL,'total_locations_missing' => $locationsMissing,'modified' => date('Y-m-d H:i:s')], ["conventionseasons_id" => $conventionSD->id]);
 		}
 
 		// --- Registrations ---

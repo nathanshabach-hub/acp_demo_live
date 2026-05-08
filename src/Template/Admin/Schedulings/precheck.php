@@ -43,60 +43,58 @@ $this->Events = TableRegistry::getTableLocator()->get('Events');
 					<tr>
 						<td>Events</td>
 						<td>
-							<?php
-							if($schedulingD->precheck_events>0)
-							{
-								echo '<i class="fa fa-check"></i>';
-							}
-							?>
+							<?php if($schedulingD->precheck_events>0): ?>
+								<i class="fa fa-check" style="color:#3c763d;"></i>
+							<?php elseif($schedulingD->precheck_events === 0 && $schedulingD->total_events_found === null): ?>
+								<i class="fa fa-times" style="color:#a94442;"></i>
+							<?php endif; ?>
 						</th>
 						<td>
-							<?php
-							if($schedulingD->precheck_events>0)
-							{
-								echo 'Total event(s) found: '.$schedulingD->total_events_found;
-							}
-							?>
+							<?php if($schedulingD->precheck_events>0): ?>
+								Total event(s) found: <?php echo $schedulingD->total_events_found; ?>
+							<?php elseif($schedulingD->precheck_events === 0 && $schedulingD->total_events_found === null): ?>
+								<span class="label label-danger">No schedulable events found for this season</span>
+							<?php endif; ?>
 						</th>
 					</tr>
 					
 					<tr>
 						<td>Locations</td>
 						<td>
-							<?php
-							if($schedulingD->precheck_locations>0)
-							{
-								echo '<i class="fa fa-check"></i>';
-							}
-							?>
+							<?php if($schedulingD->precheck_locations>0): ?>
+								<i class="fa fa-check" style="color:#3c763d;"></i>
+							<?php elseif($schedulingD->precheck_locations === 0 && $schedulingD->total_locations_missing !== null): ?>
+								<i class="fa fa-times" style="color:#a94442;"></i>
+							<?php endif; ?>
 						</td>
 						<td>
-							<?php
-							if($schedulingD->precheck_locations>0)
-							{
-								echo 'Total location(s) found: '.$schedulingD->total_locations_found;
-							}
-							?>
+							<?php if($schedulingD->precheck_locations>0): ?>
+								Total location(s) found: <?php echo $schedulingD->total_locations_found; ?>
+							<?php elseif($schedulingD->precheck_locations === 0 && $schedulingD->total_locations_missing !== null): ?>
+								<?php if($schedulingD->total_locations_missing > 0): ?>
+									<span class="label label-warning"><?php echo $schedulingD->total_locations_missing; ?> event(s) not assigned to any room</span>
+								<?php else: ?>
+									<span class="label label-danger">No rooms configured for this convention</span>
+								<?php endif; ?>
+							<?php endif; ?>
 						</td>
 					</tr>
 					
 					<tr>
 						<td>Registrations</td>
 						<td>
-							<?php
-							if($schedulingD->precheck_registrations>0)
-							{
-								echo '<i class="fa fa-check"></i>';
-							}
-							?>
+							<?php if($schedulingD->precheck_registrations>0): ?>
+								<i class="fa fa-check" style="color:#3c763d;"></i>
+							<?php elseif($schedulingD->precheck_registrations === 0 && $schedulingD->total_registrations_found === null): ?>
+								<i class="fa fa-times" style="color:#a94442;"></i>
+							<?php endif; ?>
 						</td>
 						<td>
-							<?php
-							if($schedulingD->precheck_registrations>0)
-							{
-								echo 'Total registration(s) found: '.$schedulingD->total_registrations_found;
-							}
-							?>
+							<?php if($schedulingD->precheck_registrations>0): ?>
+								Total registration(s) found: <?php echo $schedulingD->total_registrations_found; ?>
+							<?php elseif($schedulingD->precheck_registrations === 0 && $schedulingD->total_registrations_found === null): ?>
+								<span class="label label-danger">No registrations found for this season</span>
+							<?php endif; ?>
 						</td>
 					</tr>
 					
@@ -104,20 +102,18 @@ $this->Events = TableRegistry::getTableLocator()->get('Events');
 					<tr>
 						<td>Students</td>
 						<td>
-							<?php
-							if($schedulingD->precheck_students>0)
-							{
-								echo '<i class="fa fa-check"></i>';
-							}
-							?>
+							<?php if($schedulingD->precheck_students>0): ?>
+								<i class="fa fa-check" style="color:#3c763d;"></i>
+							<?php elseif($schedulingD->precheck_students === 0 && $schedulingD->total_students_found === null): ?>
+								<i class="fa fa-times" style="color:#a94442;"></i>
+							<?php endif; ?>
 						</td>
 						<td>
-							<?php
-							if($schedulingD->precheck_students>0)
-							{
-								echo 'Total student(s) found: '.$schedulingD->total_students_found;
-							}
-							?>
+							<?php if($schedulingD->precheck_students>0): ?>
+								Total student(s) found: <?php echo $schedulingD->total_students_found; ?>
+							<?php elseif($schedulingD->precheck_students === 0 && $schedulingD->total_students_found === null): ?>
+								<span class="label label-danger">No students found for this convention</span>
+							<?php endif; ?>
 						</td>
 					</tr>
 					
