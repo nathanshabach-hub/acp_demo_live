@@ -859,6 +859,36 @@ class ConventionregistrationsController extends AppController {
 			];
 		}
 		$this->set('savedAssignments', $savedAssignments);
+
+		// Build workload data: how many events each judge is currently assigned to
+		$workloadCounts = [];
+		foreach($savedAssignments as $eid => $panel)
+		{
+			foreach(['judge1','judge2','judge3'] as $slot)
+			{
+				$uid = (int)$panel[$slot];
+				if($uid > 0)
+				{
+					if(!isset($workloadCounts[$uid])) { $workloadCounts[$uid] = 0; }
+					$workloadCounts[$uid]++;
+				}
+			}
+		}
+		$workloadData = [];
+		foreach($judgeDD as $uid => $name)
+		{
+			if($uid === '') { continue; }
+			$uid = (int)$uid;
+			$workloadData[] = [
+				'user_id' => $uid,
+				'name'    => $name,
+				'count'   => isset($workloadCounts[$uid]) ? $workloadCounts[$uid] : 0,
+			];
+		}
+		usort($workloadData, function($a, $b) { return $b['count'] <=> $a['count']; });
+		$avgLoad = count($workloadData) > 0 ? array_sum(array_column($workloadData, 'count')) / count($workloadData) : 0;
+		$this->set('workloadData', $workloadData);
+		$this->set('avgLoad', round($avgLoad, 1));
     }
 
 	public function allschools($conv_season_slug=null) {
@@ -896,7 +926,91 @@ class ConventionregistrationsController extends AppController {
 		$conventionregistrations = $this->Conventionregistrations->find()->contain(['Users'])->where($condition)->order(["Conventionregistrations.id" => "DESC"])->all();
 		$this->set('conventionregistrations', $conventionregistrations);
     }
-	
+
+	public function judginglistcsv() {
+
+		$this->viewBuilder()->setLayout('admin');
+
+		if(!isset($this->JudgingAssignments)) {
+			$this->JudgingAssignments = $this->loadModel('JudgingAssignments');
+		}
+
+		$sess_admin_header_season_id = $this->request->getSession()->read("sess_admin_header_season_id");
+		if($sess_admin_header_season_id <= 0) {
+			$this->Flash->error('Please select a convention season first.');
+			return $this->redirect(['controller' => 'admins', 'action' => 'dashboard']);
+		}
+
+		$convSeasonD = $this->Conventionseasons->find()->where(['Conventionseasons.id' => $sess_admin_header_season_id])->first();
+		if(empty($convSeasonD)) {
+			$this->Flash->error('Convention season not found.');
+			return $this->redirect(['controller' => 'admins', 'action' => 'dashboard']);
+		}
+
+		$events = $this->Conventionseasonevents->find()
+			->contain(['Events'])
+			->where(['Conventionseasonevents.conventionseasons_id' => $convSeasonD->id])
+			->order(['Conventionseasonevents.event_id' => 'ASC'])
+			->all();
+
+		$judgeRegistrations = $this->Conventionregistrations->find()
+			->contain(['Users'])
+			->where([
+				'Conventionregistrations.convention_id' => $convSeasonD->convention_id,
+				'Conventionregistrations.season_id'     => $convSeasonD->season_id,
+				'Conventionregistrations.season_year'   => $convSeasonD->season_year,
+			])
+			->all();
+
+		$judgeNames = [];
+		foreach($judgeRegistrations as $reg) {
+			$userData = !empty($reg->Users) ? $reg->Users : (!empty($reg->user) ? $reg->user : null);
+			if(empty($userData)) { continue; }
+			$isJudge = ($userData['user_type'] == 'Judge') || ($userData['user_type'] == 'Teacher_Parent' && (int)$userData['is_judge'] === 1);
+			if(!$isJudge) { continue; }
+			$judgeNames[(int)$userData['id']] = trim($userData['first_name'].' '.$userData['last_name']);
+		}
+
+		$savedRows = $this->JudgingAssignments->find()->where(['conventionseason_id' => $sess_admin_header_season_id])->all();
+		$savedAssignments = [];
+		foreach($savedRows as $row) {
+			$savedAssignments[(int)$row->event_id] = [
+				'judge1' => $row->judge1_user_id,
+				'judge2' => $row->judge2_user_id,
+				'judge3' => $row->judge3_user_id,
+			];
+		}
+
+		$filename = 'judging_list_'.preg_replace('/[^a-z0-9_]/i', '_', $convSeasonD->season_year).'_'.date('Ymd').'.csv';
+
+		$this->autoRender = false;
+		ob_start();
+		$fp = fopen('php://output', 'w');
+		fputcsv($fp, ['Event Code', 'Event Name', 'Judge 1', 'Judge 2', 'Judge 3']);
+		foreach($events as $eventRow) {
+			$eid = (int)$eventRow->event_id;
+			$eventName = 'Event #'.$eid;
+			$eventCode = '';
+			if(!empty($eventRow->Events)) {
+				if(!empty($eventRow->Events['event_name'])) { $eventName = $eventRow->Events['event_name']; }
+				if(!empty($eventRow->Events['event_id_number'])) { $eventCode = $eventRow->Events['event_id_number']; }
+			}
+			$saved = isset($savedAssignments[$eid]) ? $savedAssignments[$eid] : ['judge1'=>null,'judge2'=>null,'judge3'=>null];
+			$j1 = isset($judgeNames[(int)$saved['judge1']]) ? $judgeNames[(int)$saved['judge1']] : '';
+			$j2 = isset($judgeNames[(int)$saved['judge2']]) ? $judgeNames[(int)$saved['judge2']] : '';
+			$j3 = isset($judgeNames[(int)$saved['judge3']]) ? $judgeNames[(int)$saved['judge3']] : '';
+			fputcsv($fp, [$eventCode, $eventName, $j1, $j2, $j3]);
+		}
+		fclose($fp);
+		$csvContent = ob_get_clean();
+
+		$response = $this->response
+			->withType('text/csv')
+			->withHeader('Content-Disposition', 'attachment; filename="'.$filename.'"')
+			->withHeader('Pragma', 'no-cache')
+			->withStringBody($csvContent);
+		return $response;
+	}
 
 }
 

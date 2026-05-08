@@ -2386,6 +2386,67 @@ class ConventionregistrationsController extends AppController {
 		
 	}
 
+	public function myjudgingevents() {
+
+		$this->userLoginCheck();
+		$this->multiLoginCheck(['Teacher_Parent','Judge']);
+
+		$this->set("title_for_layout", "My Judging Assignments" . TITLE_FOR_PAGES);
+		$this->viewBuilder()->setLayout('home');
+
+		$user_id = (int)$this->request->getSession()->read("user_id");
+		$userDetails = $this->Users->find()->where(['Users.id' => $user_id])->first();
+		$this->set('userDetails', $userDetails);
+
+		$JudgingAssignments = TableRegistry::getTableLocator()->get('JudgingAssignments');
+
+		// Find all panels this judge is assigned to
+		$assignedRows = $JudgingAssignments->find()->where([
+			'OR' => [
+				'judge1_user_id' => $user_id,
+				'judge2_user_id' => $user_id,
+				'judge3_user_id' => $user_id,
+			]
+		])->all();
+
+		// Group by conventionseason_id
+		$seasonMap = []; // season_id => [event_ids]
+		foreach($assignedRows as $row) {
+			$sid = (int)$row->conventionseason_id;
+			$eid = (int)$row->event_id;
+			if(!isset($seasonMap[$sid])) { $seasonMap[$sid] = []; }
+			$seasonMap[$sid][] = $eid;
+		}
+
+		$portalData = [];
+		if(!empty($seasonMap)) {
+			$seasonIds = array_keys($seasonMap);
+			$seasons = $this->Conventionseasons->find()
+				->where(['Conventionseasons.id IN' => $seasonIds])
+				->contain(['Conventions'])
+				->all();
+			$seasonsById = [];
+			foreach($seasons as $s) { $seasonsById[(int)$s->id] = $s; }
+
+			foreach($seasonMap as $sid => $eventIds) {
+				$eventIds = array_unique($eventIds);
+				if(empty($eventIds)) { continue; }
+				$events = $this->Events->find()
+					->where(['Events.id IN' => $eventIds])
+					->order(['Events.event_id_number' => 'ASC', 'Events.event_name' => 'ASC'])
+					->all()
+					->toArray();
+				$portalData[] = [
+					'season'    => isset($seasonsById[$sid]) ? $seasonsById[$sid] : null,
+					'season_id' => $sid,
+					'events'    => $events,
+				];
+			}
+		}
+
+		$this->set('portalData', $portalData);
+	}
+
 }
 
 ?>

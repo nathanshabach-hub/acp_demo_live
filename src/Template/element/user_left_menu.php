@@ -216,6 +216,9 @@ if ($this->request->getSession()->read("user_id") > 0 && ($this->request->getSes
 				<li class="nav-item dash-item">
 					<?php echo $this->Html->link('Events', ['controller' => 'conventionregistrations', 'action' => 'judgeevents'], ['escape' => false, 'class' => 'nav-link ' . $active_cr_judgeevents]); ?>
 				</li>
+				<li class="nav-item dash-item">
+					<?php echo $this->Html->link('My Judging Assignments', ['controller' => 'conventionregistrations', 'action' => 'myjudgingevents'], ['escape' => false, 'class' => 'nav-link']); ?>
+				</li>
 				<hr>
 				<?php
 				}

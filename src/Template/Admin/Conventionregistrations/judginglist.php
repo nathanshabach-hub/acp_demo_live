@@ -52,6 +52,8 @@
             <div class="box-header with-border">
                 <h3 class="box-title"><i class="fa fa-check-square-o"></i>&nbsp; Judging Panel Assignments</h3>
                 <div class="box-tools pull-right">
+                    <?php echo $this->Html->link('<i class="fa fa-download"></i> Export CSV', ['controller'=>'conventionregistrations', 'action'=>'judginglistcsv'], ['class'=>'btn btn-sm btn-success', 'escape'=>false]); ?>
+                    &nbsp;
                     <?php echo $this->Html->link('<i class="fa fa-user"></i> Manage Judges', ['controller'=>'conventionregistrations', 'action'=>'alljudges'], ['class'=>'btn btn-sm btn-default', 'escape'=>false]); ?>
                 </div>
             </div>
@@ -185,6 +187,47 @@
                 <?php } ?>
             </div>
         </div>
+
+        <?php if (!empty($workloadData)) { ?>
+        <div class="box box-default" style="margin-top:18px;">
+            <div class="box-header with-border">
+                <h3 class="box-title"><i class="fa fa-bar-chart"></i>&nbsp; Judge Workload Balance <small id="wl-avg-label">(saved avg: <?php echo $avgLoad; ?> events/judge)</small></h3>
+                <div class="box-tools pull-right">
+                    <small class="text-muted" style="font-size:12px;"><i class="fa fa-refresh"></i> Updates live as you change dropdowns</small>
+                </div>
+            </div>
+            <div class="box-body" style="padding:10px;">
+                <table id="workload_table" class="table table-condensed table-bordered" style="max-width:600px;">
+                    <thead>
+                        <tr>
+                            <th>Judge</th>
+                            <th style="width:80px;text-align:center;">Events</th>
+                            <th style="width:120px;">Load</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    <?php foreach($workloadData as $wd) { ?>
+                        <tr data-uid="<?php echo (int)$wd['user_id']; ?>">
+                            <td><?php echo h($wd['name']); ?></td>
+                            <td style="text-align:center;" class="wl-count"><?php echo (int)$wd['count']; ?></td>
+                            <td class="wl-bar">
+                                <?php
+                                $cnt = (int)$wd['count'];
+                                if($avgLoad <= 0) { $cls = 'default'; }
+                                elseif($cnt <= ceil($avgLoad)) { $cls = 'success'; }
+                                elseif($cnt <= ceil($avgLoad) + 2) { $cls = 'warning'; }
+                                else { $cls = 'danger'; }
+                                echo '<span class="label label-'.$cls.'">'.h($cnt > 0 ? $cnt.' assigned' : 'none').'</span>';
+                                ?>
+                            </td>
+                        </tr>
+                    <?php } ?>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <?php } ?>
+
     </section>
 </div>
 
@@ -200,5 +243,37 @@ $(document).ready(function() {
         order: [[0,'asc']],
         columnDefs: [{ orderable: false, targets: [3,4,5,6] }]
     });
+
+    // Live workload recalculation when any judge dropdown changes
+    function recalcWorkload() {
+        var counts = {};
+        $('#judging_list_table select').each(function() {
+            var val = $(this).val();
+            if(val && val !== '') {
+                counts[val] = (counts[val] || 0) + 1;
+            }
+        });
+        var total = 0, numJudges = 0;
+        $('#workload_table tbody tr').each(function() {
+            var uid = $(this).data('uid').toString();
+            var cnt = counts[uid] || 0;
+            total += cnt; numJudges++;
+            $(this).find('.wl-count').text(cnt);
+        });
+        var avg = numJudges > 0 ? total / numJudges : 0;
+        $('#wl-avg-label').text('(live avg: ' + avg.toFixed(1) + ' events/judge)');
+        $('#workload_table tbody tr').each(function() {
+            var uid = $(this).data('uid').toString();
+            var cnt = counts[uid] || 0;
+            var cls, label;
+            if(avg <= 0)         { cls = 'default';  label = cnt > 0 ? cnt+' assigned' : 'none'; }
+            else if(cnt <= Math.ceil(avg))     { cls = 'success'; label = cnt+' assigned'; }
+            else if(cnt <= Math.ceil(avg) + 2) { cls = 'warning'; label = cnt+' assigned'; }
+            else                               { cls = 'danger';  label = cnt+' assigned'; }
+            if(cnt === 0) label = 'none';
+            $(this).find('.wl-bar').html('<span class="label label-'+cls+'">'+label+'</span>');
+        });
+    }
+    $('#judging_list_table').on('change', 'select', recalcWorkload);
 });
 </script>
