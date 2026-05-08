@@ -27,6 +27,8 @@ class SchedulingtweaksController extends AppController {
         $this->Schedulingeventtweaks       = $this->loadModel('Schedulingeventtweaks');
         $this->Events                      = $this->loadModel('Events');
         $this->Schedulings                 = $this->loadModel('Schedulings');
+        $this->Schedulingroomlimits        = $this->loadModel('Schedulingroomlimits');
+        $this->Schedulingtimings           = $this->loadModel('Schedulingtimings');
     }
 
     /* ------------------------------------------------------------------ */
@@ -213,6 +215,123 @@ class SchedulingtweaksController extends AppController {
             }
             $this->Flash->success('Room availability windows saved.');
             return $this->redirect(['action' => 'roomavailability', $convention_season_slug]);
+        }
+    }
+
+    /* ------------------------------------------------------------------ */
+    /*  ROOM LIMITS – show booked hours per room per day + set max hours   */
+    /* ------------------------------------------------------------------ */
+    public function roomlimits($convention_season_slug = null) {
+        $this->set('title', ADMIN_TITLE . 'Room Time Allocation');
+        $this->viewBuilder()->setLayout('admin');
+        $this->set('manageConventions', '1');
+        $this->set('conventionList', '1');
+        $this->set('convention_season_slug', $convention_season_slug);
+
+        $conventionSD = $this->Conventionseasons->find()
+            ->where(['Conventionseasons.slug' => $convention_season_slug])
+            ->contain(['Conventions'])
+            ->first();
+        $this->set('conventionSD', $conventionSD);
+        $this->set('convention_slug', $conventionSD->Conventions['slug']);
+
+        $seasonId = $conventionSD->id;
+
+        /* Convention days ordered */
+        $weekArr     = ['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday'];
+        $allowedDays = [];
+        $schedulingD = $this->Schedulings->find()
+            ->where(['conventionseasons_id' => $seasonId])
+            ->first();
+        if ($schedulingD && $schedulingD->first_day && $schedulingD->number_of_days > 0) {
+            $keyStart = array_search($schedulingD->first_day, $weekArr);
+            if ($keyStart !== false) {
+                for ($d = 0; $d < $schedulingD->number_of_days; $d++) {
+                    $allowedDays[] = $weekArr[($keyStart + $d) % 7];
+                }
+            }
+        }
+        if (empty($allowedDays)) {
+            /* Fallback: pull distinct days from timings */
+            $distinctDays = $this->Schedulingtimings->find()
+                ->select(['day'])
+                ->where(['conventionseasons_id' => $seasonId])
+                ->distinct()
+                ->order(['day' => 'ASC'])
+                ->all();
+            foreach ($distinctDays as $row) {
+                if (!empty($row->day)) $allowedDays[] = $row->day;
+            }
+        }
+        $this->set('allowedDays', $allowedDays);
+
+        /* All rooms for this convention */
+        $rooms = $this->Conventionrooms->find()
+            ->where(['Conventionrooms.convention_id' => $conventionSD->convention_id])
+            ->order(['Conventionrooms.room_name' => 'ASC'])
+            ->all();
+        $this->set('rooms', $rooms);
+
+        /* Existing max-hours limits */
+        $limitsRaw = $this->Schedulingroomlimits->find()
+            ->where(['conventionseasons_id' => $seasonId])
+            ->all();
+        $limits = []; /* [room_id][day] => max_hours */
+        foreach ($limitsRaw as $lim) {
+            $limits[$lim->room_id][$lim->day] = $lim->max_hours;
+        }
+        $this->set('limits', $limits);
+
+        /* Booked minutes per room per day from schedulingtimings (raw query) */
+        $conn      = $this->Schedulingtimings->getConnection();
+        $bookedStmt = $conn->execute(
+            'SELECT room_id, day,
+                    SUM(TIME_TO_SEC(TIMEDIFF(finish_time, start_time)) / 60) AS total_minutes
+             FROM schedulingtimings
+             WHERE conventionseasons_id = :sid AND day IS NOT NULL AND day != \'\'
+             GROUP BY room_id, day',
+            ['sid' => $seasonId]
+        );
+        $booked = []; /* [room_id][day] => minutes */
+        foreach ($bookedStmt->fetchAll('assoc') as $row) {
+            $booked[$row['room_id']][$row['day']] = (float) $row['total_minutes'];
+        }
+        $this->set('booked', $booked);
+
+        /* Handle save */
+        if ($this->request->is(['post'])) {
+            $postData    = (array) $this->request->getData();
+            $maxHoursAll = $postData['max_hours'] ?? [];
+            $now         = date('Y-m-d H:i:s');
+            foreach ($rooms as $room) {
+                foreach ($allowedDays as $day) {
+                    $val = isset($maxHoursAll[$room->id][$day]) && $maxHoursAll[$room->id][$day] !== ''
+                        ? (float) $maxHoursAll[$room->id][$day] : null;
+
+                    /* Upsert */
+                    $existing = $this->Schedulingroomlimits->find()
+                        ->where(['conventionseasons_id' => $seasonId, 'room_id' => $room->id, 'day' => $day])
+                        ->first();
+                    if ($existing) {
+                        $this->Schedulingroomlimits->updateAll(
+                            ['max_hours' => $val, 'modified' => $now],
+                            ['id' => $existing->id]
+                        );
+                    } else {
+                        $entity = $this->Schedulingroomlimits->newEntity([
+                            'conventionseasons_id' => $seasonId,
+                            'room_id'              => $room->id,
+                            'day'                  => $day,
+                            'max_hours'            => $val,
+                            'created'              => $now,
+                            'modified'             => $now,
+                        ]);
+                        $this->Schedulingroomlimits->save($entity);
+                    }
+                }
+            }
+            $this->Flash->success('Room time limits saved.');
+            return $this->redirect(['action' => 'roomlimits', $convention_season_slug]);
         }
     }
 }

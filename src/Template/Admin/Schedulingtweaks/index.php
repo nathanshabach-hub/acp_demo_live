@@ -31,6 +31,12 @@
                         ['controller'=>'schedulingtweaks','action'=>'roomavailability',$convention_season_slug],
                         ['class'=>'btn btn-sm btn-default', 'escape'=>false]
                     ); ?>
+                    &nbsp;
+                    <?php echo $this->Html->link(
+                        '<i class="fa fa-bar-chart"></i> Room Time Allocation',
+                        ['controller'=>'schedulingtweaks','action'=>'roomlimits',$convention_season_slug],
+                        ['class'=>'btn btn-sm btn-info', 'escape'=>false]
+                    ); ?>
                 </div>
             </div>
             <div class="ersu_message"><?php echo $this->Flash->render(); ?></div>
