@@ -38,7 +38,7 @@ $this->Conventionregistrationteachers = TableRegistry::getTableLocator()->get('C
 						{
 						?>
                             <?php
-							if(($datarecord->Users['user_type'] == "Judge" || $datarecord->Users['user_type'] == "Teacher_Parent") && $datarecord->Users['is_judge'] == 1)
+                            if(!empty($datarecord->Users) && (($datarecord->Users['user_type'] == "Judge" || $datarecord->Users['user_type'] == "Teacher_Parent") && $datarecord->Users['is_judge'] == 1))
 							{
 							?>
                             <tr>
