@@ -1643,12 +1643,56 @@ class ConventionregistrationsController extends AppController {
 				$eventNameIDDD = array();
 				$condEvents = array();
 				$condEvents[] = "(Events.id IN ($arrConvSeasonEventsImplode) )";
-				$eventsList = $this->Events->find()->where($condEvents)->order(['Events.event_id_number' => 'ASC'])->all();
+				$eventsList = $this->Events->find()->where($condEvents)->order(['Events.event_id_number' => 'ASC'])->all()->toArray();
 				foreach($eventsList as $eventrec)
 				{
 					$eventNameIDDD[$eventrec->id] = $eventrec->event_name.' ('.$eventrec->event_id_number.')';
 				}
 				$this->set('eventNameIDDD', $eventNameIDDD);
+
+
+				$this->set('eventsList', $eventsList);
+
+				// Load judging assignments for this season
+				$JudgingAssignments = TableRegistry::getTableLocator()->get('JudgingAssignments');
+				$assignedRows = $JudgingAssignments->find()->where(['conventionseason_id' => $convSeasonD->id])->all();
+				$seasonAssignments = [];
+				$assignedUserIds = [];
+				foreach($assignedRows as $arow) {
+					$eid = (int)$arow->event_id;
+					$seasonAssignments[$eid] = [
+						'judge1' => $arow->judge1_user_id,
+						'judge2' => $arow->judge2_user_id,
+						'judge3' => $arow->judge3_user_id,
+					];
+					foreach(['judge1_user_id','judge2_user_id','judge3_user_id'] as $col) {
+						if(!empty($arow->$col)) { $assignedUserIds[(int)$arow->$col] = true; }
+					}
+				}
+				$judgeNamesById = [];
+				if(!empty($assignedUserIds)) {
+					$judgeUsers = $this->Users->find()->where(['Users.id IN' => array_keys($assignedUserIds)])->all();
+					foreach($judgeUsers as $ju) {
+						$judgeNamesById[(int)$ju->id] = trim($ju->first_name.' '.$ju->last_name);
+					}
+				}
+				$this->set('seasonAssignments', $seasonAssignments);
+				$this->set('judgeNamesById', $judgeNamesById);
+
+				// Pre-populate checkboxes from existing registration
+				$alreadySelectedIds = [];
+				$existingReg = $this->Conventionregistrations->find()->where([
+					'Conventionregistrations.convention_id' => $convention_id,
+					'Conventionregistrations.user_id'       => $user_id,
+					'Conventionregistrations.season_id'     => $season_id,
+				])->first();
+				if(!empty($existingReg) && !empty($existingReg->judges_event_ids)) {
+					foreach(explode(',', (string)$existingReg->judges_event_ids) as $rawId) {
+						$id = (int)trim($rawId);
+						if($id > 0) { $alreadySelectedIds[$id] = true; }
+					}
+				}
+				$this->set('alreadySelectedIds', $alreadySelectedIds);
 
 				// Always provide a new entity for the form (GET and POST new-record path)
 				$conventionregistrations = $this->Conventionregistrations->newEntity();
@@ -1663,7 +1707,13 @@ class ConventionregistrationsController extends AppController {
 					{
 						$convRegID 		= $checkRegExists->id;
 						$convRegSlug 	= $checkRegExists->slug;
-						$this->Conventionregistrations->updateAll(['modified' => date('Y-m-d H:i:s')], ["id" => $convRegID]);
+						// Save updated event selections from checkboxes
+						$rawIds = $this->request->getData('Conventionregistrations.judges_event_ids');
+						$eventIdsStr = (!empty($rawIds) && is_array($rawIds)) ? implode(',', array_map('intval', $rawIds)) : '';
+						$this->Conventionregistrations->updateAll(
+							['judges_event_ids' => $eventIdsStr, 'modified' => date('Y-m-d H:i:s')],
+							["id" => $convRegID]
+						);
 					}
 					else
 					{
@@ -1682,9 +1732,9 @@ class ConventionregistrationsController extends AppController {
 						$dataCR->created 				= date('Y-m-d H:i:s');
 						$dataCR->modified 				= NULL;
 						
-						if($this->request->getData('Conventionregistrations.judges_event_ids'))
-						{
-							$dataCR->judges_event_ids 			= implode(",",$this->request->getData('Conventionregistrations.judges_event_ids'));
+						$rawIds = $this->request->getData('Conventionregistrations.judges_event_ids');
+						if(!empty($rawIds) && is_array($rawIds)) {
+							$dataCR->judges_event_ids = implode(',', array_map('intval', $rawIds));
 						}
 
 						$resultCR 		= $this->Conventionregistrations->save($dataCR);
