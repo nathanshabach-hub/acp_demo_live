@@ -216,6 +216,58 @@ class SchedulingsController extends AppController {
 		$this->redirect(['controller' => 'schedulings', 'action' => 'precheck',$convention_season_slug]);
     }
 	
+	public function precheckall($convention_season_slug=null) {
+
+		$conventionSD = $this->Conventionseasons->find()->where(['Conventionseasons.slug' => $convention_season_slug])->contain(["Conventions"])->first();
+
+		// --- Events ---
+		$cntrPreCheckEvents = 0;
+		$conventionSEventsList = $this->Conventionseasonevents->find()->where(['Conventionseasonevents.conventionseasons_id' => $conventionSD->id])->contain(['Events'])->all();
+		foreach($conventionSEventsList as $convevPreCheck) {
+			if($convevPreCheck->Events['needs_schedule'] == 1) { $cntrPreCheckEvents++; }
+		}
+		if($cntrPreCheckEvents > 0) {
+			$this->Schedulings->updateAll(['precheck_events' => 1,'total_events_found' => $cntrPreCheckEvents,'modified' => date('Y-m-d H:i:s')], ["conventionseasons_id" => $conventionSD->id]);
+		} else {
+			$this->Schedulings->updateAll(['precheck_events' => 0,'total_events_found' => NULL,'modified' => date('Y-m-d H:i:s')], ["conventionseasons_id" => $conventionSD->id]);
+		}
+
+		// --- Locations ---
+		$conventionRoomsTotal = $this->Conventionrooms->find()->where(['Conventionrooms.convention_id' => $conventionSD->convention_id])->count();
+		$cntrConvSeasonTotalEvents = $cntrPreCheckEvents;
+		$roomEventsArr = [];
+		$convRoomEvents = $this->Conventionseasonroomevents->find()->where(['Conventionseasonroomevents.conventionseasons_id' => $conventionSD->id])->all();
+		foreach($convRoomEvents as $convroomev) {
+			foreach(explode(",", $convroomev->event_ids) as $eid) {
+				if(!in_array($eid, $roomEventsArr)) { $roomEventsArr[] = $eid; }
+			}
+		}
+		if($conventionRoomsTotal > 0 && count($roomEventsArr) >= $cntrConvSeasonTotalEvents) {
+			$this->Schedulings->updateAll(['precheck_locations' => 1,'total_locations_found' => $conventionRoomsTotal,'modified' => date('Y-m-d H:i:s')], ["conventionseasons_id" => $conventionSD->id]);
+		} else {
+			$this->Schedulings->updateAll(['precheck_locations' => 0,'total_locations_found' => NULL,'modified' => date('Y-m-d H:i:s')], ["conventionseasons_id" => $conventionSD->id]);
+		}
+
+		// --- Registrations ---
+		$conventionRegCount = $this->Conventionregistrations->find()->where(['Conventionregistrations.conventionseason_id' => $conventionSD->id])->count();
+		if($conventionRegCount > 0) {
+			$this->Schedulings->updateAll(['precheck_registrations' => 1,'total_registrations_found' => $conventionRegCount,'modified' => date('Y-m-d H:i:s')], ["conventionseasons_id" => $conventionSD->id]);
+		} else {
+			$this->Schedulings->updateAll(['precheck_registrations' => 0,'total_registrations_found' => NULL,'modified' => date('Y-m-d H:i:s')], ["conventionseasons_id" => $conventionSD->id]);
+		}
+
+		// --- Students ---
+		$studentsRegCount = $this->Conventionregistrationstudents->find()->where(['Conventionregistrationstudents.convention_id' => $conventionSD->convention_id,'Conventionregistrationstudents.season_id' => $conventionSD->season_id,'Conventionregistrationstudents.season_year' => $conventionSD->season_year])->count();
+		if($studentsRegCount > 0) {
+			$this->Schedulings->updateAll(['precheck_students' => 1,'total_students_found' => $studentsRegCount,'modified' => date('Y-m-d H:i:s')], ["conventionseasons_id" => $conventionSD->id]);
+		} else {
+			$this->Schedulings->updateAll(['precheck_students' => 0,'total_students_found' => NULL,'modified' => date('Y-m-d H:i:s')], ["conventionseasons_id" => $conventionSD->id]);
+		}
+
+		$this->Flash->success('Pre-check complete. Events: '.$cntrPreCheckEvents.', Locations: '.$conventionRoomsTotal.', Registrations: '.$conventionRegCount.', Students: '.$studentsRegCount.'.');
+		$this->redirect(['controller' => 'schedulings', 'action' => 'precheck', $convention_season_slug]);
+	}
+
 	public function resetallprecheck($convention_season_slug=null) {
 		
 		$conventionSD = $this->Conventionseasons->find()->where(['Conventionseasons.slug' => $convention_season_slug])->contain(["Conventions"])->first();
