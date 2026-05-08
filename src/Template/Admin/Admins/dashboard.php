@@ -89,6 +89,19 @@
                     <?php echo $this->Html->link('More info <i class="fa fa-arrow-circle-right"></i>', ['controller' => 'conventionregistrations', 'action' => 'judginglist'], [ 'escape' => false, 'title' => 'Judging List', 'class' => 'small-box-footer']); ?>
                 </div>
             </div>
+
+			<div class="col-lg-3 col-xs-6">
+                <div class="small-box bg-maroon">
+                    <div class="inner">
+                        <h3><?php echo isset($total_events_judged) ? $total_events_judged : '0'; ?></h3>
+                        <p>Evaluation Update</p>
+                    </div>
+                    <div class="icon">
+                        <i class="fa fa-gavel"></i>
+                    </div>
+                    <?php echo $this->Html->link('More info <i class="fa fa-arrow-circle-right"></i>', ['controller' => 'conventionregistrations', 'action' => 'judginglist'], [ 'escape' => false, 'title' => 'Evaluation Update', 'class' => 'small-box-footer']); ?>
+                </div>
+            </div>
 			
 			<div class="col-lg-3 col-xs-6"> 
                 <div class="small-box bg-yellow">

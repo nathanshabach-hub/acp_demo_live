@@ -36,6 +36,7 @@ class AdminsController extends AppController {
 		$this->Conventionregistrationteachers = $this->loadModel('Conventionregistrationteachers');
 		$this->Conventionseasonevents = $this->loadModel('Conventionseasonevents');
 		$this->Conventionseasons = $this->loadModel('Conventionseasons');
+        $this->JudgingAssignments = $this->loadModel('JudgingAssignments');
     }
 
     public function login() {
@@ -231,6 +232,18 @@ class AdminsController extends AppController {
 			
 			$total_conv_seas_events = $this->Conventionseasonevents->find()->where(["conventionseasons_id"=> $convSD->id])->count();
 			$this->set('total_conv_seas_events', $total_conv_seas_events);
+
+            $total_events_judged = $this->JudgingAssignments->find()
+                ->where(['JudgingAssignments.conventionseason_id' => $convSD->id])
+                ->where(function ($exp) {
+                    return $exp->or_([
+                        'JudgingAssignments.judge1_user_id >' => 0,
+                        'JudgingAssignments.judge2_user_id >' => 0,
+                        'JudgingAssignments.judge3_user_id >' => 0,
+                    ]);
+                })
+                ->count();
+            $this->set('total_events_judged', $total_events_judged);
 			
 			
 			$condTr = array();
