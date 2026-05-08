@@ -25,7 +25,7 @@
                 <h3 class="box-title">&nbsp;</h3>
             </div>
             <div class="ersu_message"> <?php echo $this->Flash->render() ?> </div>
-            <?php echo $this->Form->create($transactions, ['id'=>'adminForm', 'type' => 'file']); ?>
+            <?php echo $this->Form->create($transactionD, ['id'=>'adminForm', 'type' => 'file']); ?>
                 <div class="form-horizontal">
                     <div class="box-body">
 					
