@@ -136,9 +136,13 @@ class JudgeevaluationsController extends AppController {
             $this->render('index');
         } */
 		
-		$judgeevaluations 		= $this->Judgeevaluations->find()->where($condition)->contain(['Eventsubmissions','Conventionregistrations','Conventions','Events','Students','Schools','Judge','Judgeevaluationmarks'])->order(['Judgeevaluations.id' => 'DESC'])->limit(1000000)->all();
-		
-		$this->set('judgeevaluations', $judgeevaluations);
+        $query = $this->Judgeevaluations->find()
+            ->where($condition)
+            ->contain(['Eventsubmissions','Conventionregistrations','Conventions','Events','Students','Schools','Judge','Judgeevaluationmarks'])
+            ->order(['Judgeevaluations.id' => 'DESC']);
+
+        $this->paginate = ['limit' => 50];
+        $this->set('judgeevaluations', $this->paginate($query));
     }
 	
 	public function removejudgeevaluation($evaluation_slug=null) {
