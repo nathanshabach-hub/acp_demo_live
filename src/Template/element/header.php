@@ -242,7 +242,7 @@ if($user_id>0)
 						{
 						?>
 						<ul class="dropdown-menu">
-							<li><a class="dropdown-item" href="<?php echo HTTP_PATH; ?>/users/switchprofile/switchtojudge">Switch to Judge</a></li>
+						<li><a class="dropdown-item" href="<?php echo $this->Url->build(['controller'=>'users','action'=>'switchprofile','switchtojudge']); ?>">Switch to Judge</a></li>
 						</ul>
 						<?php
 						}
@@ -253,7 +253,7 @@ if($user_id>0)
 						{
 						?>
 						<ul class="dropdown-menu">
-							<li><a class="dropdown-item" href="<?php echo HTTP_PATH; ?>/users/switchprofile/switchtosupervisor">Switch to Supervisor</a></li>
+						<li><a class="dropdown-item" href="<?php echo $this->Url->build(['controller'=>'users','action'=>'switchprofile','switchtosupervisor']); ?>">Switch to Supervisor</a></li>
 						</ul>
 						<?php
 						}
