@@ -212,12 +212,72 @@ if($schedulings->sports_day_having_events_after_sport_yes_no)
 }
 ?>
 
+<style>
+	.wizard-shell {
+		padding: 8px 6px 4px;
+	}
+	.wizard-intro {
+		border: 1px solid #d9edf7;
+		background: #f4fbff;
+		border-radius: 6px;
+		padding: 12px 14px;
+		margin-bottom: 16px;
+		color: #1f4f66;
+		font-size: 13px;
+	}
+	.wizard-shell .form-group {
+		margin-left: 0;
+		margin-right: 0;
+		padding-bottom: 4px;
+	}
+	.wizard-shell .control-label {
+		width: 230px;
+		text-align: left;
+		font-weight: 600;
+		color: #394b59;
+	}
+	.wizard-shell .col-sm-10 {
+		width: calc(100% - 230px);
+	}
+	.wizard-shell .control-label h3 {
+		margin: 10px 0 0;
+		font-size: 17px;
+		font-weight: 700;
+		color: #2c3e50;
+	}
+	.wizard-section-hint {
+		font-size: 13px;
+		line-height: 1.5;
+		color: #6c757d;
+	}
+	.wizard-preview {
+		background: #f7fafc;
+		border: 1px dashed #ccd6dd;
+		border-radius: 4px;
+		padding: 10px 12px;
+	}
+	.wizard-actions {
+		display: flex;
+		gap: 8px;
+		align-items: center;
+	}
+	@media (max-width: 991px) {
+		.wizard-shell .control-label,
+		.wizard-shell .col-sm-10 {
+			width: 100%;
+		}
+		.wizard-shell .control-label {
+			margin-bottom: 4px;
+		}
+	}
+</style>
+
 <div class="content-wrapper">
     <section class="content-header">
-      <h1>
-        Scheduling Wizard - [Convention - <?php echo $conventionSD->Conventions['name']; ?>]&nbsp;&nbsp;&nbsp;&nbsp;
-		  [Season Year - <?php echo $conventionSD->season_year; ?>]
-      </h1>
+			<h1>
+				Scheduling Wizard
+		  <small><?php echo h($conventionSD->Conventions['name']); ?> &mdash; <?php echo h($conventionSD->season_year); ?></small>
+			</h1>
       <ol class="breadcrumb">
           <li><?php echo $this->Html->link('<i class="fa fa-dashboard"></i> <span>Dashboard</span> ', ['controller'=>'admins', 'action'=>'dashboard'], ['escape'=>false]);?></li>
           <li><?php echo $this->Html->link('<i class="fa fa-bars"></i> Conventions ', ['controller'=>'conventions', 'action'=>'index'], ['escape'=>false]);?></li>
@@ -228,13 +288,17 @@ if($schedulings->sports_day_having_events_after_sport_yes_no)
 
     <section class="content">
      <div class="box box-info">
-            <div class="box-header with-border">
-                <h3 class="box-title">&nbsp;</h3>
-            </div>
+			<div class="box-header with-border">
+				<h3 class="box-title"><i class="fa fa-sliders"></i>&nbsp; Wizard Settings</h3>
+			</div>
             <div class="ersu_message"> <?php echo $this->Flash->render() ?> </div>
             <?php echo $this->Form->create($schedulings, ['id'=>'schedulingWizardForm', 'type' => 'file', 'autocomplete' => 'off']); ?>
                 <div class="form-horizontal">
                     <div class="box-body">
+					<div class="wizard-shell">
+						<div class="wizard-intro">
+							Configure convention days, daily times, judging breaks, and sports day timing in one place.
+						</div>
 					
 					
 					<!-- Convention Days Starts -->
@@ -269,8 +333,10 @@ if($schedulings->sports_day_having_events_after_sport_yes_no)
 					<div class="form-group">
 					  <label class="col-sm-2 control-label">Schedule Window</label>
 					  <div class="col-sm-10" style="padding-top:7px;">
-						  <div id="convention-day-window-preview" style="font-weight:600;">Pick First Day and Number of Days to see the allowed schedule window.</div>
-						  <div id="convention-day-window-warning" style="color:#b94a48; margin-top:4px;"></div>
+						  <div class="wizard-preview">
+							  <div id="convention-day-window-preview" style="font-weight:600;">Pick First Day and Number of Days to see the allowed schedule window.</div>
+							  <div id="convention-day-window-warning" style="color:#b94a48; margin-top:4px;"></div>
+						  </div>
 					  </div>
 					</div>
 					<!-- Convention Days Ends -->
@@ -338,7 +404,7 @@ if($schedulings->sports_day_having_events_after_sport_yes_no)
 					<!-- Judging Breaks Starts -->
 					<div class="form-group">
                       <label class="col-sm-2 control-label"><h3>Judging Breaks </h3><span class="require"></span></label>
-                      <div class="col-sm-10" style="padding-top:30px;">
+				      <div class="col-sm-10 wizard-section-hint" style="padding-top:30px;">
                           Check the box if you want to schedule breaks for music and platform judges. (They need it but the schedule might be so tight they can't fit one in). We recommend trying to generate the schedule with breaks first and take them out if it can't be done.
                       </div>
                     </div>
@@ -387,7 +453,7 @@ if($schedulings->sports_day_having_events_after_sport_yes_no)
 					<!-- Sports Day Starts -->
 					<div class="form-group">
                       <label class="col-sm-2 control-label"><h3>Sports Day </h3><span class="require"></span></label>
-                      <div class="col-sm-10" style="padding-top:30px;">
+				      <div class="col-sm-10 wizard-section-hint" style="padding-top:30px;">
                           Check the box if you are having sports day (for track and field). And then choose the day from the list. If you're only having half the day for sport and you want other events in the afternoon then check the box and fill the times for other event.
                       </div>
                     </div>
@@ -464,9 +530,12 @@ if($schedulings->sports_day_having_events_after_sport_yes_no)
                     <div class="box-footer">
                         <label class="col-sm-2 control-label" for="inputPassword3">&nbsp;</label>
                         <?php echo $this->Form->input('Schedulings.id', ['label'=>false, 'type'=>'hidden']); ?>
-                        <?php echo $this->Form->button('Save', ['type'=>'submit', 'class' => 'btn btn-info', 'div'=>false]); ?>
-                        <?php echo $this->Html->link('Cancel', ['controller'=>'schedulings', 'action' => 'precheck', $convention_season_slug], ['class'=>'btn btn-default canlcel_le']); ?>
+						<div class="wizard-actions">
+							<?php echo $this->Form->button('<i class="fa fa-save"></i> Save Wizard Settings', ['type'=>'submit', 'escapeTitle'=>false, 'class' => 'btn btn-info', 'div'=>false]); ?>
+							<?php echo $this->Html->link('<i class="fa fa-times"></i> Cancel', ['controller'=>'schedulings', 'action' => 'precheck', $convention_season_slug], ['escape'=>false, 'class'=>'btn btn-default']); ?>
+						</div>
                     </div>
+					</div>
                   </div>
                 </div>
             <?php echo $this->Form->end(); ?>
@@ -475,71 +544,25 @@ if($schedulings->sports_day_having_events_after_sport_yes_no)
   </div>
 
 <script type="text/javascript">
-    $(document).ready(function() {
-		
-		$("#starting_different_time_first_day_yes_no").click(function() {
-			
-			if($("#starting_different_time_first_day_yes_no").prop('checked') == true)
-			{
-				$("#box_starting_different_time_first_day_yes_no").css("display", "block");
+	$(document).ready(function() {
+		function bindToggle(checkboxSelector, boxSelector) {
+			function refresh() {
+				if ($(checkboxSelector).prop('checked')) {
+					$(boxSelector).show();
+				} else {
+					$(boxSelector).hide();
+				}
 			}
-			else
-			{
-				$("#box_starting_different_time_first_day_yes_no").css("display", "none");
-			}
-		});
-    });
-</script>
 
-<script type="text/javascript">
-    $(document).ready(function() {
-		
-		$("#judging_breaks_yes_no").click(function() {
-			
-			if($("#judging_breaks_yes_no").prop('checked') == true)
-			{
-				$("#box_judging_breaks_yes_no").css("display", "block");
-			}
-			else
-			{
-				$("#box_judging_breaks_yes_no").css("display", "none");
-			}
-		});
-    });
-</script>
+			$(checkboxSelector).on('change', refresh);
+			refresh();
+		}
 
-<script type="text/javascript">
-    $(document).ready(function() {
-		
-		$("#sports_day_yes_no").click(function() {
-			
-			if($("#sports_day_yes_no").prop('checked') == true)
-			{
-				$("#box_sports_day_yes_no").css("display", "block");
-			}
-			else
-			{
-				$("#box_sports_day_yes_no").css("display", "none");
-			}
-		});
-    });
-</script>
-
-<script type="text/javascript">
-    $(document).ready(function() {
-		
-		$("#sports_day_having_events_after_sport_yes_no").click(function() {
-			
-			if($("#sports_day_having_events_after_sport_yes_no").prop('checked') == true)
-			{
-				$("#box_sports_day_having_events_after_sport_yes_no").css("display", "block");
-			}
-			else
-			{
-				$("#box_sports_day_having_events_after_sport_yes_no").css("display", "none");
-			}
-		});
-    });
+		bindToggle('#starting_different_time_first_day_yes_no', '#box_starting_different_time_first_day_yes_no');
+		bindToggle('#judging_breaks_yes_no', '#box_judging_breaks_yes_no');
+		bindToggle('#sports_day_yes_no', '#box_sports_day_yes_no');
+		bindToggle('#sports_day_having_events_after_sport_yes_no', '#box_sports_day_having_events_after_sport_yes_no');
+	});
 </script>
 
   
