@@ -6,61 +6,60 @@
     color: #fff;
     margin-bottom: 12px;
 }
-.jl-metric h3 {
-    margin: 0;
-    font-size: 24px;
-    font-weight: 700;
-}
-.jl-metric p {
-    margin: 2px 0 0 0;
-    font-size: 13px;
-}
-.jl-metric.blue { background: #2980b9; }
-.jl-metric.green { background: #27ae60; }
+.jl-metric h3 { margin: 0; font-size: 24px; font-weight: 700; }
+.jl-metric p  { margin: 2px 0 0 0; font-size: 13px; }
+.jl-metric.blue   { background: #2980b9; }
+.jl-metric.green  { background: #27ae60; }
 .jl-metric.orange { background: #e67e22; }
-.jl-metric.red { background: #c0392b; }
-.jl-list {
-    margin: 0;
-    padding-left: 18px;
-}
-.jl-list li {
-    margin-bottom: 3px;
-}
-.jl-empty {
-    color: #999;
-    font-style: italic;
-}
+.jl-metric.red    { background: #c0392b; }
 .jl-note {
     border-left: 4px solid #3498db;
     background: #f3f8fc;
     padding: 10px 12px;
     border-radius: 3px;
-    margin-bottom: 12px;
+    margin-bottom: 14px;
+    font-size: 13px;
 }
+.jl-preferred { font-size: 12px; color: #888; margin-top: 3px; }
+.jl-badge {
+    display: inline-block;
+    font-size: 11px;
+    padding: 1px 7px;
+    border-radius: 10px;
+    font-weight: 600;
+    margin-left: 4px;
+}
+.jl-badge.ok   { background: #d5f5e3; color: #1e8449; }
+.jl-badge.warn { background: #fdebd0; color: #b9770e; }
+.jl-badge.bad  { background: #fce4e4; color: #c0392b; }
+#judging_list_table select { min-width: 160px; }
 </style>
 
 <div class="content-wrapper">
     <section class="content-header">
-      <h1>
-         Judging List
-         <small><?php echo h($convSeasonD->slug); ?></small>
-      </h1>
-      <ol class="breadcrumb">
-          <li><?php echo $this->Html->link('<i class="fa fa-dashboard"></i> <span>Dashboard</span> ', ['controller'=>'admins', 'action'=>'dashboard'], ['escape'=>false]);?></li>
-          <li class="active">Judging List</li>
-      </ol>
+        <h1>
+            Judging List
+            <small><?php echo h($convSeasonD->slug); ?></small>
+        </h1>
+        <ol class="breadcrumb">
+            <li><?php echo $this->Html->link('<i class="fa fa-dashboard"></i> Dashboard', ['controller'=>'admins', 'action'=>'dashboard'], ['escape'=>false]); ?></li>
+            <li class="active">Judging List</li>
+        </ol>
     </section>
 
     <section class="content">
         <div class="box box-info">
             <div class="box-header with-border">
-                <h3 class="box-title"><i class="fa fa-check-square-o"></i>&nbsp; Judging Coverage Draft</h3>
+                <h3 class="box-title"><i class="fa fa-check-square-o"></i>&nbsp; Judging Panel Assignments</h3>
+                <div class="box-tools pull-right">
+                    <?php echo $this->Html->link('<i class="fa fa-user"></i> Manage Judges', ['controller'=>'conventionregistrations', 'action'=>'alljudges'], ['class'=>'btn btn-sm btn-default', 'escape'=>false]); ?>
+                </div>
             </div>
-            <div class="panel-body">
+            <div class="panel-body" style="padding:14px 14px 0;">
                 <div class="ersu_message"> <?php echo $this->Flash->render() ?></div>
 
                 <div class="jl-note">
-                    This page builds a draft panel from judge-selected events. Use the 2-judge and 3-judge suggestions as a starting point, then finalize manually.
+                    Assign up to 3 judges per event. The <em>Preferred Judges</em> column shows who selected this event. Use the dropdowns to confirm or override the panel, then click <strong>Save Assignments</strong>.
                 </div>
 
                 <div class="row">
@@ -79,84 +78,127 @@
                     <div class="col-lg-3 col-sm-6">
                         <div class="jl-metric orange">
                             <h3><?php echo $eventsWithUnderTwo; ?></h3>
-                            <p>Events With &lt; 2 Judges</p>
+                            <p>Events &lt; 2 Preferred</p>
                         </div>
                     </div>
                     <div class="col-lg-3 col-sm-6">
                         <div class="jl-metric red">
                             <h3><?php echo $eventsWithUnderThree; ?></h3>
-                            <p>Events With &lt; 3 Judges</p>
+                            <p>Events &lt; 3 Preferred</p>
                         </div>
                     </div>
                 </div>
 
                 <?php if (!empty($eventJudgeRows)) { ?>
+                <?php echo $this->Form->create(null, ['id'=>'judgingAssignForm', 'method'=>'post', 'url'=>['action'=>'judginglist']]); ?>
                 <section id="no-more-tables" class="lstng-section">
                     <div class="tbl-resp-listing">
                         <table id="judging_list_table" class="table table-bordered table-striped table-condensed cf">
                             <thead class="cf ajshort">
                                 <tr>
-                                    <th>#ID</th>
-                                    <th>Event ID Number</th>
+                                    <th style="width:40px;">#</th>
+                                    <th>Code</th>
                                     <th>Event Name</th>
                                     <th>Preferred Judges</th>
-                                    <th>Suggested 2-Judge Panel</th>
-                                    <th>Suggested 3-Judge Panel</th>
+                                    <th>Judge 1</th>
+                                    <th>Judge 2</th>
+                                    <th>Judge 3</th>
                                 </tr>
                             </thead>
                             <tbody>
-                                <?php foreach ($eventJudgeRows as $row) { ?>
+                            <?php foreach ($eventJudgeRows as $row) {
+                                $eid = (int)$row['event_id'];
+                                $saved = isset($savedAssignments[$eid]) ? $savedAssignments[$eid] : ['judge1'=>null,'judge2'=>null,'judge3'=>null];
+
+                                // Auto-suggest from preferred names if nothing is saved yet
+                                $allSaved = $saved['judge1'] || $saved['judge2'] || $saved['judge3'];
+                                if(!$allSaved)
+                                {
+                                    $judgeFlip = array_flip($judgeDD);
+                                    $panel = $row['panel_three_names'];
+                                    $saved['judge1'] = isset($panel[0], $judgeFlip[$panel[0]]) ? $judgeFlip[$panel[0]] : null;
+                                    $saved['judge2'] = isset($panel[1], $judgeFlip[$panel[1]]) ? $judgeFlip[$panel[1]] : null;
+                                    $saved['judge3'] = isset($panel[2], $judgeFlip[$panel[2]]) ? $judgeFlip[$panel[2]] : null;
+                                }
+
+                                $assignedCount = count(array_filter([$saved['judge1'],$saved['judge2'],$saved['judge3']]));
+                                if($assignedCount >= 3)     { $badge = '<span class="jl-badge ok">3 judges</span>'; }
+                                elseif($assignedCount == 2) { $badge = '<span class="jl-badge warn">2 judges</span>'; }
+                                elseif($assignedCount == 1) { $badge = '<span class="jl-badge bad">1 judge</span>'; }
+                                else                        { $badge = '<span class="jl-badge bad">unassigned</span>'; }
+                            ?>
                                 <tr>
-                                    <td data-title="ID"><?php echo (int)$row['event_id']; ?></td>
-                                    <td data-title="Event ID Number"><?php echo h($row['event_id_number']); ?></td>
-                                    <td data-title="Event Name"><?php echo h($row['event_name']); ?></td>
-                                    <td data-title="Preferred Judges">
-                                        <?php if (!empty($row['preferred_names'])) { ?>
-                                            <ul class="jl-list">
-                                                <?php foreach ($row['preferred_names'] as $name) { ?>
-                                                    <li><?php echo h($name); ?></li>
-                                                <?php } ?>
-                                            </ul>
-                                        <?php } else { ?>
-                                            <span class="jl-empty">No judges selected this event yet</span>
-                                        <?php } ?>
+                                    <td><?php echo $eid; ?></td>
+                                    <td><?php echo h($row['event_id_number']); ?></td>
+                                    <td>
+                                        <?php echo h($row['event_name']); ?>
+                                        <?php echo $badge; ?>
                                     </td>
-                                    <td data-title="Suggested 2-Judge Panel">
-                                        <?php if (!empty($row['panel_two_names'])) { ?>
-                                            <ul class="jl-list">
-                                                <?php foreach ($row['panel_two_names'] as $name) { ?>
-                                                    <li><?php echo h($name); ?></li>
-                                                <?php } ?>
-                                            </ul>
-                                        <?php } else { ?>
-                                            <span class="jl-empty">Need more judge preferences</span>
-                                        <?php } ?>
+                                    <td>
+                                        <?php if (!empty($row['preferred_names'])) {
+                                            echo '<small class="jl-preferred">'.implode(', ', array_map('htmlspecialchars', $row['preferred_names'])).'</small>';
+                                        } else {
+                                            echo '<small class="jl-preferred" style="color:#ccc;">None selected</small>';
+                                        } ?>
                                     </td>
-                                    <td data-title="Suggested 3-Judge Panel">
-                                        <?php if (!empty($row['panel_three_names'])) { ?>
-                                            <ul class="jl-list">
-                                                <?php foreach ($row['panel_three_names'] as $name) { ?>
-                                                    <li><?php echo h($name); ?></li>
-                                                <?php } ?>
-                                            </ul>
-                                        <?php } else { ?>
-                                            <span class="jl-empty">Need more judge preferences</span>
-                                        <?php } ?>
+                                    <td>
+                                        <select name="assignments[<?php echo $eid; ?>][judge1]" class="form-control input-sm">
+                                            <?php foreach($judgeDD as $uid => $uname) {
+                                                $sel = ($uid !== '' && (int)$uid === (int)$saved['judge1']) ? ' selected' : '';
+                                                echo '<option value="'.h($uid).'"'.$sel.'>'.h($uname).'</option>';
+                                            } ?>
+                                        </select>
+                                    </td>
+                                    <td>
+                                        <select name="assignments[<?php echo $eid; ?>][judge2]" class="form-control input-sm">
+                                            <?php foreach($judgeDD as $uid => $uname) {
+                                                $sel = ($uid !== '' && (int)$uid === (int)$saved['judge2']) ? ' selected' : '';
+                                                echo '<option value="'.h($uid).'"'.$sel.'>'.h($uname).'</option>';
+                                            } ?>
+                                        </select>
+                                    </td>
+                                    <td>
+                                        <select name="assignments[<?php echo $eid; ?>][judge3]" class="form-control input-sm">
+                                            <?php foreach($judgeDD as $uid => $uname) {
+                                                $sel = ($uid !== '' && (int)$uid === (int)$saved['judge3']) ? ' selected' : '';
+                                                echo '<option value="'.h($uid).'"'.$sel.'>'.h($uname).'</option>';
+                                            } ?>
+                                        </select>
                                     </td>
                                 </tr>
-                                <?php } ?>
+                            <?php } ?>
                             </tbody>
                         </table>
                     </div>
                 </section>
+                <?php echo $this->Form->end(); ?>
                 <?php } else { ?>
                     <div class="alert alert-warning">No season events found. Add events to this season first.</div>
                 <?php } ?>
             </div>
             <div class="box-footer">
                 <?php echo $this->Html->link('<i class="fa fa-arrow-left"></i> Back to Dashboard', ['controller'=>'admins', 'action'=>'dashboard'], ['class'=>'btn btn-default', 'escape'=>false]); ?>
-                <?php echo $this->Html->link('<i class="fa fa-user"></i> Manage Judges', ['controller'=>'conventionregistrations', 'action'=>'alljudges'], ['class'=>'btn btn-info', 'escape'=>false]); ?>
+                <?php if (!empty($eventJudgeRows)) { ?>
+                <button type="submit" form="judgingAssignForm" class="btn btn-success">
+                    <i class="fa fa-save"></i> Save Assignments
+                </button>
+                <?php } ?>
             </div>
         </div>
     </section>
 </div>
+
+<script src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.4/js/dataTables.bootstrap5.min.js"></script>
+<link rel="stylesheet" href="https://cdn.datatables.net/1.13.4/css/dataTables.bootstrap5.min.css">
+<script>
+$(document).ready(function() {
+    $('#judging_list_table').dataTable({
+        bPaginate: true,
+        bLengthChange: false,
+        pageLength: 100,
+        order: [[0,'asc']],
+        columnDefs: [{ orderable: false, targets: [3,4,5,6] }]
+    });
+});
+</script>

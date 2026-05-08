@@ -632,11 +632,60 @@ class ConventionregistrationsController extends AppController {
         $this->viewBuilder()->setLayout('admin');
         $this->set('dashboard', '1');
 
+		if(!isset($this->JudgingAssignments))
+		{
+			$this->JudgingAssignments = $this->loadModel('JudgingAssignments');
+		}
+
 		$sess_admin_header_season_id = $this->request->getSession()->read("sess_admin_header_season_id");
 		if($sess_admin_header_season_id <= 0)
 		{
 			$this->Flash->error('Please select a convention season first.');
 			return $this->redirect(['controller' => 'admins', 'action' => 'dashboard']);
+		}
+
+		// Handle save POST
+		if($this->request->is('post'))
+		{
+			$assignments = $this->request->getData('assignments');
+			if(!empty($assignments) && is_array($assignments))
+			{
+				foreach($assignments as $eventId => $panel)
+				{
+					$eventId = (int)$eventId;
+					if($eventId <= 0) { continue; }
+
+					$j1 = !empty($panel['judge1']) ? (int)$panel['judge1'] : null;
+					$j2 = !empty($panel['judge2']) ? (int)$panel['judge2'] : null;
+					$j3 = !empty($panel['judge3']) ? (int)$panel['judge3'] : null;
+
+					$existing = $this->JudgingAssignments->find()->where([
+						'conventionseason_id' => $sess_admin_header_season_id,
+						'event_id' => $eventId,
+					])->first();
+
+					if($existing)
+					{
+						$existing->judge1_user_id = $j1;
+						$existing->judge2_user_id = $j2;
+						$existing->judge3_user_id = $j3;
+						$this->JudgingAssignments->save($existing);
+					}
+					else
+					{
+						$newRow = $this->JudgingAssignments->newEntity([
+							'conventionseason_id' => $sess_admin_header_season_id,
+							'event_id' => $eventId,
+							'judge1_user_id' => $j1,
+							'judge2_user_id' => $j2,
+							'judge3_user_id' => $j3,
+						]);
+						$this->JudgingAssignments->save($newRow);
+					}
+				}
+				$this->Flash->success('Judging assignments saved successfully.');
+				return $this->redirect(['action' => 'judginglist']);
+			}
 		}
 
 		$convSeasonD = $this->Conventionseasons->find()->where(['Conventionseasons.id' => $sess_admin_header_season_id])->first();
@@ -776,6 +825,40 @@ class ConventionregistrationsController extends AppController {
 		$this->set('totalJudgesInPool', count($judgePool));
 		$this->set('eventsWithUnderTwo', $eventsWithUnderTwo);
 		$this->set('eventsWithUnderThree', $eventsWithUnderThree);
+
+		// Build judge dropdown: user_id => name, sorted by name
+		$judgeDD = ['' => '-- None --'];
+		foreach($judgePool as $j)
+		{
+			// need user_id; rebuild from judgeRegistrations
+		}
+		foreach($judgeRegistrations as $reg)
+		{
+			$userData = null;
+			if(!empty($reg->Users)) { $userData = $reg->Users; }
+			elseif(!empty($reg->user)) { $userData = $reg->user; }
+			if(empty($userData)) { continue; }
+			$isJudge = ($userData['user_type'] == 'Judge') || ($userData['user_type'] == 'Teacher_Parent' && (int)$userData['is_judge'] === 1);
+			if(!$isJudge) { continue; }
+			$judgeDD[(int)$userData['id']] = trim($userData['first_name'].' '.$userData['last_name']);
+		}
+		asort($judgeDD);
+		$this->set('judgeDD', $judgeDD);
+
+		// Load saved assignments keyed by event_id
+		$savedRows = $this->JudgingAssignments->find()->where([
+			'conventionseason_id' => $sess_admin_header_season_id,
+		])->all();
+		$savedAssignments = [];
+		foreach($savedRows as $row)
+		{
+			$savedAssignments[(int)$row->event_id] = [
+				'judge1' => $row->judge1_user_id,
+				'judge2' => $row->judge2_user_id,
+				'judge3' => $row->judge3_user_id,
+			];
+		}
+		$this->set('savedAssignments', $savedAssignments);
     }
 
 	public function allschools($conv_season_slug=null) {
