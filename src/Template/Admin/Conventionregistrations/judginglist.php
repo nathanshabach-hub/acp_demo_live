@@ -33,6 +33,73 @@
 .jl-badge.warn { background: #fdebd0; color: #b9770e; }
 .jl-badge.bad  { background: #fce4e4; color: #c0392b; }
 #judging_list_table select { min-width: 160px; }
+
+.jl-workload-wrap {
+    border: 1px solid #e6e9ef;
+    border-radius: 6px;
+    overflow: hidden;
+}
+
+#workload_table {
+    margin-bottom: 0;
+}
+
+#workload_table th,
+#workload_table td {
+    vertical-align: middle !important;
+}
+
+#workload_table .wl-rank {
+    width: 50px;
+    text-align: center;
+    color: #777;
+    font-weight: 600;
+}
+
+#workload_table .wl-count {
+    width: 90px;
+    text-align: center;
+    font-weight: 700;
+}
+
+#workload_table .wl-meter {
+    width: 38%;
+}
+
+.jl-load-track {
+    background: #edf1f5;
+    border-radius: 999px;
+    height: 10px;
+    overflow: hidden;
+    width: 100%;
+}
+
+.jl-load-fill {
+    display: block;
+    height: 100%;
+    transition: width .2s ease;
+}
+
+.jl-load-fill.success { background: #27ae60; }
+.jl-load-fill.warning { background: #f39c12; }
+.jl-load-fill.danger  { background: #e74c3c; }
+.jl-load-fill.default { background: #95a5a6; }
+
+.wl-balance {
+    width: 130px;
+    text-align: center;
+    font-weight: 700;
+}
+
+.wl-balance.pos { color: #c0392b; }
+.wl-balance.neg { color: #1e8449; }
+.wl-balance.neu { color: #7f8c8d; }
+
+.jl-workload-note {
+    font-size: 12px;
+    color: #666;
+    margin-bottom: 8px;
+}
 </style>
 
 <div class="content-wrapper">
@@ -80,13 +147,13 @@
                     <div class="col-lg-3 col-sm-6">
                         <div class="jl-metric orange">
                             <h3><?php echo $eventsWithUnderTwo; ?></h3>
-                            <p>Events &lt; 2 Preferred</p>
+                            <p>Events &lt; Minimum 2 Judges</p>
                         </div>
                     </div>
                     <div class="col-lg-3 col-sm-6">
                         <div class="jl-metric red">
                             <h3><?php echo $eventsWithUnderThree; ?></h3>
-                            <p>Events &lt; 3 Preferred</p>
+                            <p>Events &lt; Maximum 3 Judges</p>
                         </div>
                     </div>
                 </div>
@@ -197,33 +264,45 @@
                 </div>
             </div>
             <div class="box-body" style="padding:10px;">
-                <table id="workload_table" class="table table-condensed table-bordered" style="max-width:600px;">
-                    <thead>
-                        <tr>
-                            <th>Judge</th>
-                            <th style="width:80px;text-align:center;">Events</th>
-                            <th style="width:120px;">Load</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                    <?php foreach($workloadData as $wd) { ?>
-                        <tr data-uid="<?php echo (int)$wd['user_id']; ?>">
-                            <td><?php echo h($wd['name']); ?></td>
-                            <td style="text-align:center;" class="wl-count"><?php echo (int)$wd['count']; ?></td>
-                            <td class="wl-bar">
-                                <?php
-                                $cnt = (int)$wd['count'];
-                                if($avgLoad <= 0) { $cls = 'default'; }
-                                elseif($cnt <= ceil($avgLoad)) { $cls = 'success'; }
-                                elseif($cnt <= ceil($avgLoad) + 2) { $cls = 'warning'; }
-                                else { $cls = 'danger'; }
-                                echo '<span class="label label-'.$cls.'">'.h($cnt > 0 ? $cnt.' assigned' : 'none').'</span>';
-                                ?>
-                            </td>
-                        </tr>
-                    <?php } ?>
-                    </tbody>
-                </table>
+                <div class="jl-workload-note">Tip: closer to the average means better balance. Positive delta means overloaded.</div>
+                <?php $maxSavedLoad = 0; foreach($workloadData as $wdx){ $maxSavedLoad = max($maxSavedLoad, (int)$wdx['count']); } ?>
+                <div class="jl-workload-wrap">
+                    <table id="workload_table" class="table table-condensed table-bordered">
+                        <thead>
+                            <tr>
+                                <th class="wl-rank">#</th>
+                                <th>Judge</th>
+                                <th class="wl-count">Events</th>
+                                <th class="wl-meter">Load Meter</th>
+                                <th class="wl-balance">Delta vs Avg</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                        <?php $rank = 0; foreach($workloadData as $wd) { $rank++; ?>
+                            <?php
+                            $cnt = (int)$wd['count'];
+                            if($avgLoad <= 0) { $cls = 'default'; }
+                            elseif($cnt <= ceil($avgLoad)) { $cls = 'success'; }
+                            elseif($cnt <= ceil($avgLoad) + 2) { $cls = 'warning'; }
+                            else { $cls = 'danger'; }
+                            $pct = $maxSavedLoad > 0 ? (int)round(($cnt / $maxSavedLoad) * 100) : 0;
+                            $delta = $cnt - $avgLoad;
+                            $deltaText = $delta > 0 ? '+' . number_format($delta, 1) : number_format($delta, 1);
+                            $deltaCls = abs($delta) < 0.05 ? 'neu' : ($delta > 0 ? 'pos' : 'neg');
+                            ?>
+                            <tr class="wl-row" data-uid="<?php echo (int)$wd['user_id']; ?>">
+                                <td class="wl-rank"><?php echo $rank; ?></td>
+                                <td><?php echo h($wd['name']); ?></td>
+                                <td class="wl-count"><?php echo $cnt; ?></td>
+                                <td class="wl-meter">
+                                    <div class="jl-load-track"><span class="jl-load-fill <?php echo $cls; ?>" style="width:<?php echo $pct; ?>%"></span></div>
+                                </td>
+                                <td class="wl-balance <?php echo $deltaCls; ?>"><?php echo $deltaText; ?></td>
+                            </tr>
+                        <?php } ?>
+                        </tbody>
+                    </table>
+                </div>
             </div>
         </div>
         <?php } ?>
@@ -262,16 +341,48 @@ $(document).ready(function() {
         });
         var avg = numJudges > 0 ? total / numJudges : 0;
         $('#wl-avg-label').text('(live avg: ' + avg.toFixed(1) + ' events/judge)');
+
+        var max = 0;
+        $('#workload_table tbody tr .wl-count').each(function() {
+            var v = parseInt($(this).text(), 10) || 0;
+            if (v > max) max = v;
+        });
+
         $('#workload_table tbody tr').each(function() {
             var uid = $(this).data('uid').toString();
             var cnt = counts[uid] || 0;
-            var cls, label;
-            if(avg <= 0)         { cls = 'default';  label = cnt > 0 ? cnt+' assigned' : 'none'; }
-            else if(cnt <= Math.ceil(avg))     { cls = 'success'; label = cnt+' assigned'; }
-            else if(cnt <= Math.ceil(avg) + 2) { cls = 'warning'; label = cnt+' assigned'; }
-            else                               { cls = 'danger';  label = cnt+' assigned'; }
-            if(cnt === 0) label = 'none';
-            $(this).find('.wl-bar').html('<span class="label label-'+cls+'">'+label+'</span>');
+            var cls;
+            if(avg <= 0)                        { cls = 'default'; }
+            else if(cnt <= Math.ceil(avg))      { cls = 'success'; }
+            else if(cnt <= Math.ceil(avg) + 2)  { cls = 'warning'; }
+            else                                { cls = 'danger'; }
+
+            var pct = max > 0 ? Math.round((cnt / max) * 100) : 0;
+            var delta = cnt - avg;
+            var deltaText = (delta > 0 ? '+' : '') + delta.toFixed(1);
+            var deltaCls = Math.abs(delta) < 0.05 ? 'neu' : (delta > 0 ? 'pos' : 'neg');
+
+            $(this).find('.jl-load-fill')
+                .removeClass('success warning danger default')
+                .addClass(cls)
+                .css('width', pct + '%');
+
+            $(this).find('.wl-balance')
+                .removeClass('pos neg neu')
+                .addClass(deltaCls)
+                .text(deltaText);
+        });
+
+        // Keep highest-load judges at top for quick balancing.
+        var rows = $('#workload_table tbody tr').get();
+        rows.sort(function(a, b) {
+            var av = parseInt($(a).find('.wl-count').text(), 10) || 0;
+            var bv = parseInt($(b).find('.wl-count').text(), 10) || 0;
+            return bv - av;
+        });
+        $.each(rows, function(i, row) {
+            $('#workload_table tbody').append(row);
+            $(row).find('.wl-rank').text(i + 1);
         });
     }
     $('#judging_list_table').on('change', 'select', recalcWorkload);

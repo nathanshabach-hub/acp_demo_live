@@ -472,6 +472,7 @@ class ConventionsController extends AppController {
         if ($slug_convention_season) {
             $conventionSD 			= $this->Conventionseasons->find()->where(['Conventionseasons.slug' => $slug_convention_season])->first();
             $season_id 				= $conventionSD->season_id;
+            $seasonD 				= $this->Seasons->get($season_id);
 			$this->set('conventionSD', $conventionSD);
         }
 		if (!$conventionSD)
@@ -552,19 +553,9 @@ class ConventionsController extends AppController {
             $condition[] = "(Conventionseasonevents.name LIKE '%".addslashes($keyword)."%')";
             $this->set('keyword', $keyword);
         }
-        //pr($condition);exit;
-        /* $separator = implode("/", $separator);
+        
+        $separator = implode("/", $separator);
         $this->set('separator', $separator);
-        $query = $this->Conventionseasonevents->find()
-            ->contain(['Conventions','Seasons','Events'])
-            ->where($condition);
-        $this->paginate = ['limit' => 1000000000];
-        $this->set('conventionseasonevents', $this->paginate($query));
-        if ($this->request->is("ajax")) {
-            $this->viewBuilder()->setLayout(($this->request->is("ajax")) ? "" : "default");
-            $this->viewBuilder()->setTemplatePath('Element' . DS . 'Admin/Conventions');
-            $this->render('events');
-        } */
 		
 		//$conventionseasonevents	= $this->Conventionseasonevents->contains(['Conventions','Seasons','Events'])->where($condition)->order(['Conventionseasonevents.id' => 'ASC'])->all();
 		

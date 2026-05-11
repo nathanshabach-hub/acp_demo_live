@@ -279,6 +279,7 @@ class ResultsController extends AppController {
 		//STEP3 :: SAVE ENTRIES IN Resultpositions TABLE
 		
 		$eventSubmissionsCS 		= $this->Eventsubmissions->find()->where(['Eventsubmissions.conventionseason_id' => $conventionSD->id,'Eventsubmissions.convention_id' => $conventionSD->convention_id,'Eventsubmissions.season_id' => $conventionSD->season_id,'Eventsubmissions.season_year' => $conventionSD->season_year,'Eventsubmissions.event_id' => $eventD->id])->contain(['Users','Students'])->all();
+		$failedResultpositionSaves = 0;
 		
 		foreach($eventSubmissionsCS as $datarecord)
 		{
@@ -424,6 +425,46 @@ class ResultsController extends AppController {
 		$this->Flash->success('Judging for the event has been closed successfully and results saved sucessfully.');
 		$this->redirect(['controller' => 'conventions', 'action' => 'events',$slug_convention_season,$slug_convention]);
     }
+
+	public function openjudging($slug_convention_season = null,$slug_convention = null,$slug_event = null)
+	{
+		if ($slug_convention_season) {
+            $conventionSD 			= $this->Conventionseasons->find()->where(['Conventionseasons.slug' => $slug_convention_season])->first();
+            $season_id 				= $conventionSD->season_id;
+			$this->set('conventionSD', $conventionSD);
+        }
+		if (!$conventionSD)
+		{
+			$this->Flash->error('Convention season not found.');
+			$this->redirect(['controller' => 'conventions', 'action' => 'index']);
+		}
+
+		if ($slug_convention) {
+            $conventionD 		= $this->Conventions->find()->where(['Conventions.slug' => $slug_convention])->first();
+            $convention_id 		= $conventionD->id;
+			$this->set('conventionD', $conventionD);
+        }
+		if (!$conventionD)
+		{
+			$this->Flash->error('Convention not found.');
+			$this->redirect(['controller' => 'conventions', 'action' => 'index']);
+		}
+
+		if ($slug_event) {
+            $eventD 		= $this->Events->find()->where(['Events.slug' => $slug_event])->first();
+			$this->set('eventD', $eventD);
+        }
+		if (!$eventD)
+		{
+			$this->Flash->error('Event not found.');
+			$this->redirect(['controller' => 'conventions', 'action' => 'index']);
+		}
+
+		$this->Conventionseasonevents->updateAll(['judging_ends' => '0'], ["conventionseasons_id" => $conventionSD->id,"event_id" => $eventD->id]);
+
+		$this->Flash->success('Judging has been reopened for this event.');
+		$this->redirect(['controller' => 'conventions', 'action' => 'events',$slug_convention_season,$slug_convention]);
+	}
 	
 	public function points($slug_convention_season = null,$slug_convention = null) {
         
@@ -776,13 +817,14 @@ class ResultsController extends AppController {
 		$condEval[] 	= "(Judgeevaluations.convention_id = '".$conventionSD->convention_id."')";
 		$condEval[] 	= "(Judgeevaluations.season_id = '".$conventionSD->season_id."')";
 		$condEval[] 	= "(Judgeevaluations.event_id = '".$eventD->id."')";
-		$condEval[] 	= "(Judgeevaluations.withdraw_yes_no != '1')";
+		$condEval[] 	= "(Judgeevaluations.withdraw_yes_no IS NULL OR Judgeevaluations.withdraw_yes_no != '1')";
 		$judgeEvals = $this->Judgeevaluations->find()->where($condEval)->contain(['Students'])->order(["Judgeevaluations.time_score" => "ASC"])->all();
 		//$this->prx($judgeEvals);
 		
 		$cntrRecord = 1;
 		
 		$cntrPos = 1;
+		$failedResultpositionSaves = 0;
 		foreach($judgeEvals as $datarecord)
 		{	
 			// Calculate tie breakers
@@ -805,7 +847,7 @@ class ResultsController extends AppController {
 
 			$dataRP->slug 								= "result-positions-".$result_id."-".$conventionSD->id."-".time().'-'.rand(100,1000000);
 			$dataRP->result_id							= $result_id;
-			$dataRP->eventsubmission_id					= $datarecord->id;
+			$dataRP->eventsubmission_id					= $datarecord->eventsubmission_id;
 			$dataRP->conventionregistration_id			= $datarecord->conventionregistration_id;
 			$dataRP->conventionseason_id				= $datarecord->conventionseason_id;
 			$dataRP->convention_id						= $datarecord->convention_id;
@@ -830,9 +872,19 @@ class ResultsController extends AppController {
 			//$this->prx($dataRP);
 
 			$resultRP = $this->Resultpositions->save($dataRP);
+			if(!$resultRP)
+			{
+				$failedResultpositionSaves++;
+				$this->log('closejudgingtimes resultposition save failed for event '.$eventD->id.' eval '.$datarecord->id.' errors: '.json_encode($dataRP->getErrors()), 'error');
+			}
 			
 			
 			$cntrRecord++;
+		}
+
+		if($failedResultpositionSaves > 0)
+		{
+			$this->Flash->error($failedResultpositionSaves.' result row(s) could not be saved during close judging. Please review logs and close judging again if needed.');
 		}
 		
 		//STEP8 :: UPDATE RESULTS MODIFIED FIELD
@@ -1044,7 +1096,7 @@ class ResultsController extends AppController {
 		$condEval[] 	= "(Judgeevaluations.season_id = '".$conventionSD->season_id."')";
 		$condEval[] 	= "(Judgeevaluations.event_id = '".$eventD->id."')";
 		//$condEval[] 	= "(Judgeevaluations.distance_score >0)";
-		$condEval[] 	= "(Judgeevaluations.withdraw_yes_no != '1')";
+		$condEval[] 	= "(Judgeevaluations.withdraw_yes_no IS NULL OR Judgeevaluations.withdraw_yes_no != '1')";
 		$condEval[] 	= "(Judgeevaluations.distance_score >= '".$qualifying_distance."')";
 		$judgeEvals = $this->Judgeevaluations->find()->where($condEval)->contain(['Students'])->order(["Judgeevaluations.distance_score" => "DESC"])->all();
 		//$this->prx($judgeEvals);
@@ -1052,6 +1104,7 @@ class ResultsController extends AppController {
 		$cntrRecord = 1;
 		
 		$cntrPos = 1;
+		$failedResultpositionSaves = 0;
 		foreach($judgeEvals as $datarecord)
 		{	
 			// Calculate tie breakers
@@ -1074,7 +1127,7 @@ class ResultsController extends AppController {
 
 			$dataRP->slug 								= "result-positions-".$result_id."-".$conventionSD->id."-".time().'-'.rand(100,1000000);
 			$dataRP->result_id							= $result_id;
-			$dataRP->eventsubmission_id					= $datarecord->id;
+			$dataRP->eventsubmission_id					= $datarecord->eventsubmission_id;
 			$dataRP->conventionregistration_id			= $datarecord->conventionregistration_id;
 			$dataRP->conventionseason_id				= $datarecord->conventionseason_id;
 			$dataRP->convention_id						= $datarecord->convention_id;
@@ -1100,8 +1153,18 @@ class ResultsController extends AppController {
 			//$this->prx($dataRP);
 
 			$resultRP = $this->Resultpositions->save($dataRP);
+			if(!$resultRP)
+			{
+				$failedResultpositionSaves++;
+				$this->log('closejudgingdistances resultposition save failed for event '.$eventD->id.' eval '.$datarecord->id.' errors: '.json_encode($dataRP->getErrors()), 'error');
+			}
 			
 			$cntrRecord++;
+		}
+
+		if($failedResultpositionSaves > 0)
+		{
+			$this->Flash->error($failedResultpositionSaves.' result row(s) could not be saved during close judging. Please review logs and close judging again if needed.');
 		}
 		
 		//STEP8 :: UPDATE RESULTS MODIFIED FIELD
@@ -1298,70 +1361,185 @@ class ResultsController extends AppController {
 		
 		
 		//STEP3 :: SAVE ENTRIES IN Resultpositions TABLE
-		
-		$condEval = array();
-		$condEval[] 	= "(Judgeevaluations.conventionseason_id = '".$conventionSD->id."')";
-		$condEval[] 	= "(Judgeevaluations.convention_id = '".$conventionSD->convention_id."')";
-		$condEval[] 	= "(Judgeevaluations.season_id = '".$conventionSD->season_id."')";
-		$condEval[] 	= "(Judgeevaluations.event_id = '".$eventD->id."')";
-		$condEval[] 	= "(Judgeevaluations.withdraw_yes_no != '1')";
-		$condEval[] 	= "(Judgeevaluations.all_pos_score >0)";
-		$judgeEvals = $this->Judgeevaluations->find()->where($condEval)->contain(['Students'])->order(["Judgeevaluations.all_pos_score" => "DESC"])->all();
-		//$this->prx($judgeEvals);
-		
-		$cntrRecord = 1;
-		
-		$cntrPos = 1;
-		foreach($judgeEvals as $datarecord)
-		{	
-			// Calculate tie breakers
-			if($cntrRecord == 1)
-			{	
-				$lastScore = $datarecord->all_pos_score;
-			}
-			else
+		$eventIdNumberPadded = str_pad((string)$eventD->event_id_number, 3, '0', STR_PAD_LEFT);
+		$placeRankingEventNumbers = ['001', '002', '051', '052', '109', '110', '139', '140', '169', '170', '174', '175', '177', '209', '210', '239', '240', '269', '270', '274', '275', '277'];
+		$isPlaceRankingEvent = stripos((string)$eventD->event_name, 'Futsal') !== false || in_array($eventIdNumberPadded, $placeRankingEventNumbers, true);
+		$failedResultpositionSaves = 0;
+
+		if($isPlaceRankingEvent)
+		{
+			$eventSubmissionsCS = $this->Eventsubmissions->find()->where([
+				'Eventsubmissions.conventionseason_id' => $conventionSD->id,
+				'Eventsubmissions.convention_id' => $conventionSD->convention_id,
+				'Eventsubmissions.season_id' => $conventionSD->season_id,
+				'Eventsubmissions.season_year' => $conventionSD->season_year,
+				'Eventsubmissions.event_id' => $eventD->id,
+			])->all();
+
+			$submissionRows = [];
+			foreach($eventSubmissionsCS as $eventSubmission)
 			{
-				if($lastScore != $datarecord->all_pos_score)
+				$condAvg = array();
+				$condAvg[] = "(Judgeevaluations.eventsubmission_id = '".$eventSubmission->id."')";
+				$condAvg[] = "(Judgeevaluations.convention_id = '".$eventSubmission->convention_id."')";
+				$condAvg[] = "(Judgeevaluations.season_id = '".$eventSubmission->season_id."')";
+				$condAvg[] = "(Judgeevaluations.event_id = '".$eventD->id."')";
+				$condAvg[] = "(Judgeevaluations.withdraw_yes_no IS NULL OR Judgeevaluations.withdraw_yes_no != '1')";
+				$condAvg[] = "(Judgeevaluations.all_pos_score > 0)";
+
+				$judgeEvals = $this->Judgeevaluations->find()->where($condAvg)->all();
+
+				$placeTotal = 0;
+				$cntrJudging = 0;
+				foreach($judgeEvals as $judgeeval)
 				{
-					$cntrPos++;
-					$lastScore = $datarecord->all_pos_score;
+					$placeTotal += (float)$judgeeval->all_pos_score;
+					$cntrJudging++;
+				}
+
+				if($cntrJudging > 0)
+				{
+					$submissionRows[] = [
+						'eventsubmission_id' => (int)$eventSubmission->id,
+						'conventionregistration_id' => $eventSubmission->conventionregistration_id,
+						'conventionseason_id' => $eventSubmission->conventionseason_id,
+						'convention_id' => $eventSubmission->convention_id,
+						'user_id' => $eventSubmission->user_id,
+						'season_id' => $eventSubmission->season_id,
+						'season_year' => $eventSubmission->season_year,
+						'group_name' => $eventSubmission->group_name,
+						'student_id' => $eventSubmission->student_id,
+						'avg_marks' => $placeTotal / $cntrJudging,
+					];
 				}
 			}
-			
-			// enter record
-			$resultpositions = $this->Resultpositions->newEntity();
-			$dataRP = $this->Resultpositions->patchEntity($resultpositions, array());
 
-			$dataRP->slug 								= "result-positions-".$result_id."-".$conventionSD->id."-".time().'-'.rand(100,1000000);
-			$dataRP->result_id							= $result_id;
-			$dataRP->eventsubmission_id					= $datarecord->id;
-			$dataRP->conventionregistration_id			= $datarecord->conventionregistration_id;
-			$dataRP->conventionseason_id				= $datarecord->conventionseason_id;
-			$dataRP->convention_id						= $datarecord->convention_id;
-			$dataRP->user_id							= $datarecord->user_id;
-			$dataRP->season_id							= $datarecord->season_id;
-			$dataRP->season_year						= $datarecord->season_year;
-			$dataRP->event_id							= $eventD->id;
-			$dataRP->event_id_number					= $eventD->event_id_number;
-			$dataRP->division_id						= $eventD->division_id;
-			$dataRP->group_name							= $datarecord->group_name;
-			$dataRP->student_id							= $datarecord->student_id;
-			$dataRP->gender								= $datarecord->Students['gender'];
-			$dataRP->avg_marks							= $datarecord->all_pos_score;
-			$dataRP->position							= $cntrPos;
-			$dataRP->created 							= date('Y-m-d H:i:s');
-			$dataRP->modified 							= date('Y-m-d H:i:s');
-			
-			if($cntrPos>=1 && $cntrPos<=6)
+			usort($submissionRows, function($a, $b) {
+				if($a['avg_marks'] == $b['avg_marks']) {
+					return 0;
+				}
+				return ($a['avg_marks'] < $b['avg_marks']) ? -1 : 1;
+			});
+
+			$cntrRecord = 1;
+			$cntrPos = 1;
+			$lastScore = null;
+			foreach($submissionRows as $datarecord)
 			{
-				$dataRP->points_obtained				= $resultPoints[$cntrPos];
-			}
-			
-			//$this->prx($dataRP);
+				if($cntrRecord == 1)
+				{
+					$lastScore = $datarecord['avg_marks'];
+				}
+				else if((float)$lastScore !== (float)$datarecord['avg_marks'])
+				{
+					$cntrPos++;
+					$lastScore = $datarecord['avg_marks'];
+				}
 
-			$resultRP = $this->Resultpositions->save($dataRP);
-			
-			$cntrRecord++;
+				$resultpositions = $this->Resultpositions->newEntity();
+				$dataRP = $this->Resultpositions->patchEntity($resultpositions, array());
+
+				$dataRP->slug 								= "result-positions-".$result_id."-".$conventionSD->id."-".time().'-'.rand(100,1000000);
+				$dataRP->result_id							= $result_id;
+				$dataRP->eventsubmission_id					= $datarecord['eventsubmission_id'];
+				$dataRP->conventionregistration_id			= $datarecord['conventionregistration_id'];
+				$dataRP->conventionseason_id				= $datarecord['conventionseason_id'];
+				$dataRP->convention_id						= $datarecord['convention_id'];
+				$dataRP->user_id							= $datarecord['user_id'];
+				$dataRP->season_id							= $datarecord['season_id'];
+				$dataRP->season_year						= $datarecord['season_year'];
+				$dataRP->event_id							= $eventD->id;
+				$dataRP->event_id_number					= $eventD->event_id_number;
+				$dataRP->division_id						= $eventD->division_id;
+				$dataRP->group_name							= $datarecord['group_name'];
+				$dataRP->student_id							= $datarecord['student_id'];
+				$dataRP->gender								= null;
+				$dataRP->avg_marks							= (int)round($datarecord['avg_marks']);
+				$dataRP->position							= $cntrPos;
+				$dataRP->created 							= date('Y-m-d H:i:s');
+				$dataRP->modified 							= date('Y-m-d H:i:s');
+
+				if($cntrPos>=1 && $cntrPos<=6)
+				{
+					$dataRP->points_obtained				= $resultPoints[$cntrPos];
+				}
+
+				$resultRP = $this->Resultpositions->save($dataRP);
+				if(!$resultRP)
+				{
+					$failedResultpositionSaves++;
+					$this->log('closejudgingscores(place) resultposition save failed for event '.$eventD->id.' submission '.$datarecord['eventsubmission_id'].' errors: '.json_encode($dataRP->getErrors()), 'error');
+				}
+				$cntrRecord++;
+			}
+		}
+		else
+		{
+			$condEval = array();
+			$condEval[] 	= "(Judgeevaluations.conventionseason_id = '".$conventionSD->id."')";
+			$condEval[] 	= "(Judgeevaluations.convention_id = '".$conventionSD->convention_id."')";
+			$condEval[] 	= "(Judgeevaluations.season_id = '".$conventionSD->season_id."')";
+			$condEval[] 	= "(Judgeevaluations.event_id = '".$eventD->id."')";
+			$condEval[] 	= "(Judgeevaluations.withdraw_yes_no IS NULL OR Judgeevaluations.withdraw_yes_no != '1')";
+			$condEval[] 	= "(Judgeevaluations.total_marks_obtained > 0)";
+			$judgeEvals = $this->Judgeevaluations->find()->where($condEval)->contain(['Students'])->order(["Judgeevaluations.total_marks_obtained" => "DESC"])->all();
+
+			$cntrRecord = 1;
+			$cntrPos = 1;
+			$lastScore = null;
+			foreach($judgeEvals as $datarecord)
+			{
+				if($cntrRecord == 1)
+				{
+					$lastScore = $datarecord->total_marks_obtained;
+				}
+				else if($lastScore != $datarecord->total_marks_obtained)
+				{
+					$cntrPos++;
+					$lastScore = $datarecord->total_marks_obtained;
+				}
+
+				$resultpositions = $this->Resultpositions->newEntity();
+				$dataRP = $this->Resultpositions->patchEntity($resultpositions, array());
+
+				$dataRP->slug 								= "result-positions-".$result_id."-".$conventionSD->id."-".time().'-'.rand(100,1000000);
+				$dataRP->result_id							= $result_id;
+				$dataRP->eventsubmission_id					= $datarecord->eventsubmission_id;
+				$dataRP->conventionregistration_id			= $datarecord->conventionregistration_id;
+				$dataRP->conventionseason_id				= $datarecord->conventionseason_id;
+				$dataRP->convention_id						= $datarecord->convention_id;
+				$dataRP->user_id							= $datarecord->user_id;
+				$dataRP->season_id							= $datarecord->season_id;
+				$dataRP->season_year						= $datarecord->season_year;
+				$dataRP->event_id							= $eventD->id;
+				$dataRP->event_id_number					= $eventD->event_id_number;
+				$dataRP->division_id						= $eventD->division_id;
+				$dataRP->group_name							= $datarecord->group_name;
+				$dataRP->student_id							= $datarecord->student_id;
+				$dataRP->gender								= !empty($datarecord->Students) ? $datarecord->Students['gender'] : null;
+				$dataRP->avg_marks							= $datarecord->total_marks_obtained;
+				$dataRP->position							= $cntrPos;
+				$dataRP->created 							= date('Y-m-d H:i:s');
+				$dataRP->modified 							= date('Y-m-d H:i:s');
+
+				if($cntrPos>=1 && $cntrPos<=6)
+				{
+					$dataRP->points_obtained				= $resultPoints[$cntrPos];
+				}
+
+				$resultRP = $this->Resultpositions->save($dataRP);
+				if(!$resultRP)
+				{
+					$failedResultpositionSaves++;
+					$this->log('closejudgingscores(score) resultposition save failed for event '.$eventD->id.' eval '.$datarecord->id.' errors: '.json_encode($dataRP->getErrors()), 'error');
+				}
+				$cntrRecord++;
+			}
+		}
+
+		if($failedResultpositionSaves > 0)
+		{
+			$this->Flash->error($failedResultpositionSaves.' result row(s) could not be saved during close judging. Please review logs and close judging again if needed.');
 		}
 		
 		//STEP8 :: UPDATE RESULTS MODIFIED FIELD
@@ -1561,7 +1739,7 @@ class ResultsController extends AppController {
 		$condEval[] 	= "(Judgeevaluations.convention_id = '".$conventionSD->convention_id."')";
 		$condEval[] 	= "(Judgeevaluations.season_id = '".$conventionSD->season_id."')";
 		$condEval[] 	= "(Judgeevaluations.event_id = '".$eventD->id."')";
-		$condEval[] 	= "(Judgeevaluations.withdraw_yes_no != '1')";
+		$condEval[] 	= "(Judgeevaluations.withdraw_yes_no IS NULL OR Judgeevaluations.withdraw_yes_no != '1')";
 		$condEval[] 	= "(Judgeevaluations.soccer_kick_best_kick >0)";
 		$judgeEvals = $this->Judgeevaluations->find()->where($condEval)->contain(['Students'])->order(["Judgeevaluations.soccer_kick_best_kick" => "DESC"])->all();
 		//$this->prx($judgeEvals);
@@ -1569,6 +1747,7 @@ class ResultsController extends AppController {
 		$cntrRecord = 1;
 		
 		$cntrPos = 1;
+		$failedResultpositionSaves = 0;
 		foreach($judgeEvals as $datarecord)
 		{	
 			// Calculate tie breakers
@@ -1592,7 +1771,7 @@ class ResultsController extends AppController {
 
 			$dataRP->slug 								= "result-positions-".$result_id."-".$conventionSD->id."-".time().'-'.rand(100,1000000);
 			$dataRP->result_id							= $result_id;
-			$dataRP->eventsubmission_id					= $datarecord->id;
+			$dataRP->eventsubmission_id					= $datarecord->eventsubmission_id;
 			$dataRP->conventionregistration_id			= $datarecord->conventionregistration_id;
 			$dataRP->conventionseason_id				= $datarecord->conventionseason_id;
 			$dataRP->convention_id						= $datarecord->convention_id;
@@ -1618,8 +1797,18 @@ class ResultsController extends AppController {
 			//$this->prx($dataRP);
 
 			$resultRP = $this->Resultpositions->save($dataRP);
+			if(!$resultRP)
+			{
+				$failedResultpositionSaves++;
+				$this->log('closejudgingsoccerkick resultposition save failed for event '.$eventD->id.' eval '.$datarecord->id.' errors: '.json_encode($dataRP->getErrors()), 'error');
+			}
 			
 			$cntrRecord++;
+		}
+
+		if($failedResultpositionSaves > 0)
+		{
+			$this->Flash->error($failedResultpositionSaves.' result row(s) could not be saved during close judging. Please review logs and close judging again if needed.');
 		}
 		
 		//STEP8 :: UPDATE RESULTS MODIFIED FIELD
@@ -1778,6 +1967,8 @@ class ResultsController extends AppController {
 		}
 		
 		global $resultPoints;
+		$eventIdNumberPadded = str_pad((string)$eventD->event_id_number, 3, '0', STR_PAD_LEFT);
+		$isTiePositionSpelling = in_array($eventIdNumberPadded, ['003', '053'], true);
 		
 		
 		//STEP1 :: DELETE ALL EXISTING RESULTS IF ANY RELATED TO THIS CONV + SEASON + EVENT
@@ -1811,69 +2002,120 @@ class ResultsController extends AppController {
 		
 		//STEP3 :: SAVE ENTRIES IN Resultpositions TABLE
 		
-		$condEval = array();
-		$condEval[] 	= "(Judgeevaluations.conventionseason_id = '".$conventionSD->id."')";
-		$condEval[] 	= "(Judgeevaluations.convention_id = '".$conventionSD->convention_id."')";
-		$condEval[] 	= "(Judgeevaluations.season_id = '".$conventionSD->season_id."')";
-		$condEval[] 	= "(Judgeevaluations.event_id = '".$eventD->id."')";
-		$condEval[] 	= "(Judgeevaluations.withdraw_yes_no != '1')";
-		$condEval[] 	= "(Judgeevaluations.spelling_score >0)";
-		$judgeEvals = $this->Judgeevaluations->find()->where($condEval)->contain(['Students'])->order(["Judgeevaluations.spelling_score" => "DESC"])->all();
-		//$this->prx($judgeEvals);
-		
-		$cntrRecord = 1;
-		
-		$cntrPos = 1;
-		foreach($judgeEvals as $datarecord)
-		{	
-			// Calculate tie breakers
-			if($cntrRecord == 1)
-			{	
-				$lastScore = $datarecord->spelling_score;
-			}
-			else
+		$eventSubmissionsCS = $this->Eventsubmissions->find()
+			->where([
+				'Eventsubmissions.conventionseason_id' => $conventionSD->id,
+				'Eventsubmissions.convention_id' => $conventionSD->convention_id,
+				'Eventsubmissions.season_id' => $conventionSD->season_id,
+				'Eventsubmissions.season_year' => $conventionSD->season_year,
+				'Eventsubmissions.event_id' => $eventD->id
+			])
+			->contain(['Students'])
+			->all();
+
+		$submissionRows = [];
+		foreach($eventSubmissionsCS as $eventSubmission)
+		{
+			$condAvg = array();
+			$condAvg[] = "(Judgeevaluations.eventsubmission_id = '".$eventSubmission->id."')";
+			$condAvg[] = "(Judgeevaluations.convention_id = '".$eventSubmission->convention_id."')";
+			$condAvg[] = "(Judgeevaluations.season_id = '".$eventSubmission->season_id."')";
+			$condAvg[] = "(Judgeevaluations.event_id = '".$eventD->id."')";
+			$condAvg[] = "(Judgeevaluations.withdraw_yes_no IS NULL OR Judgeevaluations.withdraw_yes_no != '1')";
+			$condAvg[] = "(Judgeevaluations.spelling_score IS NOT NULL)";
+
+			$judgeEvals = $this->Judgeevaluations->find()->where($condAvg)->all();
+
+			$marksObtained = 0;
+			$cntrJudging = 0;
+			foreach($judgeEvals as $judgeeval)
 			{
-				if($lastScore != $datarecord->spelling_score)
-				{
-					$cntrPos++;
-					$lastScore = $datarecord->spelling_score;
-				}
+				$marksObtained = $marksObtained + (float)$judgeeval->spelling_score;
+				$cntrJudging++;
 			}
-			
-			// enter record
+
+			if($cntrJudging > 0)
+			{
+				$avgMarksSub = $marksObtained / $cntrJudging;
+				$submissionRows[] = [
+					'eventsubmission_id' => (int)$eventSubmission->id,
+					'conventionregistration_id' => $eventSubmission->conventionregistration_id,
+					'conventionseason_id' => $eventSubmission->conventionseason_id,
+					'convention_id' => $eventSubmission->convention_id,
+					'user_id' => $eventSubmission->user_id,
+					'season_id' => $eventSubmission->season_id,
+					'season_year' => $eventSubmission->season_year,
+					'group_name' => $eventSubmission->group_name,
+					'student_id' => $eventSubmission->student_id,
+					'gender' => $eventSubmission->Students['gender'] ?? null,
+					'avg_marks' => $avgMarksSub
+				];
+			}
+		}
+
+		usort($submissionRows, function ($a, $b) {
+			if ($a['avg_marks'] == $b['avg_marks']) {
+				return $a['eventsubmission_id'] <=> $b['eventsubmission_id'];
+			}
+			return ($a['avg_marks'] < $b['avg_marks']) ? 1 : -1;
+		});
+
+		$lastScore = null;
+		$currentPos = 0;
+		$failedResultpositionSaves = 0;
+		foreach($submissionRows as $row)
+		{
+			if($lastScore === null || (float)$lastScore !== (float)$row['avg_marks'])
+			{
+				$currentPos++;
+				$lastScore = $row['avg_marks'];
+			}
+
+			$finalPos = $currentPos;
+			if($isTiePositionSpelling && $currentPos > 6)
+			{
+				$finalPos = null;
+			}
+
 			$resultpositions = $this->Resultpositions->newEntity();
 			$dataRP = $this->Resultpositions->patchEntity($resultpositions, array());
 
 			$dataRP->slug 								= "result-positions-".$result_id."-".$conventionSD->id."-".time().'-'.rand(100,1000000);
 			$dataRP->result_id							= $result_id;
-			$dataRP->eventsubmission_id					= $datarecord->id;
-			$dataRP->conventionregistration_id			= $datarecord->conventionregistration_id;
-			$dataRP->conventionseason_id				= $datarecord->conventionseason_id;
-			$dataRP->convention_id						= $datarecord->convention_id;
-			$dataRP->user_id							= $datarecord->user_id;
-			$dataRP->season_id							= $datarecord->season_id;
-			$dataRP->season_year						= $datarecord->season_year;
+			$dataRP->eventsubmission_id					= $row['eventsubmission_id'];
+			$dataRP->conventionregistration_id			= $row['conventionregistration_id'];
+			$dataRP->conventionseason_id				= $row['conventionseason_id'];
+			$dataRP->convention_id						= $row['convention_id'];
+			$dataRP->user_id							= $row['user_id'];
+			$dataRP->season_id							= $row['season_id'];
+			$dataRP->season_year						= $row['season_year'];
 			$dataRP->event_id							= $eventD->id;
 			$dataRP->event_id_number					= $eventD->event_id_number;
 			$dataRP->division_id						= $eventD->division_id;
-			$dataRP->group_name							= $datarecord->group_name;
-			$dataRP->student_id							= $datarecord->student_id;
-			$dataRP->gender								= $datarecord->Students['gender'];
-			$dataRP->avg_marks							= $datarecord->spelling_score;
-			$dataRP->position							= $cntrPos;
+			$dataRP->group_name							= $row['group_name'];
+			$dataRP->student_id							= $row['student_id'];
+			$dataRP->gender								= $row['gender'];
+			$dataRP->avg_marks							= round($row['avg_marks'], 2);
+			$dataRP->position							= $finalPos;
 			$dataRP->created 							= date('Y-m-d H:i:s');
 			$dataRP->modified 							= date('Y-m-d H:i:s');
-			
-			if($cntrPos>=1 && $cntrPos<=6)
+
+			if($finalPos >= 1 && $finalPos <= 6)
 			{
-				$dataRP->points_obtained				= $resultPoints[$cntrPos];
+				$dataRP->points_obtained = $resultPoints[$finalPos];
 			}
-			
-			//$this->prx($dataRP);
 
 			$resultRP = $this->Resultpositions->save($dataRP);
-			
-			$cntrRecord++;
+			if(!$resultRP)
+			{
+				$failedResultpositionSaves++;
+				$this->log('closejudgingspellings resultposition save failed for event '.$eventD->id.' submission '.$row['eventsubmission_id'].' errors: '.json_encode($dataRP->getErrors()), 'error');
+			}
+		}
+
+		if($failedResultpositionSaves > 0)
+		{
+			$this->Flash->error($failedResultpositionSaves.' result row(s) could not be saved during close judging. Please review logs and close judging again if needed.');
 		}
 		
 		//STEP8 :: UPDATE RESULTS MODIFIED FIELD
@@ -1903,6 +2145,7 @@ class ResultsController extends AppController {
 		global $eventTypeDD;
 		$this->set('eventTypeDD', $eventTypeDD);
 		
+		global $resultPoints;
 		$data = array();
 		
         if ($slug_convention_season) {
@@ -1942,8 +2185,10 @@ class ResultsController extends AppController {
 		
 		// to check that results are already saved for this conv season event or not
 		$checkResultsAlready 		= $this->Results->find()->where(['Results.conventionseason_id' => $conventionSD->id,'Results.convention_id' => $conventionSD->convention_id,'Results.season_id' => $conventionSD->season_id,'Results.season_year' => $conventionSD->season_year,'Results.event_id' => $eventD->id])->first();
+		$this->set('checkResultsAlready', $checkResultsAlready);
 		if($checkResultsAlready)
 		{
+			$result_id = $checkResultsAlready->id;
 			// to fetch result positions based on already saved results
 			$resultsPos 		= $this->Resultpositions->find()->where(['Resultpositions.result_id' => $checkResultsAlready->id])->order(['Resultpositions.position' => 'ASC'])->contain(['Students','Users'])->all();
 			$this->set('resultsPos', $resultsPos);

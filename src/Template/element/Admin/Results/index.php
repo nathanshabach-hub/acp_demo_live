@@ -2,8 +2,10 @@
 use Cake\ORM\TableRegistry;
 $this->Eventsubmissions = TableRegistry::getTableLocator()->get('Eventsubmissions');
 $this->Judgeevaluations = TableRegistry::getTableLocator()->get('Judgeevaluations');
-
-
+$eventIdNumberPadded = str_pad((string)$eventD->event_id_number, 3, '0', STR_PAD_LEFT);
+$placeRankingEventNumbers = ['001', '002', '051', '052', '109', '110', '139', '140', '169', '170', '174', '175', '177', '209', '210', '239', '240', '269', '270', '274', '275', '277'];
+$isPlaceRankingEvent = stripos((string)$eventD->event_name, 'Futsal') !== false || in_array($eventIdNumberPadded, $placeRankingEventNumbers, true);
+global $resultPoints;
 ?>
 <div class="admin_loader" id="loaderID"><?php echo $this->Html->image('loader_large_blue.gif');?></div>
 <?php //if (!$conventionseasonevents->isEmpty()) { ?> 
@@ -21,10 +23,10 @@ $this->Judgeevaluations = TableRegistry::getTableLocator()->get('Judgeevaluation
                     <thead class="cf ajshort">
                         <tr>
                             <th class="sorting_paging">Position</th>
-                            <th class="sorting_paging">Average Marks</th>
+							<th class="sorting_paging"><?php echo $isPlaceRankingEvent ? 'Average Place' : 'Average Marks'; ?></th>
                             <th class="sorting_paging">Points Obtained</th>
                             <th class="sorting_paging">Edit Position</th>
-                            <th class="sorting_paging">Edit Average Marks</th>
+							<th class="sorting_paging"><?php echo $isPlaceRankingEvent ? 'Edit Average Place' : 'Edit Average Marks'; ?></th>
                             <th class="sorting_paging">School</th>
                             <th class="sorting_paging">Student/Group</th>
                         </tr>
@@ -43,65 +45,98 @@ $this->Judgeevaluations = TableRegistry::getTableLocator()->get('Judgeevaluation
 							
 							$marksObtained = 0;
 							$cntrJudging = 0;
+							$placeValue = 0;
+							$pointsObtained = 0;
 							foreach($judgeEvals as $judgeeval)
+						{
+							if($isPlaceRankingEvent && $judgeeval->all_pos_score > 0)
+							{
+								$placeValue = $judgeeval->all_pos_score;
+							}
+							else
 							{
 								$marksObtained = $marksObtained+$judgeeval->total_marks_obtained;
-								$cntrJudging++;
 							}
-							
-							if($cntrJudging>0)
-							{
-								$avgMarksSub = $marksObtained/$cntrJudging;
-							}
-							else
-							{
-								$avgMarksSub = 0;
-							}
-							
-							$positionSub = 0;
-							
-							if($avgMarksSub>90)
-							{
-								$positionSub = 1;
-							}
-							else
-							if($avgMarksSub<=90 && $avgMarksSub>80)
-							{
-								$positionSub = 2;
-							}
-							else
-							if($avgMarksSub<=80 && $avgMarksSub>70)
-							{
-								$positionSub = 3;
-							}
-							
-							// to see that if already saved results
-							if($checkResultsAlready->id >0)
-							{
-								$positionSub 		= $arrAlreadySavedResults[$datarecord->id]['position'];
-								$avgMarksSub 		= $arrAlreadySavedResults[$datarecord->id]['avg_marks'];
-								$pointsObtained 	= $arrAlreadySavedResults[$datarecord->id]['points_obtained'];
-							}
-							
-						?>
-                            <?php //pr($datarecord); exit;?> 
-                            <tr>
-                                <td data-title="Position">
-									<!--<input type="number" name="result_position_<?php echo $datarecord->id; ?>" id="result_position_<?php echo $datarecord->id; ?>" value="<?php echo $positionSub;?>" />-->
-									<?php echo $positionSub;?>
-								</td>
-								<td data-title="Average Marks">
-									<!--<input type="number" name="result_avg_marks_<?php echo $datarecord->id; ?>" id="result_avg_marks_<?php echo $datarecord->id; ?>" value="<?php echo $avgMarksSub;?>" />-->
-									<?php echo $avgMarksSub;?>
-								</td>
-								<td data-title="Points Obtained">
-									<?php echo $pointsObtained;?>
+							$cntrJudging++;
+						}
+						
+						if($isPlaceRankingEvent && $placeValue > 0)
+						{
+							$avgMarksSub = $placeValue;
+						}
+						else if($cntrJudging>0)
+					{
+						$avgMarksSub = $marksObtained/$cntrJudging;
+					}
+					else
+					{
+						$avgMarksSub = 0;
+					}
+					
+					$positionSub = 0;
+					
+					if($isPlaceRankingEvent)
+					{
+						// For place-ranking events, position = place value
+						$positionSub = $avgMarksSub;
+					}
+					else
+					{
+						// For scoring events, calculate position from marks
+						if($avgMarksSub>90)
+						{
+							$positionSub = 1;
+						}
+						else
+						if($avgMarksSub<=90 && $avgMarksSub>80)
+						{
+							$positionSub = 2;
+						}
+						else
+						if($avgMarksSub<=80 && $avgMarksSub>70)
+						{
+							$positionSub = 3;
+						}
+					}
+					
+					// Calculate points obtained based on position
+					if($positionSub >= 1 && $positionSub <= 6 && !empty($resultPoints))
+					{
+						$pointsObtained = $resultPoints[$positionSub];
+					}
+					else
+					{
+						$pointsObtained = 0;
+					}
+					
+					// to see that if already saved results
+					// For place-ranking events, always recalculate from judges instead of using saved results
+					if($checkResultsAlready->id > 0 && !$isPlaceRankingEvent)
+					{
+						$positionSub 		= $arrAlreadySavedResults[$datarecord->id]['position'];
+						$avgMarksSub 		= $arrAlreadySavedResults[$datarecord->id]['avg_marks'];
+						$pointsObtained 	= $arrAlreadySavedResults[$datarecord->id]['points_obtained'];
+					}
+					
+				?>
+                    <?php //pr($datarecord); exit;?> 
+                    <tr>
+                        <td data-title="Position">
+								<!--<input type="number" name="result_position_<?php echo $datarecord->id; ?>" id="result_position_<?php echo $datarecord->id; ?>" value="<?php echo $positionSub;?>" />-->
+								<?php echo $positionSub;?>
+							</td>
+							<td data-title="<?php echo $isPlaceRankingEvent ? 'Average Place' : 'Average Marks'; ?>">
+								<!--<input type="number" name="result_avg_marks_<?php echo $datarecord->id; ?>" id="result_avg_marks_<?php echo $datarecord->id; ?>" value="<?php echo $avgMarksSub;?>" />-->
+								<?php echo $avgMarksSub;?>
+							</td>
+							<td data-title="Points Obtained">
+								<?php echo $pointsObtained;?>
 								</td>
 								
 								<td data-title="Edit Position">
 									<input type="number" name="result_position_<?php echo $datarecord->id; ?>" id="result_position_<?php echo $datarecord->id; ?>" value="<?php echo $positionSub;?>" />
 								</td>
-								<td data-title="Edit Average Marks">
+								<td data-title="<?php echo $isPlaceRankingEvent ? 'Edit Average Place' : 'Edit Average Marks'; ?>">
 									<input type="number" name="result_avg_marks_<?php echo $datarecord->id; ?>" id="result_avg_marks_<?php echo $datarecord->id; ?>" value="<?php echo $avgMarksSub;?>" />
 								</td>
 								
@@ -152,7 +187,7 @@ $('#results_table').dataTable({
     "bInfo": false,
     //"bLengthChange": false,
 	//"pageLength": 500000,
-	order: [[1, 'desc']],
+	order: [[1, '<?php echo $isPlaceRankingEvent ? 'asc' : 'desc'; ?>']],
     //"bFilter": true,
     //"bInfo": false,
     //"bAutoWidth": false

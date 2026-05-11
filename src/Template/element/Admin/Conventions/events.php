@@ -2,6 +2,7 @@
 use Cake\ORM\TableRegistry;
 $this->Conventionregistrations = TableRegistry::getTableLocator()->get('Conventionregistrations');
 $this->Eventsubmissions = TableRegistry::getTableLocator()->get('Eventsubmissions');
+$this->Judgeevaluations = TableRegistry::getTableLocator()->get('Judgeevaluations');
 $this->Conventionseasonroomevents = TableRegistry::getTableLocator()->get('Conventionseasonroomevents');
 ?>
 <div class="admin_loader" id="loaderID"><?php echo $this->Html->image('loader_large_blue.gif');?></div>
@@ -49,6 +50,7 @@ $this->Conventionseasonroomevents = TableRegistry::getTableLocator()->get('Conve
 							<th class="sorting_paging">Rooms Allocated</th>
 							<th class="sorting_paging">Entries</th>
 							<th class="sorting_paging">Judge(s)</th>
+							<th class="sorting_paging">Status</th>
 							<th class="sorting_paging">Judging?</th>
 							<th class="sorting_paging">Qualifying Score/time</th>
 							<th class="sorting_paging">Result</th>
@@ -80,7 +82,7 @@ $this->Conventionseasonroomevents = TableRegistry::getTableLocator()->get('Conve
 								<td data-title="#DB ID Event"><?php echo $datarecord->Events['id'];?></td>
                                 <td data-title="Event ID Number"><?php echo $datarecord->Events['event_id_number'];?></td>
                                 <td data-title="Event Name"><?php echo $datarecord->Events['event_name'];?> (<?php echo $datarecord->Events['event_judging_type'];?>)</td>
-                                <td data-title="Event Type"><?php echo $eventTypeDD[$datarecord->Events['event_type']];?></td>
+								<td data-title="Event Type"><?php echo isset($eventTypeDD[$datarecord->Events['event_type']]) ? $eventTypeDD[$datarecord->Events['event_type']] : 'Unknown Type ('.$datarecord->Events['event_type'].')';?></td>
 								
                                 <td data-title="Rooms Aloocated">
 								<?php 
@@ -107,6 +109,7 @@ $this->Conventionseasonroomevents = TableRegistry::getTableLocator()->get('Conve
 								<?php
 								// to get judges register for this
 								$judgeNamesArr = array();
+								$judgeUserIdsArr = array();
 								
 								// first to get all registrations for this convseason, conv and season
 								$condConvreg = array();
@@ -117,13 +120,66 @@ $this->Conventionseasonroomevents = TableRegistry::getTableLocator()->get('Conve
 								$allConvReg = $this->Conventionregistrations->find()->where($condConvreg)->contain(['Users'])->all();
 								foreach($allConvReg as $convreg)
 								{
-									if(!empty($convreg->judges_event_ids))
+									if(!empty($convreg->judges_event_ids) && !empty($convreg->Users))
 									{
 										$judges_event_ids_explode = explode(",",$convreg->judges_event_ids);
 										if(in_array($datarecord->event_id,$judges_event_ids_explode))
 										{
 											$judgeNamesArr[] = $convreg->Users['first_name'].' '.$convreg->Users['last_name'];
+											$judgeUserIdsArr[] = (int)$convreg->user_id;
 										}
+									}
+								}
+								$judgeUserIdsArr = array_values(array_unique($judgeUserIdsArr));
+								$totalAssignedJudges = count($judgeUserIdsArr);
+
+								$pendingEntries = 0;
+								$completedEntries = 0;
+								if($totalEntriesEvent > 0 && $totalAssignedJudges > 0)
+								{
+									$eventSubmissionIds = $this->Eventsubmissions->find()
+										->select(['id'])
+										->where($condTotalEntries)
+										->enableHydration(false)
+										->extract('id')
+										->toList();
+
+									if(count($eventSubmissionIds))
+									{
+										$distinctEvalPairs = $this->Judgeevaluations->find()
+											->select(['Judgeevaluations.eventsubmission_id', 'Judgeevaluations.uploaded_by_user_id'])
+											->where([
+												'Judgeevaluations.eventsubmission_id IN' => $eventSubmissionIds,
+												'Judgeevaluations.uploaded_by_user_id IN' => $judgeUserIdsArr
+											])
+											->distinct(['Judgeevaluations.eventsubmission_id', 'Judgeevaluations.uploaded_by_user_id'])
+											->enableHydration(false)
+											->toArray();
+
+										$submissionJudgeCounts = array();
+										foreach($distinctEvalPairs as $evalPair)
+										{
+											$submissionId = (int)$evalPair['eventsubmission_id'];
+											if(!isset($submissionJudgeCounts[$submissionId]))
+											{
+												$submissionJudgeCounts[$submissionId] = 0;
+											}
+											$submissionJudgeCounts[$submissionId]++;
+										}
+
+										foreach($submissionJudgeCounts as $judgeCountPerSubmission)
+										{
+											if($judgeCountPerSubmission >= $totalAssignedJudges)
+											{
+												$completedEntries++;
+											}
+										}
+									}
+
+									$pendingEntries = ($totalEntriesEvent - $completedEntries);
+									if($pendingEntries < 0)
+									{
+										$pendingEntries = 0;
 									}
 								}
 								
@@ -133,6 +189,30 @@ $this->Conventionseasonroomevents = TableRegistry::getTableLocator()->get('Conve
 								}
 								?>
 								</td>
+								<td data-title="Status">
+									<?php
+									if($datarecord->judging_ends == 1)
+									{
+										echo '<span class="badge" style="background-color: #5cb85c; color: white; padding: 3px 8px; border-radius: 3px; font-size: 11px;">Closed</span>';
+									}
+									else if($totalEntriesEvent == 0)
+									{
+										echo '<span class="badge" style="background-color: #777; color: white; padding: 3px 8px; border-radius: 3px; font-size: 11px;">No Entries</span>';
+									}
+									else if($totalAssignedJudges == 0)
+									{
+										echo '<span class="badge" style="background-color: #777; color: white; padding: 3px 8px; border-radius: 3px; font-size: 11px;">No Judges</span>';
+									}
+									else if($pendingEntries > 0)
+									{
+										echo '<span class="badge" style="background-color: #d9534f; color: white; padding: 3px 8px; border-radius: 3px; font-size: 11px;">'.$pendingEntries.' Entries Remaining</span>';
+									}
+									else
+									{
+										echo '<span class="badge" style="background-color: #5cb85c; color: white; padding: 3px 8px; border-radius: 3px; font-size: 11px;">Ready to Close</span>';
+									}
+									?>
+								</td>
 								
 								<td data-title="Judging">
 									<?php
@@ -141,6 +221,44 @@ $this->Conventionseasonroomevents = TableRegistry::getTableLocator()->get('Conve
 										if($datarecord->judging_ends == 1)
 										{
 											echo 'Closed';
+											echo '<br />';
+											echo $this->Html->link('<i class="fa fa-unlock"></i> Open', ['controller' => 'results', 'action' => 'openjudging',$slug_convention_season,$slug_convention,$datarecord->Events['slug']], [ 'escape' => false, 'title' => 'Reopen Judging', 'class'=>'btn btn-info btn-xs', 'confirm' => 'Are you sure you want to reopen judging for this event?']);
+										}
+										else if($pendingEntries > 0)
+										{
+											echo 'Pending ('.$pendingEntries.' entries left)';
+											echo '<br />';
+
+											if($datarecord->Events['event_judging_type'] == 'times')
+											{
+												$actionClose = 'closejudgingtimes';
+											}
+											else
+											if($datarecord->Events['event_judging_type'] == 'distances')
+											{
+												$actionClose = 'closejudgingdistances';
+											}
+											else
+											if($datarecord->Events['event_judging_type'] == 'scores')
+											{
+												$actionClose = 'closejudgingscores';
+											}
+											else
+											if($datarecord->Events['event_judging_type'] == 'soccer_kick')
+											{
+												$actionClose = 'closejudgingsoccerkick';
+											}
+											else
+											if($datarecord->Events['event_judging_type'] == 'spellings')
+											{
+												$actionClose = 'closejudgingspellings';
+											}
+											else
+											{
+												$actionClose = 'closejudging';
+											}
+
+											echo $this->Html->link('<i class="fa fa-close"></i> Close', ['controller' => 'results', 'action' => $actionClose,$slug_convention_season,$slug_convention,$datarecord->Events['slug']], [ 'escape' => false, 'title' => 'Close Judging', 'class'=>'btn btn-danger btn-xs', 'confirm' => 'This event still has '.$pendingEntries.' entries pending. Are you sure you want to force close judging for this event?']);
 										}
 										else
 										{

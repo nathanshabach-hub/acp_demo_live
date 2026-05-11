@@ -290,7 +290,7 @@ class JudgeevaluationsController extends AppController {
 		
 		// to check if judging is closed or not
 		$conventionSeasonEventD 	= $this->Conventionseasonevents->find()->where(['Conventionseasonevents.conventionseasons_id' => $eventsubmissionD->conventionseasons_id,'Conventionseasonevents.convention_id' => $eventsubmissionD->convention_id,'Conventionseasonevents.season_id' => $eventsubmissionD->season_id,'Conventionseasonevents.season_year' => $eventsubmissionD->season_year,'Conventionseasonevents.event_id' => $eventsubmissionD->event_id])->first();
-		if($conventionSeasonEventD->judging_ends == 1)
+		if(!empty($conventionSeasonEventD) && $conventionSeasonEventD->judging_ends == 1)
 		{
 			$this->Flash->error('Sorry, judging ends for this event.');
 			$this->redirect(['controller' => 'conventionregistrations', 'action' => 'judgeevententries',$convRegD->slug,$eventD->slug]);
@@ -513,7 +513,7 @@ class JudgeevaluationsController extends AppController {
 		
 		// to check if judging is closed or not
 		$conventionSeasonEventD 	= $this->Conventionseasonevents->find()->where(['Conventionseasonevents.conventionseasons_id' => $eventsubmissionD->conventionseasons_id,'Conventionseasonevents.convention_id' => $eventsubmissionD->convention_id,'Conventionseasonevents.season_id' => $eventsubmissionD->season_id,'Conventionseasonevents.season_year' => $eventsubmissionD->season_year,'Conventionseasonevents.event_id' => $eventsubmissionD->event_id])->first();
-		if($conventionSeasonEventD->judging_ends == 1)
+		if(!empty($conventionSeasonEventD) && $conventionSeasonEventD->judging_ends == 1)
 		{
 			$this->Flash->error('Sorry, judging ends for this event.');
 			$this->redirect(['controller' => 'conventionregistrations', 'action' => 'judgeevententries',$convRegD->slug,$eventD->slug]);

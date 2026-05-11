@@ -1,0 +1,229 @@
+event_id_number,event_name,event_judging_type,total_evaluations,evals_with_marks,judges_with_evals
+001,"Checkers U16",general,4,4,1
+003,"Spelling U16",general,73,16,1
+005,"Science Collection U16",general,4,4,2
+009,"Social Studies Collection U16",general,12,12,2
+012,"Poetry Writing U16",general,52,52,2
+013,"Short Story Writing U16",general,18,18,2
+014,"Book Report U16",general,18,18,2
+051,"Checkers OPEN",general,4,4,1
+052,"Chess OPEN",general,1,1,1
+053,"Spelling OPEN",general,25,6,1
+056,"Science Research OPEN",general,4,4,2
+059,"Social Studies Collection OPEN",general,2,2,2
+060,"Social Studies Research OPEN",general,4,4,2
+061,"Persuasive Essay Writing OPEN",general,12,12,2
+062,"Poetry Writing OPEN",general,22,22,2
+064,"Book Report OPEN",general,6,6,2
+100,"100m (Male) U14",times,19,19,1
+101,"200m (Male) U14",times,14,14,1
+102,"400m (Male) U14",times,7,7,1
+103,"800m (Male) U14",times,1,1,1
+104,"1500m (Male) U14",times,1,1,1
+105,"4 x 100m Relay (Male) U14",times,3,3,1
+106,"Long Jump (Male) U14",distances,7,7,1
+111,"Football Kick (Male) U14",distances,11,4,1
+112,"Soccer Kick (Male) U14",distances,19,8,1
+113,"Netball Shoot (Male) U14",scores,3,3,1
+130,"100m (Male) U17",times,19,19,1
+131,"200m (Male) U17",times,9,9,1
+132,"400m (Male) U17",times,3,3,1
+134,"1500m (Male) U17",times,1,1,1
+135,"4 x 100m Relay (Male) U17",times,3,3,1
+136,"Long Jump (Male) U17",distances,8,6,1
+137,"Shot Put (Male) U17",distances,18,8,1
+138,"Discus (Male) U17",distances,9,7,1
+141,"Football Kick (Male) U17",distances,18,8,1
+142,"Soccer Kick (Male) U17",distances,18,8,1
+143,"Netball Shoot (Male) U17",scores,7,7,1
+160,"100m (Male) OPEN",times,11,11,1
+161,"200m (Male) OPEN",times,6,6,1
+162,"400m (Male) OPEN",times,4,4,1
+163,"800m (Male) OPEN",times,1,1,1
+164,"1500m (Male) OPEN",times,1,1,1
+165,"4 x 100m Relay (Male) OPEN",times,2,2,1
+166,"Long Jump (Male) OPEN",distances,5,2,1
+167,"Shot Put (Male) OPEN",distances,4,3,1
+168,"Discus (Male) OPEN",distances,4,4,1
+171,"Football Kick (Male) OPEN",distances,14,9,1
+172,"Soccer Kick (Male) OPEN",distances,9,4,1
+173,"Netball Shoot (Male) OPEN",scores,5,5,1
+174,"Basketball (Male) OPEN",general,7,7,1
+176,"Futsal (Male) OPEN",general,6,6,1
+177,"Volleyball (Male) OPEN",general,6,6,1
+200,"100m (Female) U14",times,17,17,1
+201,"200m (Female) U14",times,11,11,1
+202,"400m (Female) U14",times,5,5,1
+203,"800m (Female) U14",times,3,3,1
+204,"1500m (Female) U14",times,1,1,1
+205,"4 x 100m Relay (Female) U14",times,2,2,1
+206,"Long Jump (Female) U14",distances,15,15,1
+211,"Football Kick (Female) U14",distances,4,1,1
+212,"Soccer Kick (Female) U14",distances,16,2,1
+213,"Netball Shoot (Female) U14",scores,33,33,1
+230,"100m (Female) U17",times,12,12,1
+231,"200m (Female) U17",times,8,8,1
+232,"400m (Female) U17",times,3,3,1
+233,"800m (Female) U17",times,1,1,1
+235,"4 x 100m Relay (Female) U17",times,4,4,1
+236,"Long Jump (Female) U17",distances,6,6,1
+237,"Shot Put (Female) U17",distances,15,5,1
+238,"Discus (Female) U17",distances,7,3,1
+241,"Football Kick (Female) U17",distances,7,5,1
+242,"Soccer Kick (Female) U17",distances,15,3,1
+243,"Netball Shoot (Female) U17",scores,24,24,1
+260,"100m (Female) OPEN",times,4,4,1
+261,"200m (Female) OPEN",times,3,3,1
+262,"400m (Female) OPEN",times,1,1,1
+263,"800m (Female) OPEN",times,2,2,1
+265,"4 x 100m Relay (Female) OPEN",times,3,3,1
+266,"Long Jump (Female) OPEN",distances,4,3,1
+267,"Shot Put (Female)  OPEN",distances,5,5,1
+268,"Discus (Female) OPEN",distances,5,4,1
+271,"Football Kick (Female) OPEN",distances,4,4,1
+272,"Soccer Kick (Female) OPEN",distances,10,3,1
+273,"Netball Shoot (Female) OPEN",scores,15,15,1
+274,"Basketball (Female) OPEN",general,4,4,1
+276,"Futsal (Female) OPEN",general,3,3,1
+277,"Volleyball (Female) OPEN",general,9,9,1
+301,"Wood Construction U16",general,62,62,2
+302,"Wood Carving U16",general,28,28,2
+304,"Metal Sculpture U16",general,18,18,2
+308,"Clay Work - Handbuilt U16",general,22,22,2
+310,"Scrapbooking U16",general,22,22,2
+311,"Flax Construction U16",general,10,10,2
+321,"Embroidery U16",general,4,4,2
+323,"Crochet U16",general,12,12,2
+324,"Knitting U16",general,8,8,2
+326,"Patchwork U16",general,13,13,2
+351,"Wood Construction OPEN",general,10,10,2
+352,"Wood Carving OPEN",general,26,26,2
+353,"Marquetry OPEN",general,4,4,2
+354,"Metal Sculpture OPEN",general,2,2,2
+358,"Clay Work - Handbuilt OPEN",general,3,3,3
+360,"Scrapbooking OPEN",general,6,6,2
+361,"Flax Construction OPEN",general,2,2,2
+366,"Female Dresses OPEN",general,6,6,3
+373,"Crochet OPEN",general,6,6,3
+374,"Knitting OPEN",general,3,3,3
+400,"Portrait Photo U16",general,19,19,2
+401,"Nature Photo U16",general,185,185,2
+402,"Structure/Vehicle Photo U16",general,51,51,2
+403,"Scapes Photo U16",general,93,93,2
+404,"Event/Action Photo U16",general,7,7,2
+405,"Macro Photo U16",general,5,5,2
+406,"General Photo U16",general,36,36,2
+412,"Posters U16",general,120,120,2
+413,"Graphic Design U16",general,1,1,1
+414,"Linear Powerpoint Presentation U16",general,4,4,2
+415,"Non-Linear Powerpoint Presentation U16",general,7,7,2
+450,"Portrait Photo OPEN",general,20,20,2
+451,"Nature Photo OPEN",general,63,63,2
+452,"Structure/Vehicle Photo OPEN",general,39,39,3
+453,"Scapes Photo OPEN",general,45,45,2
+454,"Event/Action Photo OPEN",general,2,2,2
+455,"Macro Photo OPEN",general,11,11,2
+456,"General Photo OPEN",general,25,25,2
+461,"Digital Art OPEN",general,2,2,2
+462,"Posters OPEN",general,37,37,2
+464,"Linear Powerpoint Presentation OPEN",general,10,10,2
+465,"Non-Linear Powerpoint Presentation OPEN",general,7,7,2
+500,"Oil U16",general,6,6,2
+501,"Watercolour U16",general,40,40,2
+502,"Acrylics U16",general,21,21,2
+503,"Sketching U16",general,66,66,2
+504,"Pastels U16",general,6,6,2
+505,"Coloured Pencils U16",general,25,25,3
+506,"Pen and Ink U16",general,19,19,2
+507,"Prints U16",general,21,21,2
+508,"Mixed Media U16",general,1,1,1
+509,"Comic Strip U16",general,4,4,2
+510,"Geometric Abstract U16",general,17,17,3
+550,"Oil OPEN",general,2,2,2
+551,"Watercolour OPEN",general,20,20,2
+552,"Acrylics OPEN",general,10,10,2
+553,"Sketching OPEN",general,33,33,2
+554,"Pastels OPEN",general,4,4,2
+555,"Coloured Pencils OPEN",general,13,13,2
+556,"Pen and Ink OPEN",general,12,12,2
+557,"Prints OPEN",general,4,4,2
+558,"Mixed Media OPEN",general,7,7,2
+559,"Comic Strip OPEN",general,2,2,2
+560,"Geometric Abstract OPEN",general,2,2,1
+600,"Self Accompanied Solo U16",general,10,10,2
+602,"Self Accompanied Trio U16",general,2,2,2
+650,"Self Accompanied Solo OPEN",general,2,2,2
+651,"Self Accompanied Duet OPEN",general,2,2,2
+656,"Combined Ensemble OPEN",general,6,6,3
+700,"Piano Solo U16",general,14,14,2
+702,"Woodwind Solo U16",general,8,8,2
+703,"String Solo - Plucked U16",general,4,4,2
+704,"String Solo - Bow U16",general,2,2,2
+707,"Miscellaneous Solo U16",general,2,2,2
+709,"Instrumental Duet U16",general,2,2,2
+710,"Tambourine Duet U16",general,2,2,2
+711,"Instrumental Trio U16",general,2,2,2
+713,"Instrumental Quartet U16",general,2,2,2
+750,"Piano Solo OPEN",general,6,6,2
+752,"Woodwind Solo OPEN",general,10,10,2
+753,"String Solo - Plucked OPEN",general,2,2,2
+754,"String Solo - Bow OPEN",general,2,2,2
+756,"Tambourine Solo OPEN",general,10,10,2
+757,"Miscellaneous Solo OPEN",general,4,4,2
+759,"Instrumental Duet OPEN",general,6,6,2
+760,"Tambourine Duet OPEN",general,2,2,2
+761,"Instrumental Trio OPEN",general,2,2,2
+762,"Tambourine Trio OPEN",general,2,2,2
+763,"Instrumental Quartet OPEN",general,2,2,2
+768,"Music Instrumental Arranging OPEN",general,3,3,2
+780,"Instrumental Ensemble OPEN",general,11,11,3
+781,"Tambourine Ensemble OPEN",general,2,2,2
+782,"Handbell Ensemble OPEN",general,21,21,3
+800,"Male Solo U16",general,12,12,3
+801,"Male Duet U16",general,3,3,3
+802,"Male Trio U16",general,3,3,3
+805,"Female Solo U16",general,33,33,3
+806,"Female Duet U16",general,6,6,3
+807,"Female Trio U16",general,2,2,2
+810,"Mixed Duet U16",general,2,2,2
+811,"Mixed Trio U16",general,2,2,2
+850,"Male Solo OPEN",general,3,3,3
+855,"Female Solo OPEN",general,24,24,3
+856,"Female Duet OPEN",general,6,6,3
+857,"Female Trio OPEN",general,2,2,2
+860,"Mixed Duet OPEN",general,3,3,3
+870,"Vocal Ensemble OPEN",general,9,9,3
+871,"Choir OPEN",general,12,12,3
+900,"Puppets U16",general,6,6,2
+901,"Dramatic Dialogue U16",general,16,16,2
+902,"Mime Solo U16",general,2,2,2
+908,"Expressive Reading (Male) U16",general,22,22,2
+910,"Poetry Recitation (Male) U16",general,101,101,3
+915,"Preaching (Male) U16",general,14,14,2
+921,"Dramatic Monologue (Female) U16",general,2,2,2
+922,"Expressive Reading (Female) U16",general,129,129,3
+923,"Dramatic Narrative (Female) U16",general,2,2,2
+924,"Poetry Recitation (Female) U16",general,149,149,3
+928,"Famous Speech (Female) U16",general,10,10,2
+929,"Preaching (Female) U16",general,9,9,2
+951,"Dramatic Dialogue OPEN",general,3,3,2
+952,"Mime Solo OPEN",general,2,2,2
+954,"One-Act Play OPEN",general,18,18,2
+956,"Oratory (Male) OPEN",general,4,4,2
+958,"Expressive Reading (Male) OPEN",general,40,40,2
+959,"Dramatic Narrative (Male) OPEN",general,2,2,2
+960,"Poetry Recitation (Male) OPEN",general,54,54,3
+961,"Illustrated Storytelling (Male) OPEN",general,2,2,2
+964,"Famous Speech (Male) OPEN",general,2,2,2
+965,"Preaching (Male) OPEN",general,10,10,2
+970,"Oratory (Female) OPEN",general,2,2,2
+971,"Dramatic Monologue (Female) OPEN",general,2,2,2
+972,"Expressive Reading (Female) OPEN",general,28,28,2
+974,"Poetry Recitation (Female) OPEN",general,46,46,3
+975,"Illustrated Storytelling (Female) OPEN",general,2,2,2
+977,"Clown Act (Female) OPEN",general,4,4,2
+978,"Famous Speech (Female) OPEN",general,4,4,2
+979,"Preaching (Female) OPEN",general,2,2,2
+1056,"Bible Memory OPEN",spellings,1,1,1
+1057,"Bible Bowl OPEN",general,12,12,1
+1058,"Group Bible Speaking OPEN",general,6,6,2

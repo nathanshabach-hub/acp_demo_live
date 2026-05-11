@@ -8,6 +8,11 @@
   .judged-count  { display: inline-block; background: #5cb85c; color: #fff; padding: 2px 7px; border-radius: 3px; font-size: 12px; font-weight: 600; min-width: 28px; text-align: center; }
   .unjudged-count { display: inline-block; background: #f0ad4e; color: #fff; padding: 2px 7px; border-radius: 3px; font-size: 12px; font-weight: 600; min-width: 28px; text-align: center; }
   .judged-sep { color: #bbb; margin: 0 3px; }
+  .je-events-toggle { cursor: pointer; background: none; border: none; padding: 0; color: #337ab7; font-size: 12px; font-weight: 600; white-space: nowrap; }
+  .je-events-toggle:hover { text-decoration: underline; }
+  .je-events-list { display: none; margin-top: 5px; padding: 0; list-style: none; }
+  .je-events-list li { font-size: 11px; color: #555; padding: 2px 0; border-bottom: 1px solid #f0f0f0; white-space: nowrap; }
+  .je-events-list li:last-child { border-bottom: none; }
 </style>
 <script type="text/javascript">
     $(document).ready(function ($) {
@@ -38,10 +43,9 @@ $this->Evaluationquestions = TableRegistry::getTableLocator()->get('Evaluationqu
                     <thead class="cf ajshort">
                         <tr>
                             <th class="sorting_paging">Judge</th>
+                            <th class="sorting_paging">Events</th>
                             <th class="sorting_paging">Judged / Remaining</th>
                             <th class="sorting_paging">Status</th>
-                            <th class="sorting_paging">School</th>
-							<th class="sorting_paging">Student</th>
 							<th class="sorting_paging">Submitted</th>
 							<th class="action_dvv"><i class=" fa fa-gavel"></i> Action</th>
                         </tr>
@@ -56,6 +60,32 @@ $this->Evaluationquestions = TableRegistry::getTableLocator()->get('Evaluationqu
 						?>
                             <tr>
                                 <td data-title="Judge"><span class="judge-name"><?php echo h($row['judge_name']); ?></span></td>
+								<td data-title="Events">
+									<?php if(!empty($row['assigned_event_list'])): ?>
+									<button type="button" class="je-events-toggle" onclick="var l=this.nextElementSibling;l.style.display=l.style.display==='block'?'none':'block';this.textContent=(l.style.display==='block'?'▲ ':'▼ ')+'<?php echo (int)$row['registered_events']; ?> Event<?php echo $row['registered_events'] !== 1 ? 's' : ''; ?>';">▼ <?php echo (int)$row['registered_events']; ?> Event<?php echo $row['registered_events'] !== 1 ? 's' : ''; ?></button>
+									<ul class="je-events-list">
+											<li style="font-weight:bold; color:#337ab7; padding-bottom:2px;">All Assigned Events:</li>
+											<?php 
+											$remainingSet = array_flip(array_map(function($e){ return $e['id']; }, $row['remaining_event_list']));
+											foreach($row['assigned_event_list'] as $ev): 
+												$evId = (int)$ev['id'];
+												$evName = $ev['name'];
+												$isRemaining = isset($remainingSet[$evId]);
+											?>
+											<li style="color:<?php echo $isRemaining ? '#d9534f' : '#5cb85c'; ?>; font-weight:bold;">
+												<?php echo h($evName); ?>
+												<?php if($isRemaining): ?>
+													<span style="font-size:10px; color:#d9534f;">(To Judge)</span>
+												<?php else: ?>
+													<span style="font-size:10px; color:#5cb85c;">(Judged)</span>
+												<?php endif; ?>
+											</li>
+											<?php endforeach; ?>
+									</ul>
+									<?php else: ?>
+									<span style="color:#aaa;">0</span>
+									<?php endif; ?>
+								</td>
                                 <td data-title="Judged / Remaining">
                                     <span class="judged-count"><?php echo (int)$row['judged_events']; ?></span>
                                     <span class="judged-sep">/</span>
@@ -68,20 +98,17 @@ $this->Evaluationquestions = TableRegistry::getTableLocator()->get('Evaluationqu
                                         <span class="badge-progress">In Progress</span>
                                     <?php endif; ?>
                                 </td>
-                                <td data-title="School"><?php echo h($row['school_name']); ?></td>
-                                <td data-title="Student"><?php echo h($row['student_name']); ?></td>
                                 <td data-title="Submitted Date"><?php echo !empty($row['submitted_date']) ? date('M d, Y', strtotime($row['submitted_date'])) : '-'; ?></td>
                                 <td data-title="Action">
-									<?php if(!empty($datarecord)) { ?>
-									<a href="#info<?php echo $datarecord->id; ?>" rel="facebox" title="Preview Evaluation" class="btn btn-info btn-xs eyee"><i class="fa fa-eye "></i></a>
-									<?php
-									echo $this->Html->link('<i class="fa fa-trash-o"></i>', ['controller' => 'judgeevaluations', 'action' => 'removejudgeevaluation',$datarecord->slug], [ 'escape' => false, 'title' => 'Delete', 'class'=>'btn btn-danger btn-xs', 'confirm' => 'Are you sure you want to remove this judge evaluation?']);
+									<?php 
+									$judgedCount = count($row['event_evaluations']);
 									?>
-									<?php } else { echo '<span style="color:#aaa;">-</span>'; } ?>
+									<?php if($judgedCount > 0): ?>
+										<a href="<?php echo $this->Url->build(['action' => 'judgedetail', $row['judge_id']]); ?>" title="View All Evaluations (<?php echo $judgedCount; ?> total)" class="btn btn-info btn-xs eyee"><i class="fa fa-eye"></i></a>
+									<?php else: ?>
+										<span style="color:#aaa;">-</span>
+									<?php endif; ?>
 								</td>
-								
-                                
-                            </tr>
                         <?php } ?>
                     </tbody>
                 </table>

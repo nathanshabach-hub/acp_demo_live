@@ -33,6 +33,7 @@ class ConventionregistrationsController extends AppController {
 		$this->Crstudentevents = $this->loadModel('Crstudentevents');
 		$this->Conventionseasonevents = $this->loadModel('Conventionseasonevents');
 		$this->Eventsubmissions = $this->loadModel('Eventsubmissions');
+		$this->Judgeevaluations = $this->loadModel('Judgeevaluations');
 		$this->Results = $this->loadModel('Results');
 		$this->Resultpositions = $this->loadModel('Resultpositions');
 		$this->Books = $this->loadModel('Books');
@@ -1896,6 +1897,202 @@ class ConventionregistrationsController extends AppController {
 		
 		$eventD = $this->Events->find()->where(['Events.slug' => $event_slug])->first();
 		$this->set('eventD', $eventD);
+		$eventIdNumber = str_pad((string)$eventD->event_id_number, 3, "0", STR_PAD_LEFT);
+		$isBulkSpellingEvent = in_array($eventIdNumber, ['003', '053'], true);
+		$placeRankingEventNumbers = ['001', '002', '051', '052', '109', '110', '139', '140', '169', '170', '174', '175', '177', '209', '210', '239', '240', '269', '270', '274', '275', '277'];
+		$isPlaceRankingEvent = stripos((string)$eventD->event_name, 'Futsal') !== false || in_array($eventIdNumber, $placeRankingEventNumbers, true);
+
+		if ($this->request->is('post') && $isBulkSpellingEvent)
+		{
+			$submissionIds = (array)$this->request->getData('spelling_submission_ids');
+			$savedCount = 0;
+
+			foreach($submissionIds as $submissionId)
+			{
+				$submissionId = (int)$submissionId;
+				if($submissionId <= 0)
+				{
+					continue;
+				}
+
+				$scoreRaw = $this->request->getData('spelling_score_'.$submissionId);
+				if($scoreRaw === null || $scoreRaw === '')
+				{
+					continue;
+				}
+
+				$score = (int)$scoreRaw;
+				if($score < 0)
+				{
+					$score = 0;
+				}
+				if($score > 50)
+				{
+					$score = 50;
+				}
+
+				$submission = $this->Eventsubmissions->find()->where([
+					'Eventsubmissions.id' => $submissionId,
+					'Eventsubmissions.event_id' => $eventD->id,
+					'Eventsubmissions.convention_id' => $conventionRegD->convention_id,
+					'Eventsubmissions.season_id' => $conventionRegD->season_id,
+					'Eventsubmissions.season_year' => $conventionRegD->season_year,
+				])->first();
+
+				if(empty($submission))
+				{
+					continue;
+				}
+
+				$condEvalJudge = array();
+				$condEvalJudge[] = "(Judgeevaluations.eventsubmission_id = '".$submission->id."')";
+				$condEvalJudge[] = "(Judgeevaluations.conventionregistration_id = '".$submission->conventionregistration_id."')";
+				$condEvalJudge[] = "(Judgeevaluations.event_id = '".$submission->event_id."')";
+				$condEvalJudge[] = "(Judgeevaluations.uploaded_by_user_id = '".$user_id."')";
+				$existingEval = $this->Judgeevaluations->find()->where($condEvalJudge)->first();
+
+				if($existingEval)
+				{
+					$this->Judgeevaluations->updateAll([
+						'spelling_score' => $score,
+						'total_marks_possible' => 50,
+						'total_marks_obtained' => $score,
+						'did_not_attend' => 0,
+						'modified' => date('Y-m-d H:i:s')
+					], ['id' => $existingEval->id]);
+				}
+				else
+				{
+					$judgeevaluations = $this->Judgeevaluations->newEntity();
+					$dataJ = $this->Judgeevaluations->patchEntity($judgeevaluations, array());
+
+					$dataJ->slug = "judge-event-evaluation-".$submission->id.'-'.time().'-'.rand(100,1000000);
+					$dataJ->eventsubmission_id = $submission->id;
+					$dataJ->conventionregistration_id = $submission->conventionregistration_id;
+					$dataJ->conventionseason_id = $submission->conventionseason_id;
+					$dataJ->convention_id = $submission->convention_id;
+					$dataJ->user_id = $submission->user_id;
+					$dataJ->season_id = $submission->season_id;
+					$dataJ->season_year = $submission->season_year;
+					$dataJ->event_id = $submission->event_id;
+					$dataJ->event_id_number = $submission->event_id_number;
+					$dataJ->group_name = $submission->group_name;
+					$dataJ->student_id = $submission->student_id;
+					$dataJ->uploaded_by_user_id = $user_id;
+					$dataJ->spelling_score = $score;
+					$dataJ->total_marks_possible = 50;
+					$dataJ->total_marks_obtained = $score;
+					$dataJ->did_not_attend = 0;
+					$dataJ->comments = '';
+					$dataJ->created = date('Y-m-d H:i:s');
+					$dataJ->modified = date('Y-m-d H:i:s');
+
+					$this->Judgeevaluations->save($dataJ);
+				}
+
+				$savedCount++;
+			}
+
+			$this->Flash->success('Spelling scores saved for '.$savedCount.' entr'.($savedCount == 1 ? 'y' : 'ies').'.');
+			$this->redirect(['controller' => 'conventionregistrations', 'action' => 'judgeevententries',$conv_reg_slug,$event_slug]);
+		}
+		else
+		if ($this->request->is('post') && $isPlaceRankingEvent)
+		{
+			$submissionIds = (array)$this->request->getData('place_submission_ids');
+			$savedCount = 0;
+
+			foreach($submissionIds as $submissionId)
+			{
+				$submissionId = (int)$submissionId;
+				if($submissionId <= 0)
+				{
+					continue;
+				}
+
+				$placeRaw = $this->request->getData('place_score_'.$submissionId);
+				if($placeRaw === null || $placeRaw === '')
+				{
+					continue;
+				}
+
+				$place = (int)$placeRaw;
+				if($place < 1)
+				{
+					$place = 1;
+				}
+				if($place > 4)
+				{
+					$place = 4;
+				}
+
+				$submission = $this->Eventsubmissions->find()->where([
+					'Eventsubmissions.id' => $submissionId,
+					'Eventsubmissions.event_id' => $eventD->id,
+					'Eventsubmissions.convention_id' => $conventionRegD->convention_id,
+					'Eventsubmissions.season_id' => $conventionRegD->season_id,
+					'Eventsubmissions.season_year' => $conventionRegD->season_year,
+				])->first();
+
+				if(empty($submission))
+				{
+					continue;
+				}
+
+				$condEvalJudge = array();
+				$condEvalJudge[] = "(Judgeevaluations.eventsubmission_id = '".$submission->id."')";
+				$condEvalJudge[] = "(Judgeevaluations.conventionregistration_id = '".$submission->conventionregistration_id."')";
+				$condEvalJudge[] = "(Judgeevaluations.event_id = '".$submission->event_id."')";
+				$condEvalJudge[] = "(Judgeevaluations.uploaded_by_user_id = '".$user_id."')";
+				$existingEval = $this->Judgeevaluations->find()->where($condEvalJudge)->first();
+
+				if($existingEval)
+				{
+					$this->Judgeevaluations->updateAll([
+						'all_pos_score' => $place,
+						'total_marks_possible' => 4,
+						'total_marks_obtained' => $place,
+						'spelling_score' => null,
+						'did_not_attend' => 0,
+						'modified' => date('Y-m-d H:i:s')
+					], ['id' => $existingEval->id]);
+				}
+				else
+				{
+					$judgeevaluations = $this->Judgeevaluations->newEntity();
+					$dataJ = $this->Judgeevaluations->patchEntity($judgeevaluations, array());
+
+					$dataJ->slug = "judge-event-evaluation-".$submission->id.'-'.time().'-'.rand(100,1000000);
+					$dataJ->eventsubmission_id = $submission->id;
+					$dataJ->conventionregistration_id = $submission->conventionregistration_id;
+					$dataJ->conventionseason_id = $submission->conventionseason_id;
+					$dataJ->convention_id = $submission->convention_id;
+					$dataJ->user_id = $submission->user_id;
+					$dataJ->season_id = $submission->season_id;
+					$dataJ->season_year = $submission->season_year;
+					$dataJ->event_id = $submission->event_id;
+					$dataJ->event_id_number = $submission->event_id_number;
+					$dataJ->group_name = $submission->group_name;
+					$dataJ->student_id = $submission->student_id;
+					$dataJ->uploaded_by_user_id = $user_id;
+					$dataJ->all_pos_score = $place;
+					$dataJ->total_marks_possible = 4;
+					$dataJ->total_marks_obtained = $place;
+					$dataJ->spelling_score = null;
+					$dataJ->did_not_attend = 0;
+					$dataJ->comments = '';
+					$dataJ->created = date('Y-m-d H:i:s');
+					$dataJ->modified = date('Y-m-d H:i:s');
+
+					$this->Judgeevaluations->save($dataJ);
+				}
+
+				$savedCount++;
+			}
+
+			$this->Flash->success('Placings saved for '.$savedCount.' entr'.($savedCount == 1 ? 'y' : 'ies').'.');
+			$this->redirect(['controller' => 'conventionregistrations', 'action' => 'judgeevententries',$conv_reg_slug,$event_slug]);
+		}
 
         $condition = array();
 		//$condition[] = "(Eventsubmissions.conventionregistration_id = '".$conventionRegD->id."')";

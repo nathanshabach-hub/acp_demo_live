@@ -153,19 +153,32 @@ class JudgeevaluationsController extends AppController {
             }
         }
 
+        // Build assigned events per judge from Conventionregistrations.judges_event_ids
         $assignedEventsByJudge = [];
-        $assignmentRows = $this->JudgingAssignments->find()
-            ->where(['JudgingAssignments.conventionseason_id' => $sess_admin_header_season_id])
-            ->all();
-        foreach($assignmentRows as $arow) {
-            $eventId = (int)$arow->event_id;
-            foreach(['judge1_user_id','judge2_user_id','judge3_user_id'] as $slotCol) {
-                $judgeId = (int)$arow->$slotCol;
-                if($judgeId > 0 && $eventId > 0) {
-                    if(!isset($assignedEventsByJudge[$judgeId])) {
-                        $assignedEventsByJudge[$judgeId] = [];
+        $convSeasonD = $this->Conventionseasons->find()->where(['Conventionseasons.id' => $sess_admin_header_season_id])->first();
+        if(!empty($convSeasonD)) {
+            $judgeRegs = $this->Conventionregistrations->find()
+                ->contain(['Users'])
+                ->where([
+                    'Conventionregistrations.convention_id' => $convSeasonD->convention_id,
+                    'Conventionregistrations.season_id'     => $convSeasonD->season_id,
+                    'Conventionregistrations.season_year'   => $convSeasonD->season_year,
+                ])
+                ->all();
+            foreach($judgeRegs as $reg) {
+                $userData = !empty($reg->Users) ? $reg->Users : (!empty($reg->user) ? $reg->user : null);
+                if(empty($userData)) continue;
+                $isJudge = ($userData['user_type'] == 'Judge') || ($userData['user_type'] == 'Teacher_Parent' && (int)$userData['is_judge'] === 1);
+                if(!$isJudge) continue;
+                $userId = (int)$reg->user_id;
+                if($userId <= 0) continue;
+                if(!empty($reg->judges_event_ids)) {
+                    foreach(explode(',', (string)$reg->judges_event_ids) as $rawId) {
+                        $eventId = (int)trim($rawId);
+                        if($eventId > 0) {
+                            $assignedEventsByJudge[$userId][$eventId] = true;
+                        }
                     }
-                    $assignedEventsByJudge[$judgeId][$eventId] = true;
                 }
             }
         }
@@ -175,24 +188,46 @@ class JudgeevaluationsController extends AppController {
             $assignedCountByJudge[(int)$judgeId] = count($eventsMap);
         }
 
+        // Fetch event names for all assigned event IDs
+        $allAssignedEventIds = [];
+        foreach($assignedEventsByJudge as $eventsMap) {
+            $allAssignedEventIds = array_merge($allAssignedEventIds, array_keys($eventsMap));
+        }
+        $allAssignedEventIds = array_unique($allAssignedEventIds);
+        $eventNamesById = [];
+        if(!empty($allAssignedEventIds)) {
+            $eventRows = $this->Events->find()->where(['Events.id IN' => $allAssignedEventIds])->all();
+            foreach($eventRows as $evrow) {
+                $eventNamesById[(int)$evrow->id] = $evrow->event_name . ' (' . $evrow->event_id_number . ')';
+            }
+        }
+
+        // Build judged event IDs per judge
         $judgedCountByJudge = [];
+        $judgedEventIdsByJudge = [];
         $judgedAgg = $this->Judgeevaluations->find();
         $judgedAgg = $judgedAgg
             ->select([
                 'Judgeevaluations.uploaded_by_user_id',
-                'judged_events' => $judgedAgg->func()->count('DISTINCT Judgeevaluations.event_id')
+                'Judgeevaluations.event_id',
             ])
             ->where($condition)
-            ->group(['Judgeevaluations.uploaded_by_user_id'])
+            ->group(['Judgeevaluations.uploaded_by_user_id', 'Judgeevaluations.event_id'])
             ->all();
         foreach($judgedAgg as $jrow) {
             $judgeId = (int)$jrow->uploaded_by_user_id;
-            if($judgeId > 0) {
-                $judgedCountByJudge[$judgeId] = (int)$jrow->judged_events;
+            $eventId = (int)$jrow->event_id;
+            if($judgeId > 0 && $eventId > 0) {
+                if (!isset($judgedEventIdsByJudge[$judgeId])) $judgedEventIdsByJudge[$judgeId] = [];
+                $judgedEventIdsByJudge[$judgeId][$eventId] = true;
             }
+        }
+        foreach($judgedEventIdsByJudge as $judgeId => $evMap) {
+            $judgedCountByJudge[$judgeId] = count($evMap);
         }
 
         $latestEvaluationByJudge = [];
+        $evaluationsByJudgeAndEvent = [];
         if(!empty($latestEvalIdByJudge)) {
             $latestEvalIds = array_values($latestEvalIdByJudge);
             $latestDetailedRows = $this->Judgeevaluations->find()
@@ -201,6 +236,24 @@ class JudgeevaluationsController extends AppController {
                 ->all();
             foreach($latestDetailedRows as $ldrow) {
                 $latestEvaluationByJudge[(int)$ldrow->uploaded_by_user_id] = $ldrow;
+            }
+        }
+        
+        // Fetch all evaluations per judge+event for the accordion icons
+        $allEvaluationsForJudges = $this->Judgeevaluations->find()
+            ->where($condition)
+            ->order(['Judgeevaluations.created' => 'DESC'])
+            ->all();
+        foreach($allEvaluationsForJudges as $evalRow) {
+            $judgeId = (int)$evalRow->uploaded_by_user_id;
+            $eventId = (int)$evalRow->event_id;
+            if($judgeId > 0 && $eventId > 0) {
+                if(!isset($evaluationsByJudgeAndEvent[$judgeId])) {
+                    $evaluationsByJudgeAndEvent[$judgeId] = [];
+                }
+                if(!isset($evaluationsByJudgeAndEvent[$judgeId][$eventId])) {
+                    $evaluationsByJudgeAndEvent[$judgeId][$eventId] = $evalRow;
+                }
             }
         }
 
@@ -237,10 +290,28 @@ class JudgeevaluationsController extends AppController {
                 $submittedDate = $latestEval->created;
             }
 
+            $assignedEventList = [];
+            $remainingEventList = [];
+            $judgedEventIds = isset($judgedEventIdsByJudge[$judgeId]) ? array_keys($judgedEventIdsByJudge[$judgeId]) : [];
+            $assignedEventIds = !empty($assignedEventsByJudge[$judgeId]) ? array_keys($assignedEventsByJudge[$judgeId]) : [];
+            foreach($assignedEventIds as $eid) {
+                $ename = isset($eventNamesById[$eid]) ? $eventNamesById[$eid] : ('Event #'.$eid);
+                $assignedEventList[] = ['id' => $eid, 'name' => $ename];
+                if (!in_array($eid, $judgedEventIds)) {
+                    $remainingEventList[] = ['id' => $eid, 'name' => $ename];
+                }
+            }
+            // Sort by name
+            usort($assignedEventList, function($a, $b) { return strcasecmp($a['name'], $b['name']); });
+            usort($remainingEventList, function($a, $b) { return strcasecmp($a['name'], $b['name']); });
+
             $evaluationUpdateRows[] = [
                 'judge_id' => $judgeId,
                 'judge_name' => isset($judgeNamesById[$judgeId]) ? $judgeNamesById[$judgeId] : ('Judge #'.$judgeId),
                 'registered_events' => $assignedCount,
+                'assigned_event_list' => $assignedEventList,
+                'remaining_event_list' => $remainingEventList,
+                'event_evaluations' => isset($evaluationsByJudgeAndEvent[$judgeId]) ? $evaluationsByJudgeAndEvent[$judgeId] : [],
                 'judged_events' => $judgedCount,
                 'not_judged_events' => $notJudgedCount,
                 'school_name' => $schoolName,
@@ -256,6 +327,130 @@ class JudgeevaluationsController extends AppController {
 
         $this->set('evaluationUpdateRows', $evaluationUpdateRows);
     }
+	
+	public function judgedetail($judge_id = null) {
+		$this->set('title', ADMIN_TITLE . 'Judge Details');
+		$this->viewBuilder()->setLayout('admin');
+		$this->set('judgeEvaluations', '1');
+		$this->set('judgeEvaluationsList', '1');
+		
+		if (!$judge_id) {
+			$this->Flash->error('Invalid judge ID.');
+			return $this->redirect(['action' => 'index']);
+		}
+		
+		$judge_id = (int)$judge_id;
+		
+		// Get session convention season
+		$sess_admin_header_season_id = $this->request->getSession()->read("sess_admin_header_season_id");
+		if($sess_admin_header_season_id <= 0) {
+			$this->Flash->error('Please select a Convention Season from the header first.');
+			return $this->redirect(['controller' => 'admins', 'action' => 'dashboard']);
+		}
+		
+		$condition = ["(Judgeevaluations.conventionseason_id = '".$sess_admin_header_season_id."')"];
+		
+		// Get judge name
+		$judge = $this->Users->find()->where(['Users.id' => $judge_id])->first();
+		if (!$judge) {
+			$this->Flash->error('Judge not found.');
+			return $this->redirect(['action' => 'index']);
+		}
+		$judgeName = trim($judge->first_name.' '.$judge->last_name);
+		
+		// Get convention season for context
+		$convSeasonD = $this->Conventionseasons->find()->where(['Conventionseasons.id' => $sess_admin_header_season_id])->first();
+		
+		// Get assigned events for this judge
+		$assignedEventsList = [];
+		$assignedEventIds = [];
+		if(!empty($convSeasonD)) {
+			$judgeRegs = $this->Conventionregistrations->find()
+				->where([
+					'Conventionregistrations.user_id' => $judge_id,
+					'Conventionregistrations.convention_id' => $convSeasonD->convention_id,
+					'Conventionregistrations.season_id'     => $convSeasonD->season_id,
+					'Conventionregistrations.season_year'   => $convSeasonD->season_year,
+				])
+				->all();
+			foreach($judgeRegs as $reg) {
+				if(!empty($reg->judges_event_ids)) {
+					foreach(explode(',', (string)$reg->judges_event_ids) as $rawId) {
+						$eventId = (int)trim($rawId);
+						if($eventId > 0) {
+							$assignedEventIds[$eventId] = true;
+						}
+					}
+				}
+			}
+		}
+		
+		// Get event details for assigned events
+		if(!empty($assignedEventIds)) {
+			$eventIds = array_keys($assignedEventIds);
+			$eventRows = $this->Events->find()->where(['Events.id IN' => $eventIds])->all();
+			foreach($eventRows as $evrow) {
+				$assignedEventsList[] = [
+					'id' => (int)$evrow->id,
+					'name' => $evrow->event_name . ' (' . $evrow->event_id_number . ')'
+				];
+			}
+			usort($assignedEventsList, function($a, $b) { 
+				return strcasecmp($a['name'], $b['name']); 
+			});
+		}
+		
+		// Get judged events for this judge
+		$judgedEventIds = [];
+		$judgedAgg = $this->Judgeevaluations->find();
+		$judgedAgg = $judgedAgg
+			->select([
+				'Judgeevaluations.event_id',
+			])
+			->where($condition + ['Judgeevaluations.uploaded_by_user_id' => $judge_id])
+			->group(['Judgeevaluations.event_id'])
+			->all();
+		foreach($judgedAgg as $jrow) {
+			$judgedEventIds[(int)$jrow->event_id] = true;
+		}
+		
+		// Fetch all evaluations per event for this judge
+		$evaluationsByEvent = [];
+		$allEvaluationsForJudge = $this->Judgeevaluations->find()
+			->where($condition + ['Judgeevaluations.uploaded_by_user_id' => $judge_id])
+			->contain(['Eventsubmissions','Conventions','Events','Students','Schools','Judge','Judgeevaluationmarks'])
+			->order(['Judgeevaluations.created' => 'DESC'])
+			->all();
+		foreach($allEvaluationsForJudge as $evalRow) {
+			$eventId = (int)$evalRow->event_id;
+			if($eventId > 0) {
+				if(!isset($evaluationsByEvent[$eventId])) {
+					$evaluationsByEvent[$eventId] = [];
+				}
+				$evaluationsByEvent[$eventId][] = $evalRow;
+			}
+		}
+		
+		// Build event details for display
+		$eventDetails = [];
+		foreach($assignedEventsList as $event) {
+			$eventId = (int)$event['id'];
+			$isJudged = isset($judgedEventIds[$eventId]);
+			$evaluations = isset($evaluationsByEvent[$eventId]) ? $evaluationsByEvent[$eventId] : [];
+			$eventDetails[] = [
+				'id' => $eventId,
+				'name' => $event['name'],
+				'is_judged' => $isJudged,
+				'evaluations' => $evaluations,
+				'evaluation_count' => count($evaluations),
+			];
+		}
+		
+		$this->set('judge_id', $judge_id);
+		$this->set('judge_name', $judgeName);
+		$this->set('eventDetails', $eventDetails);
+		$this->set('allEvaluations', $allEvaluationsForJudge);
+	}
 	
 	public function removejudgeevaluation($evaluation_slug=null) {
 		

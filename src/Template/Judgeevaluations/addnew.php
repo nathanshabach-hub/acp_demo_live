@@ -5,8 +5,13 @@ $this->Evaluationareas 			= TableRegistry::getTableLocator()->get('Evaluationare
 $this->Evaluationcategories 	= TableRegistry::getTableLocator()->get('Evaluationcategories');
 $this->Evaluationquestions 		= TableRegistry::getTableLocator()->get('Evaluationquestions');
 
+$judgingform = $judgingform ?? null;
+$checkEvalJudge = $checkEvalJudge ?? null;
+$selected_division_ids_explode = array();
+$selected_tag_ids_explode = array();
+
 $arrAlreadyData = array();
-if($checkEvalJudge->id>0)
+if(!empty($checkEvalJudge) && !empty($checkEvalJudge->id))
 {	
 	if(!empty($checkEvalJudge->division_ids))
 	{
@@ -18,7 +23,7 @@ if($checkEvalJudge->id>0)
 		$selected_tag_ids_explode = explode(",",$checkEvalJudge->tag_ids);
 	}
 	
-	foreach($checkEvalJudge->Judgeevaluationmarks as $evalmarks)
+	foreach(($checkEvalJudge->Judgeevaluationmarks ?? array()) as $evalmarks)
 	{
 		$arrAlreadyData[$evalmarks->question_id] = $evalmarks->question_marks_obtained;
 	}
@@ -193,7 +198,7 @@ $(document).ready(function () {
 										<div class="thirtyycolom">
 											<div class="halfcom"><?php echo $evalquestion->max_points; ?></div>
 											<div class="halfcom">
-												<input type="text" name="question_marks_obtained_<?php echo $cntrQuestOuter; ?>" id="question_marks_obtained_<?php echo $cntrQuestOuter; ?>" placeholder="" class="text-center calculateTotal" min="0" max="<?php echo $evalquestion->max_points; ?>" value="<?php echo $arrAlreadyData[$evalquestion->id]; ?>" />
+												<input type="text" name="question_marks_obtained_<?php echo $cntrQuestOuter; ?>" id="question_marks_obtained_<?php echo $cntrQuestOuter; ?>" placeholder="" class="text-center calculateTotal" min="0" max="<?php echo $evalquestion->max_points; ?>" value="<?php echo $arrAlreadyData[$evalquestion->id] ?? ''; ?>" />
 												
 												<input type="hidden" name="question_id_<?php echo $cntrQuestOuter; ?>" id="question_id_<?php echo $cntrQuestOuter; ?>" value="<?php echo $evalquestion->id; ?>" />
 												
@@ -228,7 +233,7 @@ $(document).ready(function () {
 									<div class="thirtyycolom" style="border-top:none;">
 										<div class="halfcom borderhide">-<?php echo $negativeQuestionD->max_points; ?></div>
 										<div class="halfcom borderhide" id="box_points_negative">
-											<input type="text" name="negative_question_marks_obtained" id="negative_question_marks_obtained" placeholder="" class="text-center calculateTotal" min="-<?php echo $negativeQuestionD->max_points; ?>" max="0" value="<?php echo $arrAlreadyData[$negativeQuestionD->id]; ?>" />
+											<input type="text" name="negative_question_marks_obtained" id="negative_question_marks_obtained" placeholder="" class="text-center calculateTotal" min="-<?php echo $negativeQuestionD->max_points; ?>" max="0" value="<?php echo $arrAlreadyData[$negativeQuestionD->id] ?? ''; ?>" />
 											
 											<input type="hidden" name="negative_question_id" id="negative_question_id" value="<?php echo $negativeQuestionD->id; ?>" />
 												
@@ -255,15 +260,15 @@ $(document).ready(function () {
 									<div class="seventycolom"><b>TOTAL POINTS</b></div>
 									<div class="thirtyycolom">
 										<div class="halfcom borderhide"><?php echo $totalPossiblePoints; ?></div>
-										<div class="halfcom borderhide" id="box_points_allotted"><?php echo $checkEvalJudge->total_marks_obtained; ?></div>
-										<input type="hidden" id="calc_points_allotted" name="calc_points_allotted" value="<?php echo $checkEvalJudge->total_marks_obtained; ?>" />
+										<div class="halfcom borderhide" id="box_points_allotted"><?php echo $checkEvalJudge->total_marks_obtained ?? ''; ?></div>
+										<input type="hidden" id="calc_points_allotted" name="calc_points_allotted" value="<?php echo $checkEvalJudge->total_marks_obtained ?? ''; ?>" />
 									</div>
 								</div>
 								
 								
 								
 								<div class="comments">
-									<textarea placeholder="COMMENT:" name="comments" id="comments"><?php echo $checkEvalJudge->comments; ?></textarea>
+									<textarea placeholder="COMMENT:" name="comments" id="comments"><?php echo $checkEvalJudge->comments ?? ''; ?></textarea>
 								</div>
 								<div class="footerpart">
 									<div class="judgename">
