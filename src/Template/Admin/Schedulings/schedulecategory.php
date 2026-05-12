@@ -41,8 +41,6 @@ $this->Schedulingtimings = TableRegistry::getTableLocator()->get('Schedulingtimi
                 </ul>
             </div>
         </div>
-			
-        </div>
 
         <!-- Status Bar -->
         <?php
