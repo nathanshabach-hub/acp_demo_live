@@ -18,6 +18,7 @@ $active_changepassword = $active_changepassword ?? '';
 $active_applyforjudge = $active_applyforjudge ?? '';
 $active_judgeexp = $active_judgeexp ?? '';
 $active_cr_judgeevents = $active_cr_judgeevents ?? '';
+ $active_conference_registrations = $active_conference_registrations ?? '';
 
 // school admin left menu
 if ($this->request->getSession()->read("user_id") > 0 && ($this->request->getSession()->read("user_type") == "School"))
@@ -39,13 +40,15 @@ if ($this->request->getSession()->read("user_id") > 0 && ($this->request->getSes
 					<?php echo $this->Html->link('Global Student List', ['controller' => 'users', 'action' => 'students'], ['escape' => false, 'class' => 'nav-link ' . $active_students]); ?>
 				</li>
 				<li class="nav-item dash-item ">
-					<?php echo $this->Html->link('Convention Registrations', ['controller' => 'conventionregistrations', 'action' => 'myregistrations'], ['escape' => false, 'class' => 'nav-link ' . $active_convention_registrations]); ?>
-				</li>
-				
-				
-				<?php
-				// to show links related to convention registrations
-				if($this->request->getSession()->read("sess_selected_convention_registration_id")>0)
+				<?php echo $this->Html->link('Conference', ['controller' => 'conventionregistrations', 'action' => 'myconferenceregistrations'], ['escape' => false, 'class' => 'nav-link ' . $active_conference_registrations]); ?>
+			</li>
+			<li class="nav-item dash-item ">
+			<?php echo $this->Html->link('Convention Registrations', ['controller' => 'conventionregistrations', 'action' => 'myregistrations'], ['escape' => false, 'class' => 'nav-link ' . $active_convention_registrations]); ?>
+		</li>
+		
+		<?php
+		// to show links related to convention registrations
+		if($this->request->getSession()->read("sess_selected_convention_registration_id")>0)
 				{
 				?>
 				<hr>

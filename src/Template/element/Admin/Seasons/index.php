@@ -1,14 +1,21 @@
 <div class="admin_loader" id="loaderID"><?php echo $this->Html->image('loader_large_blue.gif');?></div>
+<?php
+$isConferenceScope = !empty($isConferenceScope);
+$indexUrl = ['controller' => 'seasons', 'action' => 'index', $separator];
+if ($isConferenceScope) {
+    $indexUrl['?'] = ['scope' => 'conference'];
+}
+?>
 <?php if (!$seasons->isEmpty()) { ?> 
     <div class="panel-body">
         <div class="ersu_message"> <?php echo $this->Flash->render() ?></div>
         <?php echo $this->Form->create(null, ['id'=>'actionFrom', "method" => "Post"]);  ?>
         <section id="no-more-tables" class="lstng-section">
             <div class="topn">
-                <div class="topn_left">Seasons List</div>
+                <div class="topn_left"><?php echo $isConferenceScope ? 'Conference Years List' : 'Seasons List'; ?></div>
                 <div class="topn_right ajshort" id="pagingLinks" align="right">
                     <?php 
-                        $this->Paginator->options(array('update' => '#listID', 'url' => ['controller'=>'seasons', 'action'=>'index', $separator]));
+                        $this->Paginator->options(array('update' => '#listID', 'url' => $indexUrl));
                         echo $this->Paginator->counter('{{page}} of {{pages}} &nbsp;');
                         echo $this->Paginator->prev('« Prev');
                         echo $this->Paginator->numbers();
@@ -47,7 +54,7 @@
                                     </span>
                                     
                                     <?php //echo $this->Html->link('<i class="fa fa-pencil"></i>', ['controller' => 'seasons', 'action' => 'edit',$datarecord->slug], [ 'escape' => false, 'title' => 'Edit', 'class'=>'btn btn-primary btn-xs']); ?>
-                                    <?php echo $this->Html->link('<i class="fa fa-trash-o"></i>', ['controller' => 'seasons', 'action' => 'deleteseason',$datarecord->slug], [ 'escape' => false, 'title' => 'Delete', 'class'=>'btn btn-danger btn-xs action-list delete-list', 'confirm' => 'Are you sure you want to delete this season ?']); ?>
+                                    <?php echo $this->Html->link('<i class="fa fa-trash-o"></i>', ['controller' => 'seasons', 'action' => 'deleteseason',$datarecord->slug, '?' => ($isConferenceScope ? ['scope' => 'conference'] : [])], [ 'escape' => false, 'title' => 'Delete', 'class'=>'btn btn-danger btn-xs action-list delete-list', 'confirm' => 'Are you sure you want to delete this season ?']); ?>
                                 </td>
                             </tr>
                         <?php } ?>

@@ -306,6 +306,172 @@ class AdminsController extends AppController {
 
     }
 
+    public function conference() {
+        $this->set('title', ADMIN_TITLE . 'Conference Dashboard');
+        $this->viewBuilder()->setLayout('admin');
+        $this->set('manageConference', '1');
+        $this->set('conferenceDashboard', '1');
+
+        $conferenceLabel = 'All Conferences';
+
+        // Filter for conference-type conventions only
+        $totalRegistrations = $this->Conventionregistrations->find()
+            ->matching('Conventions', function ($q) {
+                return $q->where(['Conventions.convention_type' => 1]);
+            })
+            ->count();
+
+        $schoolsEnrolled = $this->Conventionregistrations->find()
+            ->select(['Conventionregistrations.user_id'])
+            ->distinct(['Conventionregistrations.user_id'])
+            ->matching('Conventions', function ($q) {
+                return $q->where(['Conventions.convention_type' => 1]);
+            })
+            ->matching('Users', function ($q) {
+                return $q->where(['Users.user_type' => 'School']);
+            })
+            ->count();
+
+        $activeConferences = $this->Conventions->find()->where(['Conventions.status' => 1, 'Conventions.convention_type' => 1])->count();
+
+        $approvedRegistrations = $this->Conventionregistrations->find()
+            ->where(['Conventionregistrations.status' => 1])
+            ->matching('Conventions', function ($q) {
+                return $q->where(['Conventions.convention_type' => 1]);
+            })
+            ->count();
+        $attendanceRate = $totalRegistrations > 0 ? (int)round(($approvedRegistrations * 100) / $totalRegistrations) : 0;
+
+        $startMonth = new \DateTime(date('Y-m-01', strtotime('-5 months')));
+        $monthLabels = [];
+        $monthKeys = [];
+        for ($i = 0; $i < 6; $i++) {
+            $monthLabels[] = $startMonth->format('M');
+            $monthKeys[] = $startMonth->format('Y-m');
+            $startMonth->modify('+1 month');
+        }
+
+        $trendQuery = $this->Conventionregistrations->find()
+            ->select([
+                'month_key' => "DATE_FORMAT(Conventionregistrations.created, '%Y-%m')",
+                'total' => 'COUNT(Conventionregistrations.id)',
+            ])
+            ->matching('Conventions', function ($q) {
+                return $q->where(['Conventions.convention_type' => 1]);
+            })
+            ->where(['Conventionregistrations.created >=' => date('Y-m-01', strtotime('-5 months'))])
+            ->group(['month_key'])
+            ->order(['month_key' => 'ASC'])
+            ->enableHydration(false)
+            ->toArray();
+
+        $trendMap = [];
+        foreach ($trendQuery as $row) {
+            $trendMap[$row['month_key']] = (int)$row['total'];
+        }
+
+        $trendValues = [];
+        foreach ($monthKeys as $key) {
+            $trendValues[] = $trendMap[$key] ?? 0;
+        }
+
+        $schoolRegistrations = $this->Conventionregistrations->find()
+            ->select(['Conventionregistrations.user_id'])
+            ->distinct(['Conventionregistrations.user_id'])
+            ->contain(['Users'])
+            ->matching('Conventions', function ($q) {
+                return $q->where(['Conventions.convention_type' => 1]);
+            })
+            ->matching('Users', function ($q) {
+                return $q->where(['Users.user_type' => 'School']);
+            })
+            ->all();
+
+        $locationMap = [];
+        $schoolList = [];
+        foreach ($schoolRegistrations as $record) {
+            if (empty($record->Users)) {
+                continue;
+            }
+            $city = trim((string)$record->Users['bill_to_city']);
+            $country = trim((string)$record->Users['bill_to_country']);
+            $location = trim(($city !== '' ? $city : 'Unknown City') . ' - ' . ($country !== '' ? $country : 'Unknown Country'));
+            $locationMap[$location] = ($locationMap[$location] ?? 0) + 1;
+
+            $schoolList[$record->user_id] = [
+                'name' => trim((string)$record->Users['first_name'] . ' ' . (string)$record->Users['last_name']),
+                'user_id' => (int)$record->user_id,
+            ];
+        }
+
+        arsort($locationMap);
+        $locationData = [];
+        $locCounter = 0;
+        foreach ($locationMap as $location => $count) {
+            $locationData[] = ['label' => $location, 'value' => $count];
+            $locCounter++;
+            if ($locCounter >= 10) {
+                break;
+            }
+        }
+
+        $transactions = $this->Transactions->find()
+            ->select(['Transactions.user_id', 'Transactions.status', 'Transactions.id'])
+            ->order(['Transactions.id' => 'DESC'])
+            ->enableHydration(false)
+            ->toArray();
+
+        $latestTransactionBySchool = [];
+        foreach ($transactions as $transaction) {
+            $userId = (int)$transaction['user_id'];
+            if ($userId <= 0 || isset($latestTransactionBySchool[$userId])) {
+                continue;
+            }
+            $latestTransactionBySchool[$userId] = (int)$transaction['status'];
+        }
+
+        $invoiceStatusRows = [];
+        foreach ($schoolList as $school) {
+            $status = 'Not Invoiced';
+            if (isset($latestTransactionBySchool[$school['user_id']])) {
+                $txStatus = (int)$latestTransactionBySchool[$school['user_id']];
+                if ($txStatus === 2 || $txStatus === 3) {
+                    $status = 'Paid';
+                } else {
+                    $status = 'Sent';
+                }
+            }
+            $invoiceStatusRows[] = [
+                'name' => $school['name'] !== '' ? $school['name'] : ('School #' . $school['user_id']),
+                'status' => $status,
+            ];
+        }
+        usort($invoiceStatusRows, function ($a, $b) {
+            return strcmp($a['name'], $b['name']);
+        });
+        $invoiceStatusRows = array_slice($invoiceStatusRows, 0, 40);
+
+        $recentRegistrations = $this->Conventionregistrations->find()
+            ->matching('Conventions', function ($q) {
+                return $q->where(['Conventions.convention_type' => 1]);
+            })
+            ->contain(['Users'])
+            ->order(['Conventionregistrations.created' => 'DESC'])
+            ->limit(5)
+            ->all();
+
+        $this->set('conferenceLabel', $conferenceLabel);
+        $this->set('totalRegistrations', $totalRegistrations);
+        $this->set('schoolsEnrolled', $schoolsEnrolled);
+        $this->set('activeConferences', $activeConferences);
+        $this->set('attendanceRate', $attendanceRate);
+        $this->set('trendLabels', $monthLabels);
+        $this->set('trendValues', $trendValues);
+        $this->set('locationData', $locationData);
+        $this->set('invoiceStatusRows', $invoiceStatusRows);
+        $this->set('recentRegistrations', $recentRegistrations);
+    }
+
 	public function runninglist() {
 		$this->set('title', ADMIN_TITLE . 'Running List');
 		$this->viewBuilder()->setLayout('admin');
@@ -541,6 +707,57 @@ class AdminsController extends AppController {
 		fclose($out);
 		$this->response = $this->response->withStringBody($csv);
 		return $this->response;
+	}
+
+	public function addConference() {
+		$this->set('title', ADMIN_TITLE . 'Add Conference');
+		$this->viewBuilder()->setLayout('admin');
+		$this->set('manageConference', '1');
+
+		$convention = $this->Conventions->newEntity();
+		
+		// Load Seasons for selection
+		$seasons = $this->Seasons->find('list', ['keyField' => 'id', 'valueField' => 'season_year'])->toArray();
+		$this->set('seasons', $seasons);
+
+		if ($this->request->is('post')) {
+			$data = $this->request->getData();
+			
+			// Ensure convention_type is set to 1 (conference)
+			$data['convention_type'] = 1;
+			$data['status'] = 1;
+			$data['created'] = new \DateTime();
+			$data['modified'] = new \DateTime();
+			
+			// Generate slug from name
+			if (!empty($data['name'])) {
+				$data['slug'] = strtolower(preg_replace('/[^a-z0-9]+/', '-', $data['name'])) . '-' . time();
+			}
+			
+			$convention = $this->Conventions->patchEntity($convention, $data);
+			
+			if ($this->Conventions->save($convention)) {
+				// If season_id is provided, link the convention to the season
+				if (!empty($data['season_id'])) {
+					$seasonD = $this->Seasons->find()->where(['Seasons.id' => $data['season_id']])->first();
+					if ($seasonD) {
+						$conventionseason = $this->Conventionseasons->newEntity([
+							'convention_id' => $convention->id,
+							'season_id' => $data['season_id'],
+							'season_year' => $seasonD->season_year
+						]);
+						$this->Conventionseasons->save($conventionseason);
+					}
+				}
+				
+				$this->Flash->success('Conference added successfully.');
+				$this->redirect(['action' => 'conference']);
+			} else {
+				$this->Flash->error('Unable to add conference. Please try again.');
+			}
+		}
+		
+		$this->set('convention', $convention);
 	}
 
     public function changeEmail() {

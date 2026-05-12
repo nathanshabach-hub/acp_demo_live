@@ -24,8 +24,6 @@ if($userDetails->user_type == 'School')
 			</div>
 			
 			
-			<?php if (!$remainingconventions->isEmpty()) { ?>
-			
 			<hr>
 			
 			<div class="teachers-top-heading">
@@ -36,8 +34,6 @@ if($userDetails->user_type == 'School')
 			<div class="m_content" id="listID">
 				<?php echo $this->element("Conventionregistrations/remainingconventions"); ?>
 			</div>
-			
-			<?php } ?>
 			
 			
 			<!-- to show past registrations -->
@@ -64,7 +60,7 @@ if($userDetails->user_type == 'School')
 
 
 <?php
-if($userDetails->user_type == 'Judge' || $this->request->getSession()->read("current_session_profile_type") == 'Judge')
+if($userDetails->user_type != 'School' && ($userDetails->user_type == 'Judge' || $this->request->getSession()->read("current_session_profile_type") == 'Judge'))
 {
 ?>
 <div class="container-fluid p-0">
@@ -87,8 +83,6 @@ if($userDetails->user_type == 'Judge' || $this->request->getSession()->read("cur
 			</div>
 			
 			
-			<?php if (!$remainingconventions->isEmpty()) { ?> 
-			
 			<hr>
 			
 			<div class="teachers-top-heading">
@@ -99,8 +93,6 @@ if($userDetails->user_type == 'Judge' || $this->request->getSession()->read("cur
 			<div class="m_content" id="listID">
 				<?php echo $this->element("Conventionregistrations/judgesremainingconventions"); ?>
 			</div>
-			
-			<?php } ?> 
 
 		</main>
 	</div>

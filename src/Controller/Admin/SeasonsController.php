@@ -30,10 +30,18 @@ class SeasonsController extends AppController {
 
     public function index() {
 
-        $this->set('title', ADMIN_TITLE . 'Manage Seasons');
+        $isConferenceScope = ($this->request->getQuery('scope') === 'conference');
+        $this->set('isConferenceScope', $isConferenceScope);
+
+        $this->set('title', ADMIN_TITLE . ($isConferenceScope ? 'Manage Conference Years' : 'Manage Seasons'));
         $this->viewBuilder()->setLayout('admin');
-        $this->set('manageSeasons', '1');
-        $this->set('seasonList', '1');
+        if ($isConferenceScope) {
+            $this->set('manageConference', '1');
+            $this->set('conferenceYearsList', '1');
+        } else {
+            $this->set('manageSeasons', '1');
+            $this->set('seasonList', '1');
+        }
 
         $separator = array();
         $condition = array();
@@ -92,6 +100,8 @@ class SeasonsController extends AppController {
     }
 
     public function deleteseason($slug = null) {
+
+        $isConferenceScope = ($this->request->getQuery('scope') === 'conference');
         
 		// first check that this season exists
 		$seasonD = $this->Seasons->find()->where(['Seasons.slug' => $slug])->first();
@@ -129,15 +139,27 @@ class SeasonsController extends AppController {
 		}
 		
 		
-        $this->redirect(['controller' => 'seasons', 'action' => 'index']);
+        $redirectUrl = ['controller' => 'seasons', 'action' => 'index'];
+        if ($isConferenceScope) {
+            $redirectUrl['?'] = ['scope' => 'conference'];
+        }
+        $this->redirect($redirectUrl);
     }
 
     public function add() {
-        $this->set('title', ADMIN_TITLE . 'Add Season');
+        $isConferenceScope = ($this->request->getQuery('scope') === 'conference');
+        $this->set('isConferenceScope', $isConferenceScope);
+
+        $this->set('title', ADMIN_TITLE . ($isConferenceScope ? 'Add Conference Year' : 'Add Season'));
         $this->viewBuilder()->setLayout('admin');
-		
-        $this->set('manageSeasons', '1');
-        $this->set('seasonAdd', '1');
+
+        if ($isConferenceScope) {
+            $this->set('manageConference', '1');
+            $this->set('conferenceYearsAdd', '1');
+        } else {
+            $this->set('manageSeasons', '1');
+            $this->set('seasonAdd', '1');
+        }
 		
         $seasons = $this->Seasons->newEntity();
         if ($this->request->is('post')) {
@@ -165,7 +187,11 @@ class SeasonsController extends AppController {
                 $data->modified = date('Y-m-d H:i:s');
                 if ($this->Seasons->save($data)) {
                     $this->Flash->success('Season added successfully.');
-                    $this->redirect(['controller' => 'seasons', 'action' => 'index']);
+                    $redirectUrl = ['controller' => 'seasons', 'action' => 'index'];
+                    if ($isConferenceScope) {
+                        $redirectUrl['?'] = ['scope' => 'conference'];
+                    }
+                    $this->redirect($redirectUrl);
                 }
             } else {
                 // $this->Flash->error('Please below listed errors.');

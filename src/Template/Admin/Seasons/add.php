@@ -35,15 +35,23 @@
     #ui-datepicker-div button.ui-datepicker-current {display: none;}
 </style>
 
+<?php
+$isConferenceScope = ($this->request->getQuery('scope') === 'conference');
+$indexUrl = ['controller' => 'seasons', 'action' => 'index'];
+if ($isConferenceScope) {
+    $indexUrl['?'] = ['scope' => 'conference'];
+}
+?>
+
 <div class="content-wrapper">
     <section class="content-header">
       <h1>
-         Add Season
+         <?php echo $isConferenceScope ? 'Add Conference Year' : 'Add Season'; ?>
       </h1>
       <ol class="breadcrumb">
           <li><?php echo $this->Html->link('<i class="fa fa-dashboard"></i> <span>Dashboard</span> ', ['controller'=>'admins', 'action'=>'dashboard'], ['escape'=>false]);?></li>
-          <li><?php echo $this->Html->link('<i class="fa fa-bullhorn"></i> Seasons ', ['controller'=>'seasons', 'action'=>'index'], ['escape'=>false]);?></li>
-          <li class="active">Add Season </li>
+          <li><?php echo $this->Html->link('<i class="fa fa-bullhorn"></i> ' . ($isConferenceScope ? 'Conference Years' : 'Seasons') . ' ', $indexUrl, ['escape'=>false]);?></li>
+          <li class="active"><?php echo $isConferenceScope ? 'Add Conference Year' : 'Add Season'; ?> </li>
       </ol>
     </section>
 
@@ -67,7 +75,7 @@
                     <div class="box-footer">
                         <label class="col-sm-2 control-label" for="inputPassword3">&nbsp;</label>
                         <?php echo $this->Form->button('Save', ['type'=>'submit', 'class' => 'btn btn-info', 'div'=>false]); ?>
-						<?php echo $this->Html->link('Cancel', ['controller'=>'seasons', 'action' => 'index'], ['class'=>'btn btn-default canlcel_le']); ?>
+                        <?php echo $this->Html->link('Cancel', $indexUrl, ['class'=>'btn btn-default canlcel_le']); ?>
                         <?php //echo $this->Form->button('Reset', ['type'=>'reset', 'class' => 'btn btn-default canlcel_le', 'div'=>false]); ?>
                     </div>
                   </div>

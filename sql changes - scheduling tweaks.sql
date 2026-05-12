@@ -7,6 +7,7 @@
 -- A: pinned_day        – restrict event to a specific day of the week
 -- B: pinned_room_id    – force a specific room (overrides auto room assignment)
 -- C: pinned_start_time – force a specific start time for this event's block
+-- D: available_from_time / available_to_time – event-level availability window
 -- (D and E handled below via conventionrooms and editschedulingtimings)
 
 CREATE TABLE IF NOT EXISTS `schedulingeventtweaks` (
@@ -15,6 +16,8 @@ CREATE TABLE IF NOT EXISTS `schedulingeventtweaks` (
   `event_id`            int(10)      DEFAULT NULL,
   `pinned_day`          varchar(50)  DEFAULT NULL  COMMENT 'A: Day to schedule on (e.g. Monday)',
   `pinned_start_time`   time         DEFAULT NULL  COMMENT 'C: Override start time for this event block',
+  `available_from_time` time         DEFAULT NULL  COMMENT 'D: Event can only start from this time',
+  `available_to_time`   time         DEFAULT NULL  COMMENT 'D: Event must finish by this time',
   `pinned_room_id`      int(10)      DEFAULT NULL  COMMENT 'B: Force specific room_id',
   `created`             datetime     DEFAULT NULL,
   `modified`            datetime     DEFAULT NULL,
@@ -29,3 +32,10 @@ CREATE TABLE IF NOT EXISTS `schedulingeventtweaks` (
 ALTER TABLE `conventionrooms`
   ADD COLUMN `available_from` time DEFAULT NULL COMMENT 'D: Room available from (blank = use convention start)',
   ADD COLUMN `available_to`   time DEFAULT NULL COMMENT 'D: Room available to (blank = use convention finish)';
+
+
+-- Event-level availability window per convention season
+-- Run if these columns do not already exist.
+ALTER TABLE `schedulingeventtweaks`
+  ADD COLUMN `available_from_time` time DEFAULT NULL COMMENT 'D: Event can only start from this time',
+  ADD COLUMN `available_to_time`   time DEFAULT NULL COMMENT 'D: Event must finish by this time';

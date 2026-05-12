@@ -80,23 +80,15 @@ private $scheduleWindowWarningShown = false;
 		// to list all schedulings
 		$schedulingTimingsList = $this->Schedulingtimings->find()->where(['Schedulingtimings.conventionseasons_id' => $conventionSD->id,'Schedulingtimings.convention_id' => $conventionSD->convention_id,'Schedulingtimings.season_id' => $conventionSD->season_id,'Schedulingtimings.season_year' => $conventionSD->season_year,'Schedulingtimings.schedule_category' => $scheduling_category])->contain(["Events","Users","Conventionrooms","Opponentuser"])->order(["Schedulingtimings.id" => "ASC"])->all();
 		$this->set('schedulingTimingsList', $schedulingTimingsList);
+		$this->set('pendingEventsToRoomsList', []);
     }
 
     public function startschedulec1($convention_season_slug=null) {
         
 		
         $this->set('convention_season_slug', $convention_season_slug);
-		$this->request->getSession()->delete('Scheduling.windowWarningShown');
-		$this->scheduleWindowWarningShown = false;
 		
 		$conventionSD = $this->Conventionseasons->find()->where(['Conventionseasons.slug' => $convention_season_slug])->contain(["Conventions"])->first();
-		
-		// first of all clear all scheduling for this category & convention, season
-		/* $this->Schedulingtimings->deleteAll(["schedule_category" => 1, "conventionseasons_id" => $conventionSD->id, "convention_id" => $conventionSD->convention_id, "season_id" => $conventionSD->season_id, "season_year" => $conventionSD->season_year]); */
-		
-		/* We need to clear all scheduling for this convention season + clear conflicts */
-		$this->clearSchedulingtimings($convention_season_slug);
-		
 		
 		// to get details of schedule timings
 		$schedulingsD = $this->Schedulings->find()->where(["Schedulings.conventionseasons_id" => $conventionSD->id, "Schedulings.convention_id" => $conventionSD->convention_id, "Schedulings.season_id" => $conventionSD->season_id, "Schedulings.season_year" => $conventionSD->season_year])->first();
@@ -424,7 +416,7 @@ private $scheduleWindowWarningShown = false;
 						
 						
 						/* Validate slot against all break periods (lunch, judging, sports) with loop to prevent blind jumps */
-						$validSlot = $this->findValidSlot($start_time, $finish_time, $schDay, $schStartDate, $cntrDays, $normal_starting_time, $normal_finish_time, $eventSetupRoundJudTime, $schedulingsD, $lunch_time_start, $lunch_time_end, $roomID);
+						$validSlot = $this->findValidSlot($start_time, $finish_time, $schDay, $schStartDate, $cntrDays, $normal_starting_time, $normal_finish_time, $eventSetupRoundJudTime, $schedulingsD, $lunch_time_start, $lunch_time_end, $roomID, (int)$eventIDCS);
 						if (!empty($validSlot['window_exhausted'])) {
 							$windowExceeded = true;
 							$this->flashConventionWindowExceeded($schedulingsD);
@@ -514,7 +506,7 @@ private $scheduleWindowWarningShown = false;
 		//exit;
 		
 		//$this->Flash->success($msgSuccess);
-		$this->redirect(['controller' => 'schedulingtimings', 'action' => 'startschedulec2', $convention_season_slug]);
+		$this->redirect(['controller' => 'schedulingtimings', 'action' => 'fillgroupuserids', $convention_season_slug]);
 		
     }
 	
@@ -1037,7 +1029,7 @@ private $scheduleWindowWarningShown = false;
 					
 					
 					/* Validate slot against all break periods (lunch, judging, sports) with loop to prevent blind jumps */
-					$validSlot = $this->findValidSlot($start_time, $finish_time, $schDay, $schStartDate, $cntrDays, $normal_starting_time, $normal_finish_time, $eventSetupRoundJudTime, $schedulingsD, $lunch_time_start, $lunch_time_end, $roomID);
+					$validSlot = $this->findValidSlot($start_time, $finish_time, $schDay, $schStartDate, $cntrDays, $normal_starting_time, $normal_finish_time, $eventSetupRoundJudTime, $schedulingsD, $lunch_time_start, $lunch_time_end, $roomID, (int)$event_id);
 					if (!empty($validSlot['window_exhausted'])) {
 						$windowExceeded = true;
 						$this->flashConventionWindowExceeded($schedulingsD);
@@ -1677,7 +1669,7 @@ private $scheduleWindowWarningShown = false;
 					
 					
 					/* Validate slot against all break periods (lunch, judging, sports) with loop to prevent blind jumps */
-					$validSlot = $this->findValidSlot($start_time, $finish_time, $schDay, $schStartDate, $cntrDays, $normal_starting_time, $normal_finish_time, $eventSetupRoundJudTime, $schedulingsD, $lunch_time_start, $lunch_time_end, $roomID);
+					$validSlot = $this->findValidSlot($start_time, $finish_time, $schDay, $schStartDate, $cntrDays, $normal_starting_time, $normal_finish_time, $eventSetupRoundJudTime, $schedulingsD, $lunch_time_start, $lunch_time_end, $roomID, (int)$event_id);
 					if (!empty($validSlot['window_exhausted'])) {
 						$windowExceeded = true;
 						$this->flashConventionWindowExceeded($schedulingsD);
@@ -1731,14 +1723,28 @@ private $scheduleWindowWarningShown = false;
 		//echo $cntrEVSCH;exit;
 		
 		//$this->Flash->success('Scheduling completed successfully for category 3.');
-		$this->redirect(['controller' => 'schedulingtimings', 'action' => 'startschedulec4', $convention_season_slug]);
+		$this->redirect(['controller' => 'schedulingtimings', 'action' => 'startschedulec1', $convention_season_slug]);
 		
 	}
 	
 	
 	public function startschedulec4($convention_season_slug=null) {
+		@set_time_limit(0);
+		@ini_set('max_execution_time', '0');
+		$this->set('convention_season_slug', $convention_season_slug);
+		$this->request->getSession()->delete('Scheduling.windowWarningShown');
+		$this->scheduleWindowWarningShown = false;
+		$defaultConnection = ConnectionManager::get('default');
+		if (method_exists($defaultConnection, 'enableQueryLogging')) {
+			$defaultConnection->enableQueryLogging(false);
+		} elseif (method_exists($defaultConnection, 'logQueries')) {
+			$defaultConnection->logQueries(false);
+		}
 		
 		$conventionSD = $this->Conventionseasons->find()->where(['Conventionseasons.slug' => $convention_season_slug])->contain(["Conventions"])->first();
+
+		/* Start a fresh full run now that Category 4 is first in chain */
+		$this->clearSchedulingtimings($convention_season_slug);
 		
 		//$this->prx($conventionSD);
 		
@@ -2079,7 +2085,7 @@ private $scheduleWindowWarningShown = false;
 					
 					
 					/* Validate slot against all break periods (lunch, judging, sports) with loop to prevent blind jumps */
-					$validSlot = $this->findValidSlot($start_time, $finish_time, $schDay, $schStartDate, $cntrDays, $normal_starting_time, $normal_finish_time, $eventSetupRoundJudTime, $schedulingsD, $lunch_time_start, $lunch_time_end, $roomID);
+					$validSlot = $this->findValidSlot($start_time, $finish_time, $schDay, $schStartDate, $cntrDays, $normal_starting_time, $normal_finish_time, $eventSetupRoundJudTime, $schedulingsD, $lunch_time_start, $lunch_time_end, $roomID, (int)$event_id);
 					if (!empty($validSlot['window_exhausted'])) {
 						$windowExceeded = true;
 						$this->flashConventionWindowExceeded($schedulingsD);
@@ -2133,7 +2139,7 @@ private $scheduleWindowWarningShown = false;
 							$finish_time 	= date("H:i:s", strtotime('+ '.$eventSetupRoundJudTime.' minutes', strtotime($normal_starting_time)));
 						}
 
-						$validSlot = $this->findValidSlot($start_time, $finish_time, $schDay, $schStartDate, $cntrDays, $normal_starting_time, $normal_finish_time, $eventSetupRoundJudTime, $schedulingsD, $lunch_time_start, $lunch_time_end, $roomID);
+						$validSlot = $this->findValidSlot($start_time, $finish_time, $schDay, $schStartDate, $cntrDays, $normal_starting_time, $normal_finish_time, $eventSetupRoundJudTime, $schedulingsD, $lunch_time_start, $lunch_time_end, $roomID, (int)$event_id);
 						if (!empty($validSlot['window_exhausted'])) {
 							$windowExceeded = true;
 							$this->flashConventionWindowExceeded($schedulingsD);
@@ -2181,7 +2187,7 @@ private $scheduleWindowWarningShown = false;
 		}
 		
 		//$this->Flash->success('Scheduling done for category 4.');
-		$this->redirect(['controller' => 'schedulingtimings', 'action' => 'fillgroupuserids', $convention_season_slug]);
+		$this->redirect(['controller' => 'schedulingtimings', 'action' => 'startschedulec2', $convention_season_slug]);
 		
 	}
 	
@@ -2763,13 +2769,30 @@ private $scheduleWindowWarningShown = false;
 	 * Loops until the slot is clean — fixes the "blind jump" bug where sequential break checks
 	 * could skip over a break after being pushed past another one.
 	 */
-	private function findValidSlot($start_time, $finish_time, $schDay, $schStartDate, $cntrDays, $normal_starting_time, $normal_finish_time, $eventSetupRoundJudTime, $schedulingsD, $lunch_time_start, $lunch_time_end, $roomID = null)
+	private function findValidSlot($start_time, $finish_time, $schDay, $schStartDate, $cntrDays, $normal_starting_time, $normal_finish_time, $eventSetupRoundJudTime, $schedulingsD, $lunch_time_start, $lunch_time_end, $roomID = null, $eventID = null)
 	{
 		$maxIterations = 20;
 		$iteration = 0;
 		$windowExhausted = false;
 		$roomAvailableFrom = null;
 		$roomAvailableTo = null;
+		$eventAvailableFrom = null;
+		$eventAvailableTo = null;
+
+		if (!empty($eventID)) {
+			$eventTweak = $this->Schedulingeventtweaks->find()->where([
+				'Schedulingeventtweaks.conventionseasons_id' => $schedulingsD->conventionseasons_id,
+				'Schedulingeventtweaks.event_id' => (int)$eventID,
+			])->first();
+			if ($eventTweak) {
+				if (!empty($eventTweak->available_from_time)) {
+					$eventAvailableFrom = date('H:i:s', strtotime($eventTweak->available_from_time));
+				}
+				if (!empty($eventTweak->available_to_time)) {
+					$eventAvailableTo = date('H:i:s', strtotime($eventTweak->available_to_time));
+				}
+			}
+		}
 
 		if (!empty($roomID)) {
 			$roomD = $this->Conventionrooms->find()->where(['Conventionrooms.id' => $roomID])->first();
@@ -2786,6 +2809,24 @@ private $scheduleWindowWarningShown = false;
 		do {
 			$slotChanged = false;
 			$iteration++;
+
+			if ($eventAvailableFrom !== null && strtotime($start_time) < strtotime($eventAvailableFrom)) {
+				$start_time = $eventAvailableFrom;
+				$finish_time = date("H:i:s", strtotime('+ '.$eventSetupRoundJudTime.' minutes', strtotime($start_time)));
+				$slotChanged = true;
+			}
+
+			if ($eventAvailableTo !== null && strtotime($finish_time) > strtotime($eventAvailableTo)) {
+				if (!$this->applyNextConventionDay($schDay, $schStartDate, $cntrDays, $schedulingsD)) {
+					$windowExhausted = true;
+					break;
+				}
+				$normal_starting_time = date("H:i:s",strtotime($schedulingsD->normal_starting_time));
+				$normal_finish_time = date("H:i:s",strtotime($schedulingsD->normal_finish_time));
+				$start_time = $eventAvailableFrom !== null ? $eventAvailableFrom : $normal_starting_time;
+				$finish_time = date("H:i:s", strtotime('+ '.$eventSetupRoundJudTime.' minutes', strtotime($start_time)));
+				$slotChanged = true;
+			}
 			
 			/* Lunch break check */
 			if( (strtotime($start_time)>=strtotime($lunch_time_start) && strtotime($start_time)<=strtotime($lunch_time_end)) || 
@@ -2894,37 +2935,9 @@ private $scheduleWindowWarningShown = false;
 				}
 			}
 			
-			/* Events after sport check */
-			if($schedulingsD->sports_day_having_events_after_sport_yes_no == 1)
-			{
-				$sports_day						= $schedulingsD->sports_day;
-				$sports_day_other_starting_time	= date("H:i:s",strtotime($schedulingsD->sports_day_other_starting_time));
-				$sports_day_other_finish_time	= date("H:i:s",strtotime($schedulingsD->sports_day_other_finish_time));
-				
-				if($sports_day == $schDay)
-				{
-					if( (strtotime($start_time)>=strtotime($sports_day_other_starting_time) && strtotime($start_time)<=strtotime($sports_day_other_finish_time)) || 
-					(strtotime($finish_time)>=strtotime($sports_day_other_starting_time) && strtotime($finish_time)<=strtotime($sports_day_other_finish_time)))
-					{
-						$start_time 	= $sports_day_other_finish_time;
-						$finish_time 	= date("H:i:s", strtotime('+ '.$eventSetupRoundJudTime.' minutes', strtotime($sports_day_other_finish_time)));
-						$slotChanged = true;
-					}
-					
-					if(strtotime($finish_time)>=strtotime($normal_finish_time))
-					{
-						if (!$this->applyNextConventionDay($schDay, $schStartDate, $cntrDays, $schedulingsD)) {
-							$windowExhausted = true;
-							break;
-						}
-						$normal_starting_time 	= date("H:i:s",strtotime($schedulingsD->normal_starting_time));
-						$normal_finish_time 	= date("H:i:s",strtotime($schedulingsD->normal_finish_time));
-						$start_time 	= $normal_starting_time;
-						$finish_time 	= date("H:i:s", strtotime('+ '.$eventSetupRoundJudTime.' minutes', strtotime($normal_starting_time)));
-						$slotChanged = true;
-					}
-				}
-			}
+			/* Events after sport are allowed in the configured post-sport window.
+			 * The lunch and sports-day checks above already move slots out of blocked periods.
+			 */
 
 			/* Room availability window check */
 			if (!empty($roomID) && ($roomAvailableFrom || $roomAvailableTo)) {

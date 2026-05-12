@@ -56,13 +56,55 @@ class ConventionregistrationsController extends AppController {
 		// first to get season_id for current year
 		$season_id = $this->getCurrentSeason();
 		$seasonD = $this->Seasons->find()->where(['Seasons.id' => $season_id])->first();
+
+		// If current season has no convention (type=0) links, fallback to latest season that has them.
+		$conventionSeasons = $this->Conventionseasons->find()
+			->innerJoinWith('Conventions', function($q) {
+				return $q->where(['Conventions.convention_type' => 0]);
+			})
+			->where(['Conventionseasons.season_id' => $season_id,'Conventionseasons.season_year' => $seasonD->season_year])
+			->order(['Conventionseasons.id' => 'ASC'])
+			->all();
+
+		if($conventionSeasons->isEmpty())
+		{
+			$fallbackConventionSeason = $this->Conventionseasons->find()
+				->innerJoinWith('Conventions', function($q) {
+					return $q->where(['Conventions.convention_type' => 0, 'Conventions.status' => 1]);
+				})
+				->order(['Conventionseasons.season_year' => 'DESC', 'Conventionseasons.id' => 'DESC'])
+				->first();
+
+			if(!empty($fallbackConventionSeason))
+			{
+				$season_id = $fallbackConventionSeason->season_id;
+				$seasonD = $this->Seasons->find()->where(['Seasons.id' => $season_id])->first();
+
+				$conventionSeasons = $this->Conventionseasons->find()
+					->innerJoinWith('Conventions', function($q) {
+						return $q->where(['Conventions.convention_type' => 0]);
+					})
+					->where(['Conventionseasons.season_id' => $season_id,'Conventionseasons.season_year' => $seasonD->season_year])
+					->order(['Conventionseasons.id' => 'ASC'])
+					->all();
+			}
+		}
 		$this->set('seasonD',$seasonD);
 		
         $conditionCurrentSeason = array();
 		$conditionCurrentSeason[] = "(Conventionregistrations.user_id = '".$user_id."')";
 		$conditionCurrentSeason[] = "(Conventionregistrations.season_id = '".$season_id."')";
 		$conditionCurrentSeason[] = "(Conventionregistrations.season_year = '".$seasonD->season_year."')";
-		$conventionregistrations = $this->Conventionregistrations->find()->where($conditionCurrentSeason)->order(['Conventionregistrations.id' => 'DESC'])->contain(['Conventions'])->all();
+		$conventionregistrations = $this->Conventionregistrations->find()
+			->where($conditionCurrentSeason)
+			->order(['Conventionregistrations.id' => 'DESC'])
+			->contain(['Conventions' => function($q) {
+				return $q->where(['Conventions.convention_type' => 0]);
+			}])
+			->matching('Conventions', function($q) {
+				return $q->where(['Conventions.convention_type' => 0]);
+			})
+			->all();
 		$this->set('conventionregistrations', $conventionregistrations);
 		
 		$myRegConvArr = array();
@@ -75,8 +117,7 @@ class ConventionregistrationsController extends AppController {
 		$conventionIDS 		= array();
 		$conventionIDS[] 	= 0;
 		
-		// We need to show conventions those are linked with current season
-		$conventionSeasons = $this->Conventionseasons->find()->where(['Conventionseasons.season_id' => $season_id,'Conventionseasons.season_year' => $seasonD->season_year])->order(['Conventionseasons.id' => 'ASC'])->all();
+		// We need to show conventions linked with the effective season (current or fallback).
 		foreach($conventionSeasons as $convs)
 		{
 			if(!in_array($convs->convention_id,(array)$conventionIDS))
@@ -95,13 +136,137 @@ class ConventionregistrationsController extends AppController {
 		$condConvention = array();
 		$condConvention[] = "(Conventions.id IN ($conventionIDSImploded))";
 		$condConvention[] = "(Conventions.status  = '1')";
+		$condConvention[] = "(Conventions.convention_type = '0')";
 		$remainingconventions = $this->Conventions->find()->where($condConvention)->order(['Conventions.name' => 'ASC'])->all();
 		$this->set('remainingconventions', $remainingconventions);
 		
 		// to get past registrations list
-		$pastRegistrations = $this->Conventionregistrations->find()->where(["Conventionregistrations.user_id" => $user_id,"Conventionregistrations.season_year <" => $seasonD->season_year])->contain(["Conventions"])->order(['Conventionregistrations.id' => 'DESC'])->all();
+		$pastRegistrations = $this->Conventionregistrations->find()
+			->where(["Conventionregistrations.user_id" => $user_id,"Conventionregistrations.season_year <" => $seasonD->season_year])
+			->contain(["Conventions" => function($q) {
+				return $q->where(['Conventions.convention_type' => 0]);
+			}])
+			->matching('Conventions', function($q) {
+				return $q->where(['Conventions.convention_type' => 0]);
+			})
+			->order(['Conventionregistrations.id' => 'DESC'])
+			->all();
 		$this->set('pastRegistrations', $pastRegistrations);
 		//$this->prx($pastRegistrations);
+    }
+
+	public function myconferenceregistrations() {
+
+        $this->userLoginCheck();
+        $this->multiLoginCheck(['School','Teacher_Parent','Judge']);
+		
+        $this->set("title_for_layout", "Conference Registrations" . TITLE_FOR_PAGES);
+        $this->viewBuilder()->setLayout('home');
+        
+		$this->set('active_conference_registrations','active');
+		
+		$user_id = $this->request->getSession()->read("user_id");
+		$userDetails = $this->Users->find()->where(['Users.id' => $user_id])->first();
+        $this->set('userDetails', $userDetails);
+		
+		// first to get season_id for current year
+		$season_id = $this->getCurrentSeason();
+		$seasonD = $this->Seasons->find()->where(['Seasons.id' => $season_id])->first();
+
+		// If current season has no conference (type=1) links, fallback to latest season that has them.
+		$conferenceSeasons = $this->Conventionseasons->find()
+			->innerJoinWith('Conventions', function($q) {
+				return $q->where(['Conventions.convention_type' => 1]);
+			})
+			->where(['Conventionseasons.season_id' => $season_id, 'Conventionseasons.season_year' => $seasonD->season_year])
+			->order(['Conventionseasons.id' => 'ASC'])
+			->all();
+
+		if($conferenceSeasons->isEmpty())
+		{
+			$fallbackConferenceSeason = $this->Conventionseasons->find()
+				->innerJoinWith('Conventions', function($q) {
+					return $q->where(['Conventions.convention_type' => 1, 'Conventions.status' => 1]);
+				})
+				->order(['Conventionseasons.season_year' => 'DESC', 'Conventionseasons.id' => 'DESC'])
+				->first();
+
+			if(!empty($fallbackConferenceSeason))
+			{
+				$season_id = $fallbackConferenceSeason->season_id;
+				$seasonD = $this->Seasons->find()->where(['Seasons.id' => $season_id])->first();
+
+				$conferenceSeasons = $this->Conventionseasons->find()
+					->innerJoinWith('Conventions', function($q) {
+						return $q->where(['Conventions.convention_type' => 1]);
+					})
+					->where(['Conventionseasons.season_id' => $season_id, 'Conventionseasons.season_year' => $seasonD->season_year])
+					->order(['Conventionseasons.id' => 'ASC'])
+					->all();
+			}
+		}
+		$this->set('seasonD',$seasonD);
+
+        $conditionCurrentSeason = array();
+		$conditionCurrentSeason[] = "(Conventionregistrations.user_id = '".$user_id."')";
+		$conditionCurrentSeason[] = "(Conventionregistrations.season_id = '".$season_id."')";
+		$conditionCurrentSeason[] = "(Conventionregistrations.season_year = '".$seasonD->season_year."')";
+		$conferenceregistrations = $this->Conventionregistrations->find()
+			->where($conditionCurrentSeason)
+			->order(['Conventionregistrations.id' => 'DESC'])
+			->contain(['Conventions' => function($q) {
+				return $q->where(['Conventions.convention_type' => 1]);
+			}])
+			->matching('Conventions', function($q) {
+				return $q->where(['Conventions.convention_type' => 1]);
+			})
+			->all();
+		$this->set('conferenceregistrations', $conferenceregistrations);
+		
+		$myRegConvArr = array();
+		foreach($conferenceregistrations as $myconvreg)
+		{
+			$myRegConvArr[] = $myconvreg->convention_id;
+		}
+		
+		// now get list of all available conference for the effective season
+		$conventionIDS 		= array();
+		$conventionIDS[] 	= 0;
+		
+		foreach($conferenceSeasons as $convs)
+		{
+			if(!in_array($convs->convention_id,(array)$conventionIDS))
+			{
+				if(!in_array($convs->convention_id,(array)$myRegConvArr))
+				{
+					$conventionIDS[] 	= $convs->convention_id;
+				}
+			}
+		}
+		
+		$conventionIDSImploded = implode(",",$conventionIDS);
+		
+		
+		// to get conferences (only conference_type = 1)
+		$condConvention = array();
+		$condConvention[] = "(Conventions.id IN ($conventionIDSImploded))";
+		$condConvention[] = "(Conventions.status  = '1')";
+		$condConvention[] = "(Conventions.convention_type = '1')";
+		$remainingconferences = $this->Conventions->find()->where($condConvention)->order(['Conventions.name' => 'ASC'])->all();
+		$this->set('remainingconferences', $remainingconferences);
+		
+		// to get past conference registrations list
+		$pastConferenceRegistrations = $this->Conventionregistrations->find()
+			->where(["Conventionregistrations.user_id" => $user_id,"Conventionregistrations.season_year <" => $seasonD->season_year])
+			->contain(["Conventions" => function($q) {
+				return $q->where(['Conventions.convention_type' => 1]);
+			}])
+			->matching('Conventions', function($q) {
+				return $q->where(['Conventions.convention_type' => 1]);
+			})
+			->order(['Conventionregistrations.id' => 'DESC'])
+			->all();
+		$this->set('pastConferenceRegistrations', $pastConferenceRegistrations);
     }
 	
 	public function pastregistrationdetails($convRegSlug = null) {

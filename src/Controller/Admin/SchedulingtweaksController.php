@@ -139,6 +139,36 @@ class SchedulingtweaksController extends AppController {
             $tweak->pinned_start_time = null;
         }
 
+        /* D: event availability window */
+        $rawAvailableFrom = trim($postData['available_from_time'] ?? '');
+        $rawAvailableTo = trim($postData['available_to_time'] ?? '');
+
+        $availableFrom = null;
+        $availableTo = null;
+        if ($rawAvailableFrom !== '') {
+            if (strtotime($rawAvailableFrom) === false) {
+                $this->Flash->error('Invalid Available From time format.');
+                return $this->redirect(['action' => 'index', $convention_season_slug]);
+            }
+            $availableFrom = date('H:i:s', strtotime($rawAvailableFrom));
+        }
+
+        if ($rawAvailableTo !== '') {
+            if (strtotime($rawAvailableTo) === false) {
+                $this->Flash->error('Invalid Available To time format.');
+                return $this->redirect(['action' => 'index', $convention_season_slug]);
+            }
+            $availableTo = date('H:i:s', strtotime($rawAvailableTo));
+        }
+
+        if ($availableFrom !== null && $availableTo !== null && strtotime($availableFrom) >= strtotime($availableTo)) {
+            $this->Flash->error('Available From must be earlier than Available To.');
+            return $this->redirect(['action' => 'index', $convention_season_slug]);
+        }
+
+        $tweak->available_from_time = $availableFrom;
+        $tweak->available_to_time = $availableTo;
+
         /* B: pinned room */
         $tweak->pinned_room_id = !empty($postData['pinned_room_id']) ? (int) $postData['pinned_room_id'] : null;
 
@@ -148,6 +178,146 @@ class SchedulingtweaksController extends AppController {
             $this->Flash->success('Tweak saved.');
         } else {
             $this->Flash->error('Could not save tweak. Check server logs.');
+        }
+
+        return $this->redirect(['action' => 'index', $convention_season_slug]);
+    }
+
+    /* ------------------------------------------------------------------ */
+    /*  BULKSAVE – apply selected tweak fields to multiple events          */
+    /* ------------------------------------------------------------------ */
+    public function bulksave($convention_season_slug = null) {
+        $this->request->allowMethod(['post']);
+
+        $conventionSD = $this->Conventionseasons->find()
+            ->where(['Conventionseasons.slug' => $convention_season_slug])
+            ->first();
+
+        if (!$conventionSD) {
+            $this->Flash->error('Invalid convention season.');
+            return $this->redirect(['action' => 'index', $convention_season_slug]);
+        }
+
+        $postData = (array) $this->request->getData();
+        $eventIdsRaw = $postData['event_ids'] ?? [];
+        if (!is_array($eventIdsRaw)) {
+            $eventIdsRaw = [$eventIdsRaw];
+        }
+
+        $eventIds = [];
+        foreach ($eventIdsRaw as $eventIdRaw) {
+            $eventId = (int) $eventIdRaw;
+            if ($eventId > 0) {
+                $eventIds[$eventId] = $eventId;
+            }
+        }
+        $eventIds = array_values($eventIds);
+
+        if (empty($eventIds)) {
+            $this->Flash->error('Select at least one event for bulk edit.');
+            return $this->redirect(['action' => 'index', $convention_season_slug]);
+        }
+
+        $applyPinnedDay = !empty($postData['apply_pinned_day']);
+        $applyPinnedRoom = !empty($postData['apply_pinned_room_id']);
+        $applyPinnedStart = !empty($postData['apply_pinned_start_time']);
+        $applyWindow = !empty($postData['apply_available_window']);
+
+        if (!$applyPinnedDay && !$applyPinnedRoom && !$applyPinnedStart && !$applyWindow) {
+            $this->Flash->error('Choose at least one field to apply in bulk edit.');
+            return $this->redirect(['action' => 'index', $convention_season_slug]);
+        }
+
+        $pinnedDay = null;
+        if ($applyPinnedDay) {
+            $pinnedDay = !empty($postData['pinned_day']) ? trim((string) $postData['pinned_day']) : null;
+        }
+
+        $pinnedRoomId = null;
+        if ($applyPinnedRoom) {
+            $pinnedRoomId = !empty($postData['pinned_room_id']) ? (int) $postData['pinned_room_id'] : null;
+        }
+
+        $pinnedStart = null;
+        if ($applyPinnedStart) {
+            $rawPinnedStart = trim((string) ($postData['pinned_start_time'] ?? ''));
+            if ($rawPinnedStart !== '' && strtotime($rawPinnedStart) === false) {
+                $this->Flash->error('Invalid pinned start time format.');
+                return $this->redirect(['action' => 'index', $convention_season_slug]);
+            }
+            $pinnedStart = ($rawPinnedStart !== '') ? date('H:i:s', strtotime($rawPinnedStart)) : null;
+        }
+
+        $availableFrom = null;
+        $availableTo = null;
+        if ($applyWindow) {
+            $rawAvailableFrom = trim((string) ($postData['available_from_time'] ?? ''));
+            $rawAvailableTo = trim((string) ($postData['available_to_time'] ?? ''));
+
+            if ($rawAvailableFrom !== '') {
+                if (strtotime($rawAvailableFrom) === false) {
+                    $this->Flash->error('Invalid Available From time format.');
+                    return $this->redirect(['action' => 'index', $convention_season_slug]);
+                }
+                $availableFrom = date('H:i:s', strtotime($rawAvailableFrom));
+            }
+
+            if ($rawAvailableTo !== '') {
+                if (strtotime($rawAvailableTo) === false) {
+                    $this->Flash->error('Invalid Available To time format.');
+                    return $this->redirect(['action' => 'index', $convention_season_slug]);
+                }
+                $availableTo = date('H:i:s', strtotime($rawAvailableTo));
+            }
+
+            if ($availableFrom !== null && $availableTo !== null && strtotime($availableFrom) >= strtotime($availableTo)) {
+                $this->Flash->error('Available From must be earlier than Available To.');
+                return $this->redirect(['action' => 'index', $convention_season_slug]);
+            }
+        }
+
+        $savedCount = 0;
+        foreach ($eventIds as $eventId) {
+            $existing = $this->Schedulingeventtweaks->find()
+                ->where([
+                    'Schedulingeventtweaks.conventionseasons_id' => $conventionSD->id,
+                    'Schedulingeventtweaks.event_id' => $eventId,
+                ])
+                ->first();
+
+            if ($existing) {
+                $tweak = $existing;
+            } else {
+                $tweak = $this->Schedulingeventtweaks->newEntity();
+                $tweak->conventionseasons_id = $conventionSD->id;
+                $tweak->event_id = $eventId;
+                $tweak->created = date('Y-m-d H:i:s');
+            }
+
+            if ($applyPinnedDay) {
+                $tweak->pinned_day = $pinnedDay;
+            }
+            if ($applyPinnedRoom) {
+                $tweak->pinned_room_id = $pinnedRoomId;
+            }
+            if ($applyPinnedStart) {
+                $tweak->pinned_start_time = $pinnedStart;
+            }
+            if ($applyWindow) {
+                $tweak->available_from_time = $availableFrom;
+                $tweak->available_to_time = $availableTo;
+            }
+
+            $tweak->modified = date('Y-m-d H:i:s');
+            if ($this->Schedulingeventtweaks->save($tweak)) {
+                $savedCount++;
+            }
+        }
+
+        if ($savedCount > 0) {
+            $this->Flash->success('Bulk tweaks applied to ' . $savedCount . ' event(s).');
+        } else {
+            $this->Flash->error('No tweaks were saved in bulk edit.');
         }
 
         return $this->redirect(['action' => 'index', $convention_season_slug]);

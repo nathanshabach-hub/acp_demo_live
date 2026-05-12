@@ -455,6 +455,17 @@ class AppController extends Controller{
 			'Schedulingeventtweaks.event_id' => $eventId,
 		])->first();
 
+		$eventStart = null;
+		$eventEnd = null;
+		if ($eventTweak) {
+			if (!empty($eventTweak->available_from_time)) {
+				$eventStart = date('H:i:s', strtotime($eventTweak->available_from_time));
+			}
+			if (!empty($eventTweak->available_to_time)) {
+				$eventEnd = date('H:i:s', strtotime($eventTweak->available_to_time));
+			}
+		}
+
 		$roomD = null;
 		if ((int)$roomId > 0) {
 			$roomD = $this->Conventionrooms->find()->where(['Conventionrooms.id' => $roomId])->first();
@@ -488,9 +499,17 @@ class AppController extends Controller{
 				$candidateStartTime = $roomStart;
 			}
 
+			if ($eventStart !== null && strtotime($candidateStartTime) < strtotime($eventStart)) {
+				$candidateStartTime = $eventStart;
+			}
+
 			$candidateFinishTime = date("H:i:s", strtotime($candidateStartTime . " +$playTime minute"));
 
-			if (strtotime($candidateFinishTime) > strtotime($normal_finish_time) || strtotime($candidateFinishTime) > strtotime($roomEnd)) {
+			if (
+				strtotime($candidateFinishTime) > strtotime($normal_finish_time) ||
+				strtotime($candidateFinishTime) > strtotime($roomEnd) ||
+				($eventEnd !== null && strtotime($candidateFinishTime) > strtotime($eventEnd))
+			) {
 				$candidateDate = date('Y-m-d', strtotime($candidateDate . ' +1 day'));
 				$candidateStartTime = $normal_starting_time;
 				continue;
@@ -698,31 +717,9 @@ class AppController extends Controller{
 		/* To check here if sports day is there, then exclude that time - ends */
 		
 		
-		/* To check here if they are having more events after sport - starts */
-		if($schedulingD->sports_day_having_events_after_sport_yes_no == 1)
-		{
-			$sports_day					= $schedulingD->sports_day;
-			$sports_day_other_starting_time	= date("H:i:s",strtotime($schedulingD->sports_day_other_starting_time));
-			$sports_day_other_finish_time		= date("H:i:s",strtotime($schedulingD->sports_day_other_finish_time));
-			
-			// to check if day match
-			if($sports_day == $schedulingTimingsD->day)
-			{
-				// Now check TIMINGS
-				if(
-				(strtotime($base_start_time)>=strtotime($sports_day_other_starting_time) &&  strtotime($base_start_time)<=strtotime($sports_day_other_finish_time))
-				||
-				(strtotime($base_finish_time)>=strtotime($sports_day_other_starting_time) &&  strtotime($base_finish_time)<=strtotime($sports_day_other_finish_time))
-				) {
-					$base_start_time = $sports_day_other_starting_time;
-					$base_finish_time = $sports_day_other_finish_time;
-
-					return $this->nextBookings($convention_season_slug, $conflict, $base_start_time, $base_finish_time, $base_sch_date_time, $recordId);
-				}
-				
-			}
-		}
-		/* To check here if they are having more events after sport - ends */
+		/* Events after sport are allowed in the configured post-sport window.
+		 * Leave them in place; only the sports-day block itself should be skipped.
+		 */
 		
 
 		return $conflict;
