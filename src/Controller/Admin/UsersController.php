@@ -9,7 +9,7 @@ use Cake\Datasource\ConnectionManager;
 class UsersController extends AppController{
 
     public $paginate = ['limit' => 50];
-    public $components = array('PImage', 'PImageTest');
+    public $components = array('PImage');
    
     public function initialize() {
         parent::initialize();

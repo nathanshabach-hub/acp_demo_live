@@ -10,7 +10,7 @@ use Cake\Datasource\ConnectionManager;
 class ResultsController extends AppController {
 
     public $paginate = ['limit' => 50, 'order' => ['Conventions.name' => 'asc']];
-    public $components = array('PImage', 'PImageTest');
+    public $components = array('PImage');
 
     //public $helpers = array('Javascript', 'Ajax');
 

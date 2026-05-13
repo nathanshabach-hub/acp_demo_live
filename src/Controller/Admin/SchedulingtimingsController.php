@@ -11,7 +11,7 @@ use Cake\Datasource\ConnectionManager;
 class SchedulingtimingsController extends AppController {
 
     public $paginate = ['limit' => 50, 'order' => ['Schedulings.name' => 'asc']];
-    public $components = array('PImage', 'PImageTest');
+    public $components = array('PImage');
 private $scheduleWindowWarningShown = false;
 
     //public $helpers = array('Javascript', 'Ajax');

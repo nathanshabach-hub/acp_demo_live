@@ -9,7 +9,7 @@ use Cake\Core\Configure\Engine\PhpConfig;
 class EvaluationquestionsController extends AppController {
 
     public $paginate = ['limit' => 50, 'order' => ['Evaluationquestions.name' => 'asc']];
-    public $components = array('PImage', 'PImageTest');
+    public $components = array('PImage');
 
     //public $helpers = array('Javascript', 'Ajax');
 

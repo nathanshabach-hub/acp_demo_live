@@ -14,7 +14,7 @@ use Cake\Core\Configure\Engine\PhpConfig;
 
 class UsersController extends AppController {
 
-    public $components = array('PImage', 'PImageTest');
+    public $components = array('PImage');
 
     
 	public function beforeFilter(EventInterface $event) {

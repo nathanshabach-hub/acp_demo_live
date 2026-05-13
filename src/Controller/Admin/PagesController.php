@@ -7,7 +7,7 @@ use Cake\Core\Configure\Engine\PhpConfig;
 class PagesController extends AppController{
 
     public $paginate = ['limit' => 50,'order' => ['Pages.name' => 'asc']];
-    public $components = array('PImage', 'PImageTest');
+    public $components = array('PImage');
     //public $helpers = array('Javascript', 'Ajax');
    
     public function initialize() {
