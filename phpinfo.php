@@ -1,1 +1,0 @@
-Testing 1234 <?php echo phpinfo();?>
