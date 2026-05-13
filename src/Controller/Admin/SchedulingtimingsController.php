@@ -39,26 +39,6 @@ private $scheduleWindowWarningShown = false;
 		$this->Schedulingeventtweaks = $this->loadModel('Schedulingeventtweaks');
     }
 	
-	/* public function viewscheduling($convention_season_slug=null) {
-        $this->set('title', ADMIN_TITLE . 'Scheduling Pre-check');
-        $this->viewBuilder()->setLayout('admin');
-		
-        $this->set('manageConventions', '1');
-        $this->set('conventionList', '1');
-		
-        $this->set('convention_season_slug', $convention_season_slug);
-		
-		$conventionSD = $this->Conventionseasons->find()->where(['Conventionseasons.slug' => $convention_season_slug])->contain(["Conventions"])->first();
-		//$this->prx($conventionSD);
-		
-		$this->set('conventionSD', $conventionSD);
-		
-		$this->set('convention_slug', $conventionSD->Conventions['slug']);
-		
-		// to list all schedulings
-		$schedulingTimingsList = $this->Schedulingtimings->find()->where(['Schedulingtimings.conventionseasons_id' => $conventionSD->id,'Schedulingtimings.convention_id' => $conventionSD->convention_id,'Schedulingtimings.season_id' => $conventionSD->season_id,'Schedulingtimings.season_year' => $conventionSD->season_year])->contain(["Events","Users","Conventionrooms","Opponentuser"])->order(["Schedulingtimings.id" => "ASC"])->all();
-		$this->set('schedulingTimingsList', $schedulingTimingsList);
-    } */
 	
 	public function viewscheduling($convention_season_slug=null,$scheduling_category=null) {
         $this->set('title', ADMIN_TITLE . 'Scheduling Pre-check');
@@ -70,7 +50,7 @@ private $scheduleWindowWarningShown = false;
         $this->set('convention_season_slug', $convention_season_slug);
         $this->set('scheduling_category', $scheduling_category);
 		
-		$conventionSD = $this->Conventionseasons->find()->where(['Conventionseasons.slug' => $convention_season_slug])->contain(["Conventions"])->first();
+		$conventionSD = $this->getConventionSeasonBySlug($convention_season_slug);
 		//$this->prx($conventionSD);
 		
 		$this->set('conventionSD', $conventionSD);
@@ -88,7 +68,7 @@ private $scheduleWindowWarningShown = false;
 		
         $this->set('convention_season_slug', $convention_season_slug);
 		
-		$conventionSD = $this->Conventionseasons->find()->where(['Conventionseasons.slug' => $convention_season_slug])->contain(["Conventions"])->first();
+		$conventionSD = $this->getConventionSeasonBySlug($convention_season_slug);
 		
 		// to get details of schedule timings
 		$schedulingsD = $this->Schedulings->find()->where(["Schedulings.conventionseasons_id" => $conventionSD->id, "Schedulings.convention_id" => $conventionSD->convention_id, "Schedulings.season_id" => $conventionSD->season_id, "Schedulings.season_year" => $conventionSD->season_year])->first();
@@ -513,7 +493,7 @@ private $scheduleWindowWarningShown = false;
 	
 	public function startschedulec2($convention_season_slug=null) {
 		
-		$conventionSD = $this->Conventionseasons->find()->where(['Conventionseasons.slug' => $convention_season_slug])->contain(["Conventions"])->first();
+		$conventionSD = $this->getConventionSeasonBySlug($convention_season_slug);
 		
 		//$this->prx($conventionSD);
 		
@@ -1108,7 +1088,7 @@ private $scheduleWindowWarningShown = false;
 	
 	public function startschedulec3($convention_season_slug=null) {
 		
-		$conventionSD = $this->Conventionseasons->find()->where(['Conventionseasons.slug' => $convention_season_slug])->contain(["Conventions"])->first();
+		$conventionSD = $this->getConventionSeasonBySlug($convention_season_slug);
 		
 		//$this->prx($conventionSD);
 		
@@ -1741,7 +1721,7 @@ private $scheduleWindowWarningShown = false;
 			$defaultConnection->logQueries(false);
 		}
 		
-		$conventionSD = $this->Conventionseasons->find()->where(['Conventionseasons.slug' => $convention_season_slug])->contain(["Conventions"])->first();
+		$conventionSD = $this->getConventionSeasonBySlug($convention_season_slug);
 
 		/* Start a fresh full run now that Category 4 is first in chain */
 		$this->clearSchedulingtimings($convention_season_slug);
@@ -2196,7 +2176,7 @@ private $scheduleWindowWarningShown = false;
 		$updateDateTime = date("Y-m-d H:i:s");
 		
 		// To get convention season details
-		$conventionSD = $this->Conventionseasons->find()->where(['Conventionseasons.slug' => $convention_season_slug])->contain(["Conventions"])->first();
+		$conventionSD = $this->getConventionSeasonBySlug($convention_season_slug);
 		
 		// Now fetch group events from Schedulings
 		$condGroupScht = array();
@@ -2293,7 +2273,7 @@ private $scheduleWindowWarningShown = false;
 	public function listconflicts($convention_season_slug=null)
 	{
 		// First we need to collect all students list of all schools
-		$conventionSD = $this->Conventionseasons->find()->where(['Conventionseasons.slug' => $convention_season_slug])->contain(["Conventions"])->first();
+		$conventionSD = $this->getConventionSeasonBySlug($convention_season_slug);
 		
 		// To get list of all conflict
 		$condSchList = array();
@@ -2441,238 +2421,9 @@ private $scheduleWindowWarningShown = false;
 	}
 	
 	
-	/* public function listconflictsgroups($convention_season_slug=null)
-	{
-		// Sudhir - starts from here
-		$this->redirect(['controller' => 'schedulings', 'action' => 'schedulecategory', $convention_season_slug]);
-		
-		// First we need to collect all students list of all schools
-		$conventionSD = $this->Conventionseasons->find()->where(['Conventionseasons.slug' => $convention_season_slug])->contain(["Conventions"])->first();
-		
-		// To get list of all conflict
-		$condSchList = array();
-		$condSchList[] = "(
-			Schedulingtimings.conventionseasons_id = '".$conventionSD->id."' AND 
-			Schedulingtimings.convention_id = '".$conventionSD->convention_id."' AND 
-			Schedulingtimings.season_id = '".$conventionSD->season_id."' AND 
-			Schedulingtimings.season_year = '".$conventionSD->season_year."' AND 
-			Schedulingtimings.user_type = 'School' AND 
-			Schedulingtimings.user_id > 0 AND 
-			Schedulingtimings.user_id_opponent > 0 AND  
-			(Schedulingtimings.group_name_user_ids != '' OR Schedulingtimings.group_name_user_ids != NULL) AND 
-			(Schedulingtimings.group_name_opponent_user_ids != '' OR Schedulingtimings.group_name_opponent_user_ids != NULL) AND 
-			Schedulingtimings.is_bye != 1 
-			
-		)";
-		// Fetch each schedule and check if there is any group name assigned
-		$schedulingtimings = $this->Schedulingtimings
-			->find()
-			->where($condSchList)
-			->order(["Schedulingtimings.id" => "ASC"])
-			->all();
-		
-		// Step 2: Normalize - build a mapping of user_id → their schedules
-		$userSchedules = [];
-		
-		
-		foreach($schedulingtimings as $schrecord)
-		{
-			$day 	= $schrecord->day;
-			$start 	= strtotime($schrecord->start_time);
-			$end   	= strtotime($schrecord->finish_time);
-
-			// Direct user_id
-			if ($schrecord->user_id) {
-				$userSchedules[$schrecord->user_id][] = [
-					'id' => $schrecord->id,
-					'day' => $day,
-					'start' => $start,
-					'end' => $end
-				];
-			}
-			
-			// Direct user_id_opponent
-			if ($schrecord->user_id_opponent) {
-				$userSchedules[$schrecord->user_id_opponent][] = [
-					'id' => $schrecord->id,
-					'day' => $day,
-					'start' => $start,
-					'end' => $end
-				];
-			}
-
-			// Group members
-			foreach (['group_name_user_ids', 'group_name_opponent_user_ids'] as $col) {
-				if (!empty($row[$col])) {
-					$ids = array_map('trim', explode(',', $row[$col]));
-					foreach ($ids as $uid) {
-						if ($uid > 0) {
-							$userSchedules[$uid][] = [
-								'id' => $row['id'],
-								'day' => $day,
-								'start' => $start,
-								'end' => $end
-							];
-						}
-					}
-				}
-			}
-			
-		}
-		
-		//$this->prx($userSchedules);
-		
-		// Step 3: Detect conflicts
-		$conflicts = [];
-
-		foreach ($userSchedules as $uid => $entries) {
-			// Compare each pair of schedules for same user
-			for ($i = 0; $i < count($entries); $i++) {
-				for ($j = $i + 1; $j < count($entries); $j++) {
-					$a = $entries[$i];
-					$b = $entries[$j];
-
-					if ($a['day'] == $b['day']) {
-						// Check overlap: (startA < endB) and (endA > startB)
-						if ($a['start'] < $b['end'] && $a['end'] > $b['start']) {
-							$conflicts[$uid][] = [
-								'schedule1' => $a['id'],
-								'schedule2' => $b['id']
-							];
-						}
-					}
-				}
-			}
-		}
-		
-		//$this->prx($conflicts);
-
-		// Step 4: Output
-		$conflictUIDS 		= [];
-		$conflictDBAutoID 	= [];
-		foreach ($conflicts as $uid => $conflictList) {
-			$conflictUIDS[] = $uid;
-			
-			// Get db ids of schedules
-			foreach ($conflictList as $row) {
-				$conflictDBAutoID[] = $row['schedule1'];
-				$conflictDBAutoID[] = $row['schedule2'];
-			}
-		}
-		
-		$finalDBAutoIDUnique = array_values(array_unique($conflictDBAutoID));
-		
-		
-		
-		//$msG = 'Scheduling completed successfully.';
-		
-		// Save conflicted user ids in database
-		if(count($conflictUIDS)>0)
-		{
-			$this->Schedulings->updateAll(['conflict_user_ids_group' => implode(",",$conflictUIDS)], ["conventionseasons_id" => $conventionSD->id]);
-			$msG .= ' There are some conflicts found. Click on resolve conflict button below and resolve conflicts.';
-			
-			// Now filter group db ids where conflict found
-			if(count($finalDBAutoIDUnique)>0)
-			{
-				$finalGroupSchDBIDs = array();
-				// filter group ids only and save to db
-				foreach($finalDBAutoIDUnique as $group_db_id)
-				{
-					// check if its a group id
-					$checkGroupGame = $this->Schedulingtimings->find()->where(['Schedulingtimings.id' => $group_db_id])->first();
-					if($checkGroupGame->user_type == 'School')
-					{
-						$finalGroupSchDBIDs[] = $group_db_id;
-					}
-				}
-				
-				// Now update to db
-				if(count($finalGroupSchDBIDs)>0)
-				{
-					$this->Schedulings->updateAll(['conflict_user_ids_group' => implode(",",$finalGroupSchDBIDs)], ["conventionseasons_id" => $conventionSD->id]);
-				}
-			}
-		}
-		
-		$this->prx($finalDBAutoIDUnique);
-		
-		$this->Flash->success($msG);
-		$this->redirect(['controller' => 'schedulings', 'action' => 'schedulecategory', $convention_season_slug]);
-	} */
 	
 	
 	
-	/* public function removeoverlapping_noneed($convention_season_slug=null)
-	{	
-		// First we need to collect all students list of all schools
-		$conventionSD = $this->Conventionseasons->find()->where(['Conventionseasons.slug' => $convention_season_slug])->contain(["Conventions"])->first();
-		
-		$condSchList = array();
-		$condSchList[] = "(
-			Schedulingtimings.conventionseasons_id = '".$conventionSD->id."' AND 
-			Schedulingtimings.convention_id = '".$conventionSD->convention_id."' AND 
-			Schedulingtimings.season_id = '".$conventionSD->season_id."' AND 
-			Schedulingtimings.season_year = '".$conventionSD->season_year."'
-		)";
-		// Fetch each schedule and check if there is any group name assigned
-		$schedulingtimings = $this->Schedulingtimings
-			->find()
-			->where($condSchList)
-			->order(["Schedulingtimings.id" => "ASC"])
-			->all();
-			
-		$arrallStudents= array();
-		
-		foreach($schedulingtimings as $recordsch)
-		{
-			// Individual events
-			if($recordsch->user_type == 'Student')
-			{	
-				if(!in_array($recordsch->user_id,$arrallStudents) && $recordsch->user_id>0)
-				{
-					$arrallStudents[] = $recordsch->user_id;
-				}
-				
-				if(!in_array($recordsch->user_id_opponent,$arrallStudents) && $recordsch->user_id_opponent>0)
-				{
-					$arrallStudents[] = $recordsch->user_id_opponent;
-				}
-			}
-			
-			// Group events
-			if($recordsch->user_type == 'School')
-			{
-				if(!empty($recordsch->group_name_user_ids) && $recordsch->group_name_user_ids != NULL)
-				{
-					$group_name_user_ids_explode = explode(",",$recordsch->group_name_user_ids);
-					foreach($group_name_user_ids_explode as $uIDG)
-					{
-						if(!in_array($uIDG,$arrallStudents) && $uIDG>0)
-						{
-							//$arrallStudents[] = $uIDG;
-						}
-					}
-				}
-				
-				if(!empty($recordsch->group_name_opponent_user_ids) && $recordsch->group_name_opponent_user_ids != NULL)
-				{
-					$group_name_opponent_user_ids_explode = explode(",",$recordsch->group_name_opponent_user_ids);
-					foreach($group_name_opponent_user_ids_explode as $uIDG)
-					{
-						if(!in_array($uIDG,$arrallStudents) && $uIDG>0)
-						{
-							//$arrallStudents[] = $uIDG;
-						}
-					}
-				}
-			}
-		}
-		
-		echo implode(",",$arrallStudents);
-		
-		$this->prx($arrallStudents);
-	} */
 	
 	
 	public function conflictdone($convention_season_slug=null) {
@@ -2976,7 +2727,15 @@ private $scheduleWindowWarningShown = false;
 			'window_exhausted' => $windowExhausted,
 		];
 	}
-	
+
+	private function getConventionSeasonBySlug($conventionSeasonSlug)
+	{
+		return $this->Conventionseasons
+			->find()
+			->where(['Conventionseasons.slug' => $conventionSeasonSlug])
+			->contain(['Conventions'])
+			->first();
+	}
 
 }
 
