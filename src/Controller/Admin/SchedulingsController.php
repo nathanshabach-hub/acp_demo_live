@@ -45,7 +45,7 @@ class SchedulingsController extends AppController {
 		
         $this->set('convention_season_slug', $convention_season_slug);
 		
-		$conventionSD = $this->Conventionseasons->find()->where(['Conventionseasons.slug' => $convention_season_slug])->contain(["Conventions"])->first();
+		$conventionSD = $this->getConventionSeasonBySlug($convention_season_slug);
 		//$this->prx($conventionSD);
 		
 		$this->set('conventionSD', $conventionSD);
@@ -54,7 +54,7 @@ class SchedulingsController extends AppController {
 		
 		// to check that if record for this conv season entered in scheduling table..
 		// ... if not entered, then entered
-		$checkSchedulingRecord = $this->Schedulings->find()->where(['Schedulings.conventionseasons_id' => $conventionSD->id])->first();
+		$checkSchedulingRecord = $this->getSchedulingByConventionSeasonId($conventionSD->id);
 		if(!$checkSchedulingRecord)
 		{
 			// enter new record
@@ -73,13 +73,13 @@ class SchedulingsController extends AppController {
 		}
 		
 		// to fetch scheduling data and send to template
-		$schedulingD = $this->Schedulings->find()->where(['Schedulings.conventionseasons_id' => $conventionSD->id])->first();
+		$schedulingD = $this->getSchedulingByConventionSeasonId($conventionSD->id);
 		$this->set('schedulingD', $schedulingD);
     }
 	
 	public function precheckevents($convention_season_slug=null) {
 		
-		$conventionSD = $this->Conventionseasons->find()->where(['Conventionseasons.slug' => $convention_season_slug])->contain(["Conventions"])->first();
+		$conventionSD = $this->getConventionSeasonBySlug($convention_season_slug);
 		
 		
 		// to check events for this convention season
@@ -98,13 +98,13 @@ class SchedulingsController extends AppController {
 		if($cntrPreCheckEvents>0)
 		{
 			// now update this precheck events in scheduling table
-			$this->Schedulings->updateAll(['precheck_events' => 1,'total_events_found' => $cntrPreCheckEvents,'modified' => date('Y-m-d H:i:s')], ["conventionseasons_id" => $conventionSD->id]);
+			$this->updateSchedulingForSeason($conventionSD->id, ['precheck_events' => 1, 'total_events_found' => $cntrPreCheckEvents]);
 			
 			$this->Flash->success('Total event found: '.$cntrPreCheckEvents);
 		}
 		else
 		{
-			$this->Schedulings->updateAll(['precheck_events' => 0,'total_events_found' => NULL,'modified' => date('Y-m-d H:i:s')], ["conventionseasons_id" => $conventionSD->id]);
+			$this->updateSchedulingForSeason($conventionSD->id, ['precheck_events' => 0, 'total_events_found' => NULL]);
 			
 			$this->Flash->error('Sorry no event found for this convention season.');
 		}
@@ -114,7 +114,7 @@ class SchedulingsController extends AppController {
 	
 	public function prechecklocations($convention_season_slug=null) {
 		
-		$conventionSD = $this->Conventionseasons->find()->where(['Conventionseasons.slug' => $convention_season_slug])->contain(["Conventions"])->first();
+		$conventionSD = $this->getConventionSeasonBySlug($convention_season_slug);
 		
 		// to check location/rooms for this convention
 		$conventionRoomsTotal = $this->Conventionrooms->find()->where(['Conventionrooms.convention_id' => $conventionSD->convention_id])->count();
@@ -151,11 +151,11 @@ class SchedulingsController extends AppController {
 			{
 				$this->Flash->error('Sorry, '.($cntrConvSeasonTotalEvents-count((array)$roomEventsArr)).' event(s) not assigned to any room. Please assign.');
 				
-				$this->Schedulings->updateAll(['precheck_locations' => 0,'total_locations_found' => NULL,'modified' => date('Y-m-d H:i:s')], ["conventionseasons_id" => $conventionSD->id]);
+				$this->updateSchedulingForSeason($conventionSD->id, ['precheck_locations' => 0, 'total_locations_found' => NULL]);
 			}
 			else
 			{
-				$this->Schedulings->updateAll(['precheck_locations' => 1,'total_locations_found' => $conventionRoomsTotal,'modified' => date('Y-m-d H:i:s')], ["conventionseasons_id" => $conventionSD->id]);
+				$this->updateSchedulingForSeason($conventionSD->id, ['precheck_locations' => 1, 'total_locations_found' => $conventionRoomsTotal]);
 			
 				$this->Flash->success('Total locations found: '.$conventionRoomsTotal);
 			}
@@ -172,19 +172,19 @@ class SchedulingsController extends AppController {
 	
 	public function precheckregistrations($convention_season_slug=null) {
 		
-		$conventionSD = $this->Conventionseasons->find()->where(['Conventionseasons.slug' => $convention_season_slug])->contain(["Conventions"])->first();
+		$conventionSD = $this->getConventionSeasonBySlug($convention_season_slug);
 		
 		// to check convention registrations
 		$conventionRegCount = $this->Conventionregistrations->find()->where(['Conventionregistrations.conventionseason_id' => $conventionSD->id])->count();
 		if($conventionRegCount>0)
 		{
-			$this->Schedulings->updateAll(['precheck_registrations' => 1,'total_registrations_found' => $conventionRegCount,'modified' => date('Y-m-d H:i:s')], ["conventionseasons_id" => $conventionSD->id]);
+			$this->updateSchedulingForSeason($conventionSD->id, ['precheck_registrations' => 1, 'total_registrations_found' => $conventionRegCount]);
 			
 			$this->Flash->success('Total registrations found: '.$conventionRegCount);
 		}
 		else
 		{
-			$this->Schedulings->updateAll(['precheck_registrations' => 0,'total_registrations_found' => NULL,'modified' => date('Y-m-d H:i:s')], ["conventionseasons_id" => $conventionSD->id]);
+			$this->updateSchedulingForSeason($conventionSD->id, ['precheck_registrations' => 0, 'total_registrations_found' => NULL]);
 			
 			$this->Flash->error('Sorry no registration found for this convention.');
 		}
@@ -196,19 +196,19 @@ class SchedulingsController extends AppController {
 	
 	public function precheckstudents($convention_season_slug=null) {
 		
-		$conventionSD = $this->Conventionseasons->find()->where(['Conventionseasons.slug' => $convention_season_slug])->contain(["Conventions"])->first();
+		$conventionSD = $this->getConventionSeasonBySlug($convention_season_slug);
 		
 		// to check convention registrations
 		$studentsRegCount = $this->Conventionregistrationstudents->find()->where(['Conventionregistrationstudents.convention_id' => $conventionSD->convention_id,'Conventionregistrationstudents.season_id' => $conventionSD->season_id,'Conventionregistrationstudents.season_year' => $conventionSD->season_year])->count();
 		if($studentsRegCount>0)
 		{
-			$this->Schedulings->updateAll(['precheck_students' => 1,'total_students_found' => $studentsRegCount,'modified' => date('Y-m-d H:i:s')], ["conventionseasons_id" => $conventionSD->id]);
+			$this->updateSchedulingForSeason($conventionSD->id, ['precheck_students' => 1, 'total_students_found' => $studentsRegCount]);
 			
 			$this->Flash->success('Total students found: '.$studentsRegCount);
 		}
 		else
 		{
-			$this->Schedulings->updateAll(['precheck_students' => 0,'total_students_found' => NULL,'modified' => date('Y-m-d H:i:s')], ["conventionseasons_id" => $conventionSD->id]);
+			$this->updateSchedulingForSeason($conventionSD->id, ['precheck_students' => 0, 'total_students_found' => NULL]);
 			
 			$this->Flash->error('Sorry no stuednts found for this convention.');
 		}
@@ -218,7 +218,7 @@ class SchedulingsController extends AppController {
 	
 	public function precheckall($convention_season_slug=null) {
 
-		$conventionSD = $this->Conventionseasons->find()->where(['Conventionseasons.slug' => $convention_season_slug])->contain(["Conventions"])->first();
+		$conventionSD = $this->getConventionSeasonBySlug($convention_season_slug);
 
 		// --- Events ---
 		$cntrPreCheckEvents = 0;
@@ -227,9 +227,9 @@ class SchedulingsController extends AppController {
 			if($convevPreCheck->Events['needs_schedule'] == 1) { $cntrPreCheckEvents++; }
 		}
 		if($cntrPreCheckEvents > 0) {
-			$this->Schedulings->updateAll(['precheck_events' => 1,'total_events_found' => $cntrPreCheckEvents,'modified' => date('Y-m-d H:i:s')], ["conventionseasons_id" => $conventionSD->id]);
+			$this->updateSchedulingForSeason($conventionSD->id, ['precheck_events' => 1, 'total_events_found' => $cntrPreCheckEvents]);
 		} else {
-			$this->Schedulings->updateAll(['precheck_events' => 0,'total_events_found' => NULL,'modified' => date('Y-m-d H:i:s')], ["conventionseasons_id" => $conventionSD->id]);
+			$this->updateSchedulingForSeason($conventionSD->id, ['precheck_events' => 0, 'total_events_found' => NULL]);
 		}
 
 		// --- Locations ---
@@ -244,25 +244,25 @@ class SchedulingsController extends AppController {
 		}
 		$locationsMissing = max(0, $cntrConvSeasonTotalEvents - count($roomEventsArr));
 		if($conventionRoomsTotal > 0 && $locationsMissing === 0) {
-			$this->Schedulings->updateAll(['precheck_locations' => 1,'total_locations_found' => $conventionRoomsTotal,'total_locations_missing' => 0,'modified' => date('Y-m-d H:i:s')], ["conventionseasons_id" => $conventionSD->id]);
+			$this->updateSchedulingForSeason($conventionSD->id, ['precheck_locations' => 1, 'total_locations_found' => $conventionRoomsTotal, 'total_locations_missing' => 0]);
 		} else {
-			$this->Schedulings->updateAll(['precheck_locations' => 0,'total_locations_found' => NULL,'total_locations_missing' => $locationsMissing,'modified' => date('Y-m-d H:i:s')], ["conventionseasons_id" => $conventionSD->id]);
+			$this->updateSchedulingForSeason($conventionSD->id, ['precheck_locations' => 0, 'total_locations_found' => NULL, 'total_locations_missing' => $locationsMissing]);
 		}
 
 		// --- Registrations ---
 		$conventionRegCount = $this->Conventionregistrations->find()->where(['Conventionregistrations.conventionseason_id' => $conventionSD->id])->count();
 		if($conventionRegCount > 0) {
-			$this->Schedulings->updateAll(['precheck_registrations' => 1,'total_registrations_found' => $conventionRegCount,'modified' => date('Y-m-d H:i:s')], ["conventionseasons_id" => $conventionSD->id]);
+			$this->updateSchedulingForSeason($conventionSD->id, ['precheck_registrations' => 1, 'total_registrations_found' => $conventionRegCount]);
 		} else {
-			$this->Schedulings->updateAll(['precheck_registrations' => 0,'total_registrations_found' => NULL,'modified' => date('Y-m-d H:i:s')], ["conventionseasons_id" => $conventionSD->id]);
+			$this->updateSchedulingForSeason($conventionSD->id, ['precheck_registrations' => 0, 'total_registrations_found' => NULL]);
 		}
 
 		// --- Students ---
 		$studentsRegCount = $this->Conventionregistrationstudents->find()->where(['Conventionregistrationstudents.convention_id' => $conventionSD->convention_id,'Conventionregistrationstudents.season_id' => $conventionSD->season_id,'Conventionregistrationstudents.season_year' => $conventionSD->season_year])->count();
 		if($studentsRegCount > 0) {
-			$this->Schedulings->updateAll(['precheck_students' => 1,'total_students_found' => $studentsRegCount,'modified' => date('Y-m-d H:i:s')], ["conventionseasons_id" => $conventionSD->id]);
+			$this->updateSchedulingForSeason($conventionSD->id, ['precheck_students' => 1, 'total_students_found' => $studentsRegCount]);
 		} else {
-			$this->Schedulings->updateAll(['precheck_students' => 0,'total_students_found' => NULL,'modified' => date('Y-m-d H:i:s')], ["conventionseasons_id" => $conventionSD->id]);
+			$this->updateSchedulingForSeason($conventionSD->id, ['precheck_students' => 0, 'total_students_found' => NULL]);
 		}
 
 		$this->Flash->success('Pre-check complete. Events: '.$cntrPreCheckEvents.', Locations: '.$conventionRoomsTotal.', Registrations: '.$conventionRegCount.', Students: '.$studentsRegCount.'.');
@@ -271,21 +271,18 @@ class SchedulingsController extends AppController {
 
 	public function resetallprecheck($convention_season_slug=null) {
 		
-		$conventionSD = $this->Conventionseasons->find()->where(['Conventionseasons.slug' => $convention_season_slug])->contain(["Conventions"])->first();
+		$conventionSD = $this->getConventionSeasonBySlug($convention_season_slug);
 		
 		//$this->prx($conventionSEvents);
 		if($conventionSD)
 		{
 			// now reset all precheck
-			$this->Schedulings->updateAll(
-			[
-			'precheck_events' => 0,'total_events_found' => NULL,
-			'precheck_locations' => 0,'total_locations_found' => NULL,
-			'precheck_registrations' => 0,'total_registrations_found' => NULL,
-			'precheck_students' => 0,'total_students_found' => NULL,
-			'modified' => date('Y-m-d H:i:s')
-			], 
-			["conventionseasons_id" => $conventionSD->id]);
+			$this->updateSchedulingForSeason($conventionSD->id, [
+				'precheck_events' => 0, 'total_events_found' => NULL,
+				'precheck_locations' => 0, 'total_locations_found' => NULL,
+				'precheck_registrations' => 0, 'total_registrations_found' => NULL,
+				'precheck_students' => 0, 'total_students_found' => NULL,
+			]);
 			
 			$this->Flash->success('Reset all pre-check prcessed successfully.');
 		}
@@ -306,7 +303,7 @@ class SchedulingsController extends AppController {
 		
         $this->set('convention_season_slug', $convention_season_slug);
 		
-		$conventionSD = $this->Conventionseasons->find()->where(['Conventionseasons.slug' => $convention_season_slug])->contain(["Conventions"])->first();
+		$conventionSD = $this->getConventionSeasonBySlug($convention_season_slug);
 		
 		$this->set('conventionSD', $conventionSD);
 		$this->set('convention_slug', $conventionSD->Conventions['slug']);
@@ -315,7 +312,7 @@ class SchedulingsController extends AppController {
 		$this->set('weekDays', $weekDays);
 		
 		// to fetch scheduling data and send to template
-		$schedulingD = $this->Schedulings->find()->where(['Schedulings.conventionseasons_id' => $conventionSD->id])->first();
+		$schedulingD = $this->getSchedulingByConventionSeasonId($conventionSD->id);
 		$this->set('schedulingD', $schedulingD);
 		
 		$schedulings = $this->Schedulings->get($schedulingD->id);
@@ -429,7 +426,7 @@ class SchedulingsController extends AppController {
 		
         $this->set('convention_season_slug', $convention_season_slug);
 		
-		$conventionSD = $this->Conventionseasons->find()->where(['Conventionseasons.slug' => $convention_season_slug])->contain(["Conventions"])->first();
+		$conventionSD = $this->getConventionSeasonBySlug($convention_season_slug);
 		$this->set('conventionSD', $conventionSD);
 		
 		$this->set('convention_slug', $conventionSD->Conventions['slug']);
@@ -524,13 +521,13 @@ class SchedulingsController extends AppController {
 		
         $this->set('convention_season_slug', $convention_season_slug);
 		
-		$conventionSD = $this->Conventionseasons->find()->where(['Conventionseasons.slug' => $convention_season_slug])->contain(["Conventions"])->first();
+		$conventionSD = $this->getConventionSeasonBySlug($convention_season_slug);
 		
 		$this->set('conventionSD', $conventionSD);
 		$this->set('convention_slug', $conventionSD->Conventions['slug']);
 		
 		// to fetch scheduling data and send to template
-		$schedulingD = $this->Schedulings->find()->where(['Schedulings.conventionseasons_id' => $conventionSD->id])->first();
+		$schedulingD = $this->getSchedulingByConventionSeasonId($conventionSD->id);
 		$this->set('schedulingD', $schedulingD);
 		
     }
@@ -544,7 +541,7 @@ class SchedulingsController extends AppController {
 		
         $this->set('convention_season_slug', $convention_season_slug);
 		
-		$conventionSD = $this->Conventionseasons->find()->where(['Conventionseasons.slug' => $convention_season_slug])->contain(["Conventions"])->first();
+		$conventionSD = $this->getConventionSeasonBySlug($convention_season_slug);
 		
 		$this->set('conventionSD', $conventionSD);
 		$this->set('convention_slug', $conventionSD->Conventions['slug']);
@@ -553,7 +550,7 @@ class SchedulingsController extends AppController {
 		$this->set('weekDays', $weekDays);
 		
 		// to fetch scheduling data and send to template
-		$schedulingD = $this->Schedulings->find()->where(['Schedulings.conventionseasons_id' => $conventionSD->id])->first();
+		$schedulingD = $this->getSchedulingByConventionSeasonId($conventionSD->id);
 		$this->set('schedulingD', $schedulingD);
 		
 		// Nathan provided these 3 events for Overwrite
@@ -677,9 +674,9 @@ class SchedulingsController extends AppController {
 	public function resolveconflicts($convention_season_slug=null) {
 		
 		// First we need to collect all students list of all schools
-		$conventionSD = $this->Conventionseasons->find()->where(['Conventionseasons.slug' => $convention_season_slug])->contain(["Conventions"])->first();
+		$conventionSD = $this->getConventionSeasonBySlug($convention_season_slug);
 		
-		$schedulingD = $this->Schedulings->find()->where(['Schedulings.conventionseasons_id' => $conventionSD->id])->first();
+		$schedulingD = $this->getSchedulingByConventionSeasonId($conventionSD->id);
 		
 		if(!empty($schedulingD->conflict_user_ids))
 		{
@@ -701,35 +698,14 @@ class SchedulingsController extends AppController {
 					$nextUserIDSConflicts = array_filter($userIDSConflict, function($item) use ($userId) {
 						return $item !== $userId;
 					});
-					
-					// Now update record
-					if(count($nextUserIDSConflicts))
-					{
-						$this->Schedulings->updateAll(
-						[
-							'conflict_user_ids'		=> implode(",",$nextUserIDSConflicts)
-						]
-						,
-						[
-							"id" => $schedulingD->id
-						]);
-					}
-					else
-					{
-						$this->Schedulings->updateAll(
-						[
-							'conflict_user_ids'		=> NULL
-						]
-						,
-						[
-							"id" => $schedulingD->id
-						]);
-					}
+
+						$this->updateSchedulingConflictField($schedulingD->id, 'conflict_user_ids', $nextUserIDSConflicts);
 				}
 				
 				//$this->prx($userConflictRecords);
 				foreach ($userConflictRecords as $userConflictRecord)
 				{
+					$recordId = $userConflictRecord['id'];
 					$base_start_time		= date("H:i:s",strtotime($userConflictRecord['start_time']));
 					$base_finish_time		= date("H:i:s",strtotime($userConflictRecord['finish_time']));
 					$base_sch_date_time 	= date("Y-m-d H:i:s",strtotime($userConflictRecord['sch_date_time']));
@@ -765,30 +741,8 @@ class SchedulingsController extends AppController {
 						$nextUserIDSConflicts = array_filter($userIDSConflict, function($item) use ($userId) {
 							return $item !== $userId;
 						});
-						
-						// Now update record
-						if(count($nextUserIDSConflicts))
-						{
-							$this->Schedulings->updateAll(
-							[
-								'conflict_user_ids'		=> implode(",",$nextUserIDSConflicts)
-							]
-							,
-							[
-								"id" => $schedulingD->id
-							]);
-						}
-						else
-						{
-							$this->Schedulings->updateAll(
-							[
-								'conflict_user_ids'		=> NULL
-							]
-							,
-							[
-								"id" => $schedulingD->id
-							]);
-						}
+
+						$this->updateSchedulingConflictField($schedulingD->id, 'conflict_user_ids', $nextUserIDSConflicts);
 						
 						///////////////
 
@@ -819,9 +773,9 @@ class SchedulingsController extends AppController {
 	public function resolveconflictsgroup($convention_season_slug=null) {
 		
 		// get convention season details
-		$conventionSD = $this->Conventionseasons->find()->where(['Conventionseasons.slug' => $convention_season_slug])->contain(["Conventions"])->first();
+		$conventionSD = $this->getConventionSeasonBySlug($convention_season_slug);
 		
-		$schedulingD = $this->Schedulings->find()->where(['Schedulings.conventionseasons_id' => $conventionSD->id])->first();
+		$schedulingD = $this->getSchedulingByConventionSeasonId($conventionSD->id);
 		
 		if(!empty($schedulingD->conflict_user_ids_group))
 		{
@@ -836,10 +790,7 @@ class SchedulingsController extends AppController {
 			// Record no longer exists — purge the stale conflict ID and move on
 			if (!$schedulingTimingsD) {
 				$nextSchIDSConflict = array_values(array_diff($schIDSConflict, [$schedulingId]));
-				$this->Schedulings->updateAll(
-					['conflict_user_ids_group' => count($nextSchIDSConflict) ? implode(',', $nextSchIDSConflict) : null],
-					['id' => $schedulingD->id]
-				);
+				$this->updateSchedulingConflictField($schedulingD->id, 'conflict_user_ids_group', $nextSchIDSConflict);
 				return $this->redirect(['controller' => 'schedulings', 'action' => 'resolveconflictsgroup', $convention_season_slug]);
 			}
 
@@ -886,30 +837,8 @@ class SchedulingsController extends AppController {
 			}); */
 			
 			$nextSchIDSConflict = array_values(array_diff($schIDSConflict, [$recordId]));
-						
-			// Now update record
-			if(count($nextSchIDSConflict))
-			{
-				$this->Schedulings->updateAll(
-				[
-					'conflict_user_ids_group'		=> implode(",",$nextSchIDSConflict)
-				]
-				,
-				[
-					"id" => $schedulingD->id
-				]);
-			}
-			else
-			{
-				$this->Schedulings->updateAll(
-				[
-					'conflict_user_ids_group'		=> NULL
-				]
-				,
-				[
-					"id" => $schedulingD->id
-				]);
-			}
+
+			$this->updateSchedulingConflictField($schedulingD->id, 'conflict_user_ids_group', $nextSchIDSConflict);
 			
 			
 		}
@@ -931,13 +860,13 @@ class SchedulingsController extends AppController {
 		
         $this->set('convention_season_slug', $convention_season_slug);
 		
-		$conventionSD = $this->Conventionseasons->find()->where(['Conventionseasons.slug' => $convention_season_slug])->contain(["Conventions"])->first();
+		$conventionSD = $this->getConventionSeasonBySlug($convention_season_slug);
 		
 		$this->set('conventionSD', $conventionSD);
 		$this->set('convention_slug', $conventionSD->Conventions['slug']);
 		
 		// to fetch scheduling data and send to template
-		$schedulingD = $this->Schedulings->find()->where(['Schedulings.conventionseasons_id' => $conventionSD->id])->first();
+		$schedulingD = $this->getSchedulingByConventionSeasonId($conventionSD->id);
 		$this->set('schedulingD', $schedulingD);
 		
 		// to fetch scheduling timings data and send to template
@@ -1154,6 +1083,41 @@ class SchedulingsController extends AppController {
         }
 		
     }
+
+	private function getConventionSeasonBySlug($conventionSeasonSlug)
+	{
+		return $this->Conventionseasons
+			->find()
+			->where(['Conventionseasons.slug' => $conventionSeasonSlug])
+			->contain(['Conventions'])
+			->first();
+	}
+
+	private function getSchedulingByConventionSeasonId($conventionSeasonId)
+	{
+		return $this->Schedulings
+			->find()
+			->where(['Schedulings.conventionseasons_id' => $conventionSeasonId])
+			->first();
+	}
+
+	private function updateSchedulingConflictField($schedulingId, $fieldName, array $ids)
+	{
+		$this->Schedulings->updateAll(
+			[
+				$fieldName => count($ids) ? implode(',', $ids) : null,
+			],
+			[
+				'id' => $schedulingId,
+			]
+		);
+	}
+
+	private function updateSchedulingForSeason($conventionSeasonId, array $fields)
+	{
+		$fields['modified'] = date('Y-m-d H:i:s');
+		$this->Schedulings->updateAll($fields, ['conventionseasons_id' => $conventionSeasonId]);
+	}
 
 }
 
