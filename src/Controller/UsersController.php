@@ -516,6 +516,27 @@ class UsersController extends AppController {
 		
 		$settingsD = $this->Settings->find()->where(['Settings.id' => 1])->first();
 		$this->set('settingsD', $settingsD);
+		
+		// For students: Get current convention registration for event registration menu
+		$studentRegistration = null;
+		if ($user_type === 'Student') {
+			$Conventionregistrationstudents = TableRegistry::getTableLocator()->get('Conventionregistrationstudents');
+			
+			// Get the student's active convention registration (most recent)
+			$studentRegistration = $Conventionregistrationstudents->find()
+				->where(['Conventionregistrationstudents.student_id' => $user_id])
+				->contain(['Conventionregistrations' => ['Conventionseasons']])
+				->order(['Conventionregistrationstudents.id' => 'DESC'])
+				->first();
+			
+			if ($studentRegistration) {
+				// Set session variables needed for event registration form
+				$this->request->getSession()->write("sess_selected_convention_registration_id", $studentRegistration->conventionregistration_id);
+				$this->request->getSession()->write("sess_selected_convention_id", $studentRegistration->convention_id);
+				$this->set('studentRegistration', $studentRegistration);
+				$this->set('studentRegistrationSlug', $studentRegistration->slug);
+			}
+		}
 
 		$dashboardVideoIds = [
 			'bT-KQAlpMOI',

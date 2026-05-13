@@ -264,6 +264,17 @@ if ($this->request->getSession()->read("user_id") > 0 && ($this->request->getSes
 				<li class="nav-item dash-item">
 					<?php echo $this->Html->link('My Events', ['controller' => 'users', 'action' => 'myevents'], ['escape' => false, 'class' => 'nav-link']); ?>
 				</li>
+				
+				<?php 
+				// Show Event Registration if student has an active registration
+				if (!empty($studentRegistrationSlug) && !empty($this->request->getSession()->read("sess_selected_convention_registration_id"))) {
+				?>
+				<hr>
+				<li class="nav-item dash-item">
+					<?php echo $this->Html->link('Event Registration', ['controller' => 'conventionregistrations', 'action' => 'managestudentevents', $studentRegistrationSlug], ['escape' => false, 'class' => 'nav-link']); ?>
+				</li>
+				<?php } ?>
+				
 				<hr>
 				<li class="nav-item dash-item">
 					<?php echo $this->Html->link('Edit Profile', ['controller' => 'users', 'action' => 'editprofile'], ['escape' => false, 'class' => 'nav-link ' . $active_editprofile]); ?>

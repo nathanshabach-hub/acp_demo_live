@@ -48,7 +48,7 @@
 				<br />
 				
 				<?php
-				if($prevSeasonConventionFound == 1)
+                if(!empty($prevSeasonConventionFound) && !empty($prevConvSeasonAutoID))
 				{
 					echo $this->Html->link('<i class="fa fa-upload"></i> Import From Previous Season Event List', ['controller'=>'conventions', 'action'=>'importeventsfromprevyear',$slug_convention_season,$slug_convention,$prevConvSeasonAutoID], ['escape'=>false, 'class'=>'btn btn-default', 'id' => 'import_from_prev_button']);
 				}

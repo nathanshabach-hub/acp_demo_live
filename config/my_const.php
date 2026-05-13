@@ -13,7 +13,7 @@ define('TAG_LINE', "");
 define('MAIL_FROM', 'info@scee.edu.au');
 define('TITLE_FOR_PAGES', " :: ".SITE_TITLE);
 
-define('HTTP_PATH', 'https://convention.accelerateministries.com.au/acp_demo');
+define('HTTP_PATH', 'http://localhost:8080');
 define("BASE_PATH", "/home/nathan-waqa/acp_demo_live");
 define("HTTP_IMAGE",HTTP_PATH . '/webroot/img');
 

@@ -62,7 +62,7 @@
 			
 			<li class="treeview <?php if(isset($manageSchools)){ echo 'active';} ?>">
                 <a href="javascript:void(0)">
-                    <i class="fa fa-bank"></i> <span>School</span> <i class="fa fa-angle-left pull-right"></i>
+                    <i class="fa fa-bank"></i> <span>Manage Schools</span> <i class="fa fa-angle-left pull-right"></i>
                 </a>
                 <ul class="treeview-menu">
                     <li class="<?php if(isset($schoolList)){ echo 'active';} ?>"><?php echo $this->Html->link('<i class="fa fa-circle-o"></i> Manage Schools', ['controller'=>'users', 'action' => 'index'], ['escape'=>false]); ?></li>
@@ -101,19 +101,19 @@
 			
 			<li class="treeview <?php if(isset($manageRegistrations)){ echo 'active';} ?>">
                 <a href="javascript:void(0)">
-                    <i class="fa fa-newspaper-o"></i> <span>Registration</span> <i class="fa fa-angle-left pull-right"></i>
+                    <i class="fa fa-newspaper-o"></i> <span>Convention Registrations</span> <i class="fa fa-angle-left pull-right"></i>
                 </a>
                 <ul class="treeview-menu">
-                    <li class="<?php if(isset($registrationsList)){ echo 'active';} ?>"><?php echo $this->Html->link('<i class="fa fa-circle-o"></i> Manage Registrations', ['controller'=>'conventionregistrations', 'action' => 'index'], ['escape'=>false]); ?></li>
+                    <li class="<?php if(isset($registrationsList)){ echo 'active';} ?>"><?php echo $this->Html->link('<i class="fa fa-circle-o"></i> List Registrations', ['controller'=>'conventionregistrations', 'action' => 'index'], ['escape'=>false]); ?></li>
                 </ul>
             </li>
 			
 			<li class="treeview <?php if(isset($judgeEvaluations)){ echo 'active';} ?>">
                 <a href="javascript:void(0)">
-                    <i class="fa fa-bar-chart"></i> <span>Analytics</span> <i class="fa fa-angle-left pull-right"></i>
+                    <i class="fa fa-bar-chart"></i> <span>Judge Evaluations</span> <i class="fa fa-angle-left pull-right"></i>
                 </a>
                 <ul class="treeview-menu">
-                    <li class="<?php if(isset($judgeEvaluationsList)){ echo 'active';} ?>"><?php echo $this->Html->link('<i class="fa fa-circle-o"></i> Feedback Analytics', ['controller'=>'judgeevaluations', 'action' => 'index'], ['escape'=>false]); ?></li>
+					<li class="<?php if(isset($judgeEvaluationsList)){ echo 'active';} ?>"><?php echo $this->Html->link('<i class="fa fa-circle-o"></i> List Judge Evaluations', ['controller'=>'judgeevaluations', 'action' => 'index'], ['escape'=>false]); ?></li>
 					<li class="<?php if(isset($guidelineBreachList)){ echo 'active';} ?>"><?php echo $this->Html->link('<i class="fa fa-circle-o"></i> Guideline Breach', ['controller'=>'eventsubmissions', 'action' => 'guidelinebreach'], ['escape'=>false]); ?></li>
 					<li class="<?php if(isset($commandPerformanceList)){ echo 'active';} ?>"><?php echo $this->Html->link('<i class="fa fa-circle-o"></i> Command Performance', ['controller'=>'eventsubmissions', 'action' => 'commandperformance'], ['escape'=>false]); ?></li>
                 </ul>
@@ -121,10 +121,10 @@
 			
 			<li class="treeview <?php if(isset($manageTransactions)){ echo 'active';} ?>">
                 <a href="javascript:void(0)">
-                    <i class="fa fa-dollar"></i> <span>Invoicing</span> <i class="fa fa-angle-left pull-right"></i>
+                    <i class="fa fa-dollar"></i> <span>Manage Transactions</span> <i class="fa fa-angle-left pull-right"></i>
                 </a>
                 <ul class="treeview-menu">
-                    <li class="<?php if(isset($transactionsList)){ echo 'active';} ?>"><?php echo $this->Html->link('<i class="fa fa-circle-o"></i> Create Invoices', ['controller'=>'transactions', 'action' => 'index'], ['escape'=>false]); ?></li>
+                    <li class="<?php if(isset($transactionsList)){ echo 'active';} ?>"><?php echo $this->Html->link('<i class="fa fa-circle-o"></i> List Transactions', ['controller'=>'transactions', 'action' => 'index'], ['escape'=>false]); ?></li>
                 </ul>
             </li>
 			

@@ -779,6 +779,8 @@ class HomesController extends AppController {
 			// now run through each event selected and check in which category it is, then compare
 			$arrLiveEventCats = array();
 			$arrLiveEventDivs = array();
+			$photographyCount = 0;
+			$designTechCount = 0;
 			$condEv = array();
 			$condEv[] = "(Events.id IN ($checkedEventIDS))";
 			$eventC = $this->Events->find()->where($condEv)->contain(['Divisions'])->all();
@@ -801,6 +803,15 @@ class HomesController extends AppController {
 					$arrLiveEventDivs[] = 'div_'.$division_id;
 				}
 				$arrLiveEventDivs['div_'.$division_id][] = $division_id;
+
+				$divisionName = strtolower(trim((string)($eventrec->Divisions['name'] ?? '')));
+				$divisionName = preg_replace('/\s+/', ' ', $divisionName);
+				if (strpos($divisionName, 'photography') !== false) {
+					$photographyCount++;
+				}
+				if (strpos($divisionName, 'design') !== false && strpos($divisionName, 'technology') !== false) {
+					$designTechCount++;
+				}
 			}
 			
 			// now check in each category, max events allowed
@@ -837,6 +848,23 @@ class HomesController extends AppController {
 						$discardLastEventSelected = 1;
 					}
 				}
+			}
+
+			$mediaArtsTotal = $photographyCount + $designTechCount;
+			if ($photographyCount > 3) {
+				$errorFlag = 1;
+				$errorMsg[] = 'Maximum events reached in division Photography.';
+				$discardLastEventSelected = 1;
+			}
+			if ($designTechCount > 3) {
+				$errorFlag = 1;
+				$errorMsg[] = 'Maximum events reached in division Design & Technology.';
+				$discardLastEventSelected = 1;
+			}
+			if ($mediaArtsTotal > 5) {
+				$errorFlag = 1;
+				$errorMsg[] = 'Maximum events reached in division Media Arts.';
+				$discardLastEventSelected = 1;
 			}
 			
 			

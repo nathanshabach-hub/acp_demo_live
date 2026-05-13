@@ -26,16 +26,9 @@ $this->Conventionseasonroomevents = TableRegistry::getTableLocator()->get('Conve
 				
 				</div> 
 				
-                <div class="topn_right ajshort" id="pagingLinks" align="right">
-                    <?php 
-                        $this->Paginator->options(array('update' => '#listID', 'url' => ['controller'=>'conventions', 'action'=>'events',$slug_convention_season,$slug_convention, $separator]));
-                        echo $this->Paginator->counter('{{page}} of {{pages}} &nbsp;');
-                        echo $this->Paginator->prev('« Prev');
-                        echo $this->Paginator->numbers();
-                        echo $this->Paginator->next('Next »');
-                        
-                    ?>
-                </div>
+				<div class="topn_right ajshort" id="pagingLinks" align="right">
+					<span class="text-muted">Client-side paging enabled</span>
+				</div>
             </div>   
 
             <div class="tbl-resp-listing">

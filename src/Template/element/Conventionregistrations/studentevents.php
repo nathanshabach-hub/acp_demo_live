@@ -47,7 +47,8 @@
 									
 									if($userDetails->user_type == "School")
 									{
-										echo $this->Html->link('<i class="fa fa-trash-o"></i>', ['controller' => 'conventionregistrations', 'action' => 'removestudentevent',$datarecord->slug], [ 'escape' => false, 'title' => 'Remove all events of this student', 'class'=>'', 'confirm' => 'Are you sure you want to remove all events of this student ?']);
+                                        echo $this->Html->link('<i class="fa fa-eraser"></i>', ['controller' => 'conventionregistrations', 'action' => 'removestudentevent',$datarecord->slug], [ 'escape' => false, 'title' => 'Remove all events of this student', 'class'=>'', 'confirm' => 'Are you sure you want to remove all events of this student?']);
+                                        echo $this->Html->link('<i class="fa fa-trash-o"></i>', ['controller' => 'conventionregistrations', 'action' => 'removestudent',$datarecord->slug], [ 'escape' => false, 'title' => 'Remove student from this convention registration', 'class'=>'', 'confirm' => 'Are you sure you want to remove this student from this convention registration? This will also remove related event/grouping/submission records.']);
 									}
 									?>
                                 </td>
