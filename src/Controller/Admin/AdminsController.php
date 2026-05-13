@@ -161,6 +161,20 @@ class AdminsController extends AppController {
 			{
 				$this->request->getSession()->write('sess_admin_header_season_id', $admin_header_season_id);
 				
+				// If the user came from a page whose URL contains a conventionseason slug
+				// (e.g. /admin/schedulings/schedulecategory/convention-season-...), preserve
+				// that page and just swap in the newly chosen conventionseason slug so the
+				// dropdown acts as an in-context switcher rather than always sending users
+				// back to the seasons listing.
+				$referer = $this->request->referer(true);
+				if ($referer && !empty($convSD->slug)) {
+					$path = parse_url($referer, PHP_URL_PATH) ?? '';
+					if (preg_match('#/(convention-season-[A-Za-z0-9\-]+)#', $path, $m)) {
+						$newPath = str_replace($m[1], $convSD->slug, $path);
+						return $this->redirect($newPath);
+					}
+				}
+				
 				$this->redirect(['controller' => 'conventions', 'action' => 'seasons', $convSD->Conventions['slug']]);
 			}
 		}
