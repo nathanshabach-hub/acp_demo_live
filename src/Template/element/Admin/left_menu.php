@@ -1,10 +1,8 @@
 <aside class="main-sidebar">
     <section class="sidebar">
         <ul class="sidebar-menu">
-            <li class="treeview <?php if(isset($dashboard)){ echo 'active';} ?>">
-                <a href="<?php echo HTTP_PATH;?>/admin/admins/dashboard">
-                    <i class="fa fa-dashboard"></i> <span>Dashboard</span> <i class="fa fa-angle-left pull-right"></i>
-                </a>
+            <li class="<?php if(isset($dashboard)){ echo 'active';} ?>">
+                <?php echo $this->Html->link('<i class="fa fa-dashboard"></i> <span>Dashboard</span>', ['controller'=>'admins', 'action' => 'dashboard'], ['escape'=>false]); ?>
             </li>
             <li class="treeview <?php if(isset($manageConference)){ echo 'active';} ?>">
                 <a href="javascript:void(0)">
@@ -112,7 +110,7 @@
 			
 			<li class="treeview <?php if(isset($judgeEvaluations)){ echo 'active';} ?>">
                 <a href="javascript:void(0)">
-                    <i class="fa fa-gavel"></i> <span>Analytics</span> <i class="fa fa-angle-left pull-right"></i>
+                    <i class="fa fa-bar-chart"></i> <span>Analytics</span> <i class="fa fa-angle-left pull-right"></i>
                 </a>
                 <ul class="treeview-menu">
                     <li class="<?php if(isset($judgeEvaluationsList)){ echo 'active';} ?>"><?php echo $this->Html->link('<i class="fa fa-circle-o"></i> Feedback Analytics', ['controller'=>'judgeevaluations', 'action' => 'index'], ['escape'=>false]); ?></li>
@@ -132,7 +130,7 @@
 			
 			<li class="treeview <?php if(isset($manageCombinedRequests)){ echo 'active';} ?>">
                 <a href="javascript:void(0)">
-                    <i class="fa fa-user-secret"></i> <span>Combined Team/Group Events </span> <i class="fa fa-angle-left pull-right"></i>
+                    <i class="fa fa-users"></i> <span>Combined Team/Group Events</span> <i class="fa fa-angle-left pull-right"></i>
                 </a>
                 <ul class="treeview-menu">
                     <li class="<?php if(isset($combinedRequestsList)){ echo 'active';} ?>"><?php echo $this->Html->link('<i class="fa fa-circle-o"></i> List Requests', ['controller'=>'combinerequests', 'action' => 'index'], ['escape'=>false]); ?></li>
@@ -165,24 +163,6 @@
 			?>
 			
 			
-			<!--
-			<li class="treeview <?php if(isset($manageEvaluations)){ echo 'active';} ?>">
-                <a href="javascript:void(0)">
-                    <i class="fa fa-bullseye"></i> <span>Evaluations Forms</span> <i class="fa fa-angle-left pull-right"></i>
-                </a>
-                <ul class="treeview-menu">
-                    <li class="<?php if(isset($tagsList)){ echo 'active';} ?>"><?php echo $this->Html->link('<i class="fa fa-circle-o"></i> List Tags', ['controller'=>'evaluationtags', 'action' => 'index'], ['escape'=>false]); ?></li>
-					<li class="<?php if(isset($evalcategoriesList)){ echo 'active';} ?>"><?php echo $this->Html->link('<i class="fa fa-circle-o"></i> List Categories', ['controller'=>'evaluationcategories', 'action' => 'index'], ['escape'=>false]); ?></li>
-					<li class="<?php if(isset($questionsList)){ echo 'active';} ?>"><?php echo $this->Html->link('<i class="fa fa-circle-o"></i> List Questions', ['controller'=>'evaluationquestions', 'action' => 'index'], ['escape'=>false]); ?></li>
-					<li class="<?php if(isset($formsList)){ echo 'active';} ?>"><?php echo $this->Html->link('<i class="fa fa-circle-o"></i> List Forms', ['controller'=>'evaluationforms', 'action' => 'index'], ['escape'=>false]); ?></li>
-                </ul>
-            </li>
-			-->
-
-             
-			
-			
-             
         </ul>
     </section>
 </aside>
