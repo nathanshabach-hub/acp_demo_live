@@ -21,28 +21,48 @@
         </div>
 
         <div class="conference-metrics row">
-            <div class="col-lg-3 col-md-6 col-sm-6">
-                <div class="conference-card">
-                    <div class="conference-card-label">Total Registrations</div>
-                    <div class="conference-card-value"><?php echo (int)$totalRegistrations; ?></div>
+            <div class="col-lg-3 col-md-6 col-sm-6 col-xs-6">
+                <div class="small-box bg-olive">
+                    <div class="inner">
+                        <h3><?php echo (int)$totalRegistrations; ?></h3>
+                        <p>Total Registrations</p>
+                    </div>
+                    <div class="icon">
+                        <i class="fa fa-newspaper-o"></i>
+                    </div>
                 </div>
             </div>
-            <div class="col-lg-3 col-md-6 col-sm-6">
-                <div class="conference-card">
-                    <div class="conference-card-label">Schools Enrolled</div>
-                    <div class="conference-card-value"><?php echo (int)$schoolsEnrolled; ?></div>
+            <div class="col-lg-3 col-md-6 col-sm-6 col-xs-6">
+                <div class="small-box bg-blue">
+                    <div class="inner">
+                        <h3><?php echo (int)$schoolsEnrolled; ?></h3>
+                        <p>Schools Enrolled</p>
+                    </div>
+                    <div class="icon">
+                        <i class="fa fa-bank"></i>
+                    </div>
                 </div>
             </div>
-            <div class="col-lg-3 col-md-6 col-sm-6">
-                <div class="conference-card">
-                    <div class="conference-card-label">Active Conferences</div>
-                    <div class="conference-card-value"><?php echo (int)$activeConferences; ?></div>
+            <div class="col-lg-3 col-md-6 col-sm-6 col-xs-6">
+                <div class="small-box bg-green">
+                    <div class="inner">
+                        <h3><?php echo (int)$activeConferences; ?></h3>
+                        <p>Active Conferences</p>
+                    </div>
+                    <div class="icon">
+                        <i class="fa fa-university"></i>
+                    </div>
                 </div>
             </div>
-            <div class="col-lg-3 col-md-6 col-sm-6">
-                <div class="conference-card">
-                    <div class="conference-card-label">Full Attendance Rate</div>
-                    <div class="conference-card-value"><?php echo (int)$attendanceRate; ?>%</div>
+            <div class="col-lg-3 col-md-6 col-sm-6 col-xs-6">
+                <div class="small-box bg-aqua">
+                    <div class="inner">
+                        <h3><?php echo (int)$attendanceRate; ?>%</h3>
+                        <p>Full Attendance Rate</p>
+                    </div>
+                    <div class="icon">
+                        <i class="fa fa-line-chart"></i>
+                    </div>
                 </div>
             </div>
         </div>
@@ -213,17 +233,17 @@
 
 <style>
 .conference-page {
-    background: radial-gradient(1200px 600px at 5% 0%, #152955 0%, #0f1b39 35%, #0b142d 100%);
+    background: #ecf0f5;
     min-height: calc(100vh - 50px);
 }
 
 .conference-header h1 {
-    color: #eef6ff;
+    color: #333;
     font-weight: 700;
 }
 
 .conference-header p {
-    color: #9eb0d3;
+    color: #666;
     margin: 6px 0 0;
 }
 
@@ -233,6 +253,11 @@
 
 .conference-quick-links {
     margin-bottom: 18px;
+    background: #fff;
+    border: 1px solid #d2d6de;
+    border-top: 3px solid #3c8dbc;
+    border-radius: 0;
+    box-shadow: none;
 }
 
 .conference-quick-links-grid {
@@ -244,44 +269,27 @@
 .conference-quick-link {
     display: block;
     text-align: center;
-    border: 1px solid rgba(64, 94, 156, 0.45);
-    border-radius: 10px;
+    border: 1px solid #d2d6de;
+    border-radius: 3px;
     padding: 10px 8px;
-    color: #7fd4ff;
-    background: rgba(13, 31, 70, 0.75);
+    color: #444;
+    background: #f7f7f7;
     font-size: 12px;
     font-weight: 600;
 }
 
 .conference-quick-link:hover {
-    color: #b9ebff;
-    background: rgba(19, 42, 89, 0.9);
+    color: #111;
+    background: #f0f0f0;
     text-decoration: none;
 }
 
-.conference-card,
 .conference-panel {
-    background: rgba(7, 19, 45, 0.92);
-    border: 1px solid rgba(64, 94, 156, 0.45);
-    border-radius: 14px;
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.28);
-}
-
-.conference-card {
-    padding: 18px;
-    margin-bottom: 18px;
-}
-
-.conference-card-label {
-    color: #9cb0d8;
-    font-size: 13px;
-}
-
-.conference-card-value {
-    color: #f2f8ff;
-    font-size: 34px;
-    font-weight: 700;
-    margin-top: 4px;
+    background: #fff;
+    border: 1px solid #d2d6de;
+    border-top: 3px solid #00a65a;
+    border-radius: 0;
+    box-shadow: none;
 }
 
 .conference-panel {
@@ -290,7 +298,7 @@
 }
 
 .conference-panel-title {
-    color: #e6f1ff;
+    color: #444;
     font-weight: 600;
     margin-bottom: 14px;
     letter-spacing: 0.3px;
@@ -314,13 +322,13 @@
     max-width: 56px;
     margin: 0 auto;
     border-radius: 10px 10px 4px 4px;
-    background: linear-gradient(180deg, #26d09f 0%, #118fbf 100%);
+    background: linear-gradient(180deg, #5faee3 0%, #3c8dbc 100%);
     min-height: 4px;
 }
 
 .conference-trend-value,
 .conference-trend-label {
-    color: #b7c7e6;
+    color: #555;
     font-size: 12px;
     margin-top: 6px;
 }
@@ -341,19 +349,19 @@
 
 .conference-location-text,
 .conference-location-value {
-    color: #b7c7e6;
+    color: #555;
     font-size: 12px;
 }
 
 .conference-location-track {
-    background: rgba(44, 69, 118, 0.45);
+    background: #e9ecef;
     border-radius: 999px;
     height: 10px;
     overflow: hidden;
 }
 
 .conference-location-bar {
-    background: linear-gradient(90deg, #2dc0ff, #39d78e);
+    background: linear-gradient(90deg, #3c8dbc, #00a65a);
     height: 100%;
 }
 
@@ -369,17 +377,17 @@
 
 .conference-table th,
 .conference-table td {
-    border-bottom: 1px solid rgba(59, 85, 136, 0.4);
+    border-bottom: 1px solid #f4f4f4;
     padding: 10px 8px;
-    color: #c6d5ef;
+    color: #444;
     font-size: 13px;
 }
 
 .conference-table th {
-    color: #e7f0ff;
+    color: #111;
     position: sticky;
     top: 0;
-    background: rgba(7, 19, 45, 0.95);
+    background: #fff;
 }
 
 .conference-chip {
@@ -415,7 +423,7 @@
     grid-template-columns: 34px 1fr auto;
     align-items: center;
     gap: 10px;
-    border-bottom: 1px solid rgba(59, 85, 136, 0.36);
+    border-bottom: 1px solid #f4f4f4;
     padding-bottom: 8px;
 }
 
@@ -423,22 +431,22 @@
     width: 34px;
     height: 34px;
     border-radius: 50%;
-    background: #1a315f;
-    color: #9fd0ff;
+    background: #d9edf7;
+    color: #31708f;
     text-align: center;
     line-height: 34px;
     font-weight: 700;
 }
 
 .conference-recent-name {
-    color: #e7f0ff;
+    color: #333;
     font-weight: 600;
     font-size: 13px;
 }
 
 .conference-recent-role,
 .conference-recent-date {
-    color: #9eb0d3;
+    color: #777;
     font-size: 12px;
 }
 
@@ -449,7 +457,7 @@
 }
 
 .conference-link-group {
-    border-bottom: 1px solid rgba(59, 85, 136, 0.36);
+    border-bottom: 1px solid #f4f4f4;
     padding-bottom: 8px;
     margin-bottom: 10px;
 }
@@ -461,7 +469,7 @@
 }
 
 .conference-link-group-title {
-    color: #9eb0d3;
+    color: #777;
     font-size: 11px;
     font-weight: 700;
     letter-spacing: 0.6px;
@@ -474,15 +482,15 @@
 }
 
 .conference-links a {
-    color: #7fd4ff;
+    color: #3c8dbc;
 }
 
 .conference-links a:hover {
-    color: #a8e8ff;
+    color: #367fa9;
 }
 
 .conference-empty {
-    color: #9eb0d3;
+    color: #777;
     font-size: 13px;
     padding: 6px 0;
 }
