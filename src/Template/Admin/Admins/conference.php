@@ -14,7 +14,7 @@
                 <?php echo $this->Html->link('Create Certificates', ['controller' => 'judgeevaluations', 'action' => 'index'], ['class' => 'conference-quick-link']); ?>
                 <?php echo $this->Html->link('Feedback Summary', ['controller' => 'judgeevaluations', 'action' => 'index'], ['class' => 'conference-quick-link']); ?>
                 <?php echo $this->Html->link('Manage Schools', ['controller' => 'users', 'action' => 'index'], ['class' => 'conference-quick-link']); ?>
-                <?php echo $this->Html->link('Manage Conferences', ['controller' => 'conventions', 'action' => 'index'], ['class' => 'conference-quick-link']); ?>
+                <?php echo $this->Html->link('Manage Conferences', ['controller' => 'admins', 'action' => 'listConferences'], ['class' => 'conference-quick-link']); ?>
                 <?php echo $this->Html->link('Create Invoices', ['controller' => 'transactions', 'action' => 'index'], ['class' => 'conference-quick-link']); ?>
                 <?php echo $this->Html->link('Feedback Analytics', ['controller' => 'judgeevaluations', 'action' => 'index'], ['class' => 'conference-quick-link']); ?>
             </div>
@@ -30,17 +30,19 @@
                     <div class="icon">
                         <i class="fa fa-newspaper-o"></i>
                     </div>
+                    <?php echo $this->Html->link('<i class="fa fa-arrow-circle-right"></i> More info', ['controller' => 'admins', 'action' => 'conferenceRegistrations'], ['class' => 'small-box-footer', 'escape' => false]); ?>
                 </div>
             </div>
             <div class="col-lg-3 col-md-6 col-sm-6 col-xs-6">
                 <div class="small-box bg-blue">
                     <div class="inner">
                         <h3><?php echo (int)$schoolsEnrolled; ?></h3>
-                        <p>Schools Enrolled</p>
+                        <p>Schools Registered</p>
                     </div>
                     <div class="icon">
                         <i class="fa fa-bank"></i>
                     </div>
+                    <?php echo $this->Html->link('<i class="fa fa-arrow-circle-right"></i> More info', ['controller' => 'admins', 'action' => 'conferenceSchools'], ['class' => 'small-box-footer', 'escape' => false]); ?>
                 </div>
             </div>
             <div class="col-lg-3 col-md-6 col-sm-6 col-xs-6">
@@ -52,6 +54,7 @@
                     <div class="icon">
                         <i class="fa fa-university"></i>
                     </div>
+                    <?php echo $this->Html->link('<i class="fa fa-arrow-circle-right"></i> More info', ['controller' => 'admins', 'action' => 'listConferences'], ['class' => 'small-box-footer', 'escape' => false]); ?>
                 </div>
             </div>
             <div class="col-lg-3 col-md-6 col-sm-6 col-xs-6">
@@ -63,6 +66,7 @@
                     <div class="icon">
                         <i class="fa fa-line-chart"></i>
                     </div>
+                    <?php echo $this->Html->link('<i class="fa fa-arrow-circle-right"></i> More info', ['controller' => 'conventionregistrations', 'action' => 'index'], ['class' => 'small-box-footer', 'escape' => false]); ?>
                 </div>
             </div>
         </div>
@@ -208,7 +212,7 @@
                     <div class="conference-link-group">
                         <div class="conference-link-group-title">Conference</div>
                         <ul>
-                            <li><?php echo $this->Html->link('Manage Conferences', ['controller' => 'conventions', 'action' => 'index']); ?></li>
+                            <li><?php echo $this->Html->link('Manage Conferences', ['controller' => 'admins', 'action' => 'listConferences']); ?></li>
                         </ul>
                     </div>
 

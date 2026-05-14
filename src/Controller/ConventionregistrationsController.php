@@ -6,7 +6,7 @@ use Cake\Datasource\ConnectionManager;
 use App\Controller\AppController;
 use Cake\Core\Configure;
 use Cake\Core\Configure\Engine\PhpConfig;
-use Cake\Mailer\Mailer;
+use App\Mailer\AppMailer as Mailer;
 use Cake\I18n\I18n;
 
 class ConventionregistrationsController extends AppController {
@@ -60,7 +60,7 @@ class ConventionregistrationsController extends AppController {
 		// If current season has no convention (type=0) links, fallback to latest season that has them.
 		$conventionSeasons = $this->Conventionseasons->find()
 			->innerJoinWith('Conventions', function($q) {
-				return $q->where(['Conventions.convention_type' => 0]);
+				return $q->where(['Conventions.convention_type IN' => [0, 3]]);
 			})
 			->where(['Conventionseasons.season_id' => $season_id,'Conventionseasons.season_year' => $seasonD->season_year])
 			->order(['Conventionseasons.id' => 'ASC'])
@@ -70,7 +70,7 @@ class ConventionregistrationsController extends AppController {
 		{
 			$fallbackConventionSeason = $this->Conventionseasons->find()
 				->innerJoinWith('Conventions', function($q) {
-					return $q->where(['Conventions.convention_type' => 0, 'Conventions.status' => 1]);
+					return $q->where(['Conventions.convention_type IN' => [0, 3], 'Conventions.status' => 1]);
 				})
 				->order(['Conventionseasons.season_year' => 'DESC', 'Conventionseasons.id' => 'DESC'])
 				->first();
@@ -82,7 +82,7 @@ class ConventionregistrationsController extends AppController {
 
 				$conventionSeasons = $this->Conventionseasons->find()
 					->innerJoinWith('Conventions', function($q) {
-						return $q->where(['Conventions.convention_type' => 0]);
+						return $q->where(['Conventions.convention_type IN' => [0, 3]]);
 					})
 					->where(['Conventionseasons.season_id' => $season_id,'Conventionseasons.season_year' => $seasonD->season_year])
 					->order(['Conventionseasons.id' => 'ASC'])
@@ -99,10 +99,10 @@ class ConventionregistrationsController extends AppController {
 			->where($conditionCurrentSeason)
 			->order(['Conventionregistrations.id' => 'DESC'])
 			->contain(['Conventions' => function($q) {
-				return $q->where(['Conventions.convention_type' => 0]);
+				return $q->where(['Conventions.convention_type IN' => [0, 3]]);
 			}])
 			->matching('Conventions', function($q) {
-				return $q->where(['Conventions.convention_type' => 0]);
+				return $q->where(['Conventions.convention_type IN' => [0, 3]]);
 			})
 			->all();
 		$this->set('conventionregistrations', $conventionregistrations);
@@ -136,7 +136,7 @@ class ConventionregistrationsController extends AppController {
 		$condConvention = array();
 		$condConvention[] = "(Conventions.id IN ($conventionIDSImploded))";
 		$condConvention[] = "(Conventions.status  = '1')";
-		$condConvention[] = "(Conventions.convention_type = '0')";
+		$condConvention[] = "(Conventions.convention_type IN ('0','3'))";
 		$remainingconventions = $this->Conventions->find()->where($condConvention)->order(['Conventions.name' => 'ASC'])->all();
 		$this->set('remainingconventions', $remainingconventions);
 		
@@ -144,10 +144,10 @@ class ConventionregistrationsController extends AppController {
 		$pastRegistrations = $this->Conventionregistrations->find()
 			->where(["Conventionregistrations.user_id" => $user_id,"Conventionregistrations.season_year <" => $seasonD->season_year])
 			->contain(["Conventions" => function($q) {
-				return $q->where(['Conventions.convention_type' => 0]);
+				return $q->where(['Conventions.convention_type IN' => [0, 3]]);
 			}])
 			->matching('Conventions', function($q) {
-				return $q->where(['Conventions.convention_type' => 0]);
+				return $q->where(['Conventions.convention_type IN' => [0, 3]]);
 			})
 			->order(['Conventionregistrations.id' => 'DESC'])
 			->all();
@@ -892,6 +892,176 @@ class ConventionregistrationsController extends AppController {
 		$this->redirect(['controller' => 'conventionregistrations', 'action' => 'students']);
     }
 	
+	public function registerconventionwizard($convention_slug = null, $season_id = null)
+	{
+		$this->userLoginCheck();
+		$this->schoolAdminLoginCheck();
+
+		$user_id    = $this->request->getSession()->read("user_id");
+		$userDetails = $this->Users->find()->where(['Users.id' => $user_id])->first();
+
+		$conventionD = $this->Conventions->find()->where(['Conventions.slug' => $convention_slug])->first();
+		if (!$conventionD) {
+			$this->Flash->error('Invalid conference.');
+			return $this->redirect(['action' => 'myconferenceregistrations']);
+		}
+
+		$seasonD = $this->Seasons->find()->where(['Seasons.id' => $season_id])->first();
+		if (!$seasonD) {
+			$this->Flash->error('Invalid season.');
+			return $this->redirect(['action' => 'myconferenceregistrations']);
+		}
+
+		$convSeasonD = $this->Conventionseasons->find()->where([
+			'Conventionseasons.convention_id' => $conventionD->id,
+			'Conventionseasons.season_id'     => $season_id,
+			'Conventionseasons.season_year'   => $seasonD->season_year,
+		])->first();
+
+		// Handle POST — actually register
+		if ($this->request->is('post')) {
+			$confirmed = $this->request->getData('confirm_registration');
+			if (!$confirmed) {
+				$this->Flash->error('Please confirm the registration before proceeding.');
+				return $this->redirect(['action' => 'registerconventionwizard', $convention_slug, $season_id]);
+			}
+
+			// Delegate to registerfornewconvention logic
+			$convention_id = $conventionD->id;
+
+			$currDateTime     = time();
+			$regStartDateTime = strtotime($convSeasonD->registration_start_date);
+			$regEndDateTime   = strtotime($convSeasonD->registration_end_date);
+
+			// If no dates are set, registrations are open with no restriction
+			$datesOpen = empty($convSeasonD->registration_start_date) && empty($convSeasonD->registration_end_date);
+			$withinWindow = $datesOpen || ($currDateTime >= $regStartDateTime && $currDateTime <= $regEndDateTime);
+
+			if ($withinWindow) {
+				$checkRegExists = $this->Conventionregistrations->find()->where([
+					'Conventionregistrations.convention_id' => $convention_id,
+					'Conventionregistrations.user_id'       => $user_id,
+					'Conventionregistrations.season_id'     => $season_id,
+				])->first();
+
+				if ($checkRegExists) {
+					$this->Conventionregistrations->updateAll(['modified' => date('Y-m-d H:i:s')], ['id' => $checkRegExists->id]);
+					$this->Flash->error('You have already registered for this conference.');
+				} else {
+					$conventionregistrations = $this->Conventionregistrations->newEntity();
+					$dataCR = $this->Conventionregistrations->patchEntity($conventionregistrations, []);
+
+					$dataCR->conventionseason_id = $convSeasonD->id;
+					$dataCR->slug                = "convention-registration-{$convention_id}-{$user_id}-{$season_id}-" . time();
+					$dataCR->convention_id       = $convention_id;
+					$dataCR->user_id             = $user_id;
+					$dataCR->season_id           = $season_id;
+					$dataCR->season_year         = $seasonD->season_year;
+					$dataCR->status              = 1;
+					$dataCR->created             = date('Y-m-d H:i:s');
+					$dataCR->modified            = null;
+
+					$savedReg = $this->Conventionregistrations->save($dataCR);
+
+					// Save attendees — existing supervisors selected
+					if ($savedReg) {
+						$regId = $savedReg->id;
+
+						// Selected existing supervisors
+						$selectedIds = $this->request->getData('attendee_ids') ?? [];
+						foreach ($selectedIds as $teacherId) {
+							$teacherUser = $this->Users->find()->where(['Users.id' => $teacherId])->first();
+							if (!$teacherUser) continue;
+							$at = $this->Conventionregistrationteachers->newEntity();
+							$at->slug                       = "conv-reg-supervisor-{$regId}-{$teacherId}-" . time();
+							$at->conventionregistration_id  = $regId;
+							$at->convention_id              = $convention_id;
+							$at->user_id                    = $user_id;
+							$at->season_id                  = $season_id;
+							$at->season_year                = $seasonD->season_year;
+							$at->teacher_id                 = $teacherId;
+							$at->attendee_role              = $this->request->getData("attendee_role_{$teacherId}") ?? '';
+							$at->dietary_needs              = $this->request->getData("attendee_diet_{$teacherId}") ?? '';
+							$at->attending_both_days        = $this->request->getData("attendee_days_{$teacherId}") ? 1 : 0;
+							$at->status                     = 1;
+							$at->created                    = date('Y-m-d H:i:s');
+							$this->Conventionregistrationteachers->save($at);
+						}
+
+						// New attendees entered manually
+						$newFirstNames = $this->request->getData('new_first_name') ?? [];
+						$newLastNames  = $this->request->getData('new_last_name') ?? [];
+						$newEmails     = $this->request->getData('new_email') ?? [];
+						$newRoles      = $this->request->getData('new_role') ?? [];
+						$newDiets      = $this->request->getData('new_diet') ?? [];
+						$newDays       = $this->request->getData('new_days') ?? [];
+						foreach ($newFirstNames as $i => $firstName) {
+							$firstName = trim($firstName);
+							if (empty($firstName) && empty($newLastNames[$i] ?? '')) continue;
+							// Create or find user record
+							$newEmail    = trim($newEmails[$i] ?? '');
+							$existUser   = !empty($newEmail) ? $this->Users->find()->where(['Users.email_address' => $newEmail])->first() : null;
+							if ($existUser) {
+								$newTeacherId = $existUser->id;
+							} else {
+								$newU = $this->Users->newEntity();
+								$newU->user_type            = 'Teacher_Parent';
+								$newU->school_id            = $userDetails->school_id;
+								$newU->first_name           = $firstName;
+								$newU->last_name            = trim($newLastNames[$i] ?? '');
+								$newU->email_address        = $newEmail;
+								$newU->slug                 = strtolower(trim($firstName)) . '-' . time() . '-' . $i;
+								$newU->status               = 1;
+								$newU->activation_status    = 1;
+								$newU->created              = date('Y-m-d H:i:s');
+								$savedUser                  = $this->Users->save($newU);
+								$newTeacherId               = $savedUser ? $savedUser->id : null;
+							}
+							if (!$newTeacherId) continue;
+							$at = $this->Conventionregistrationteachers->newEntity();
+							$at->slug                       = "conv-reg-supervisor-{$regId}-{$newTeacherId}-" . time() . "-{$i}";
+							$at->conventionregistration_id  = $regId;
+							$at->convention_id              = $convention_id;
+							$at->user_id                    = $user_id;
+							$at->season_id                  = $season_id;
+							$at->season_year                = $seasonD->season_year;
+							$at->teacher_id                 = $newTeacherId;
+							$at->attendee_role              = trim($newRoles[$i] ?? '');
+							$at->dietary_needs              = trim($newDiets[$i] ?? '');
+							$at->attending_both_days        = !empty($newDays[$i]) ? 1 : 0;
+							$at->status                     = 1;
+							$at->created                    = date('Y-m-d H:i:s');
+							$this->Conventionregistrationteachers->save($at);
+						}
+					}
+
+					$this->Flash->success('You have successfully registered for the conference.');
+				}
+			} else {
+				$this->Flash->error('Registrations are not currently open for this conference.');
+			}
+
+			return $this->redirect(['action' => 'myconferenceregistrations']);
+		}
+
+		// GET — show wizard: fetch school's existing supervisors
+		$schoolSupervisors = [];
+		// For School-type users, their own id is the school id.
+		// For Teacher_Parent users, use their school_id field.
+		$schoolLookupId = ($userDetails->user_type === 'School') ? $userDetails->id : $userDetails->school_id;
+		if (!empty($schoolLookupId)) {
+			$schoolSupervisors = $this->Users->find()->where([
+				'Users.school_id' => $schoolLookupId,
+				'Users.user_type' => 'Teacher_Parent',
+				'Users.status !=' => 2,
+			])->order(['Users.first_name' => 'ASC'])->all()->toList();
+		}
+
+		$this->set("title_for_layout", "Register for Conference" . TITLE_FOR_PAGES);
+		$this->viewBuilder()->setLayout('home');
+		$this->set(compact('conventionD', 'seasonD', 'convSeasonD', 'userDetails', 'convention_slug', 'season_id', 'schoolSupervisors'));
+	}
+
 	public function registerfornewconvention($convention_slug=null,$season_id=null)
 	{
 		$this->userLoginCheck();
@@ -1501,10 +1671,10 @@ class ConventionregistrationsController extends AppController {
 				if($checkValidEvent && $checkValidEventGender && $studentAge<21)
 				{
 					// We need to apply a filter here to check events based on convention type
-					// if convention_type = 0 means in person, then choose event_type = 0 and 2
+					// if convention_type = 0 or 3 means in person/small convention, then choose event_type = 0 and 2
 					// if convention_type = 1 means online, then choose event_type = 1 and 2
 					
-					if($convention_type == 0)
+					if($convention_type == 0 || $convention_type == 3)
 					{
 						if($eventD->event_type == 0 || $eventD->event_type == 2)
 						{
@@ -2143,7 +2313,7 @@ class ConventionregistrationsController extends AppController {
 							->setFrom([HEADERS_FROM_EMAIL => HEADERS_FROM_NAME])
 							->setSubject($subjectToSend)
 							->setViewVars(['content_for_layout' => $messageToSend])
-							->deliver();
+							->send();
 						
 					}
 						

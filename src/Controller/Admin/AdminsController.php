@@ -5,7 +5,7 @@ namespace App\Controller\Admin;
 use App\Controller\AppController;
 use Cake\Core\Configure;
 use Cake\Core\Configure\Engine\PhpConfig;
-use Cake\Mailer\Mailer;
+use App\Mailer\AppMailer as Mailer;
 
 class AdminsController extends AppController {
 
@@ -127,7 +127,7 @@ class AdminsController extends AppController {
                             ->setFrom([MAIL_FROM => SITE_TITLE])
                             ->setSubject($subjectToSend)
                             ->setViewVars(['content_for_layout' => $messageToSend])
-                            ->deliver();
+                            ->send();
 
                     $this->Flash->success('New admin password sent to admin email address.');
                     $this->redirect(['action' => 'login']);
@@ -328,8 +328,8 @@ class AdminsController extends AppController {
 
         $conferenceLabel = 'All Conferences';
 
-        // Filter for conference-type conventions only
-        $totalRegistrations = $this->Conventionregistrations->find()
+        // Total individual attendees (Principal/Administrator/Supervisor/Monitor/Other) across all educators' conferences
+        $totalRegistrations = $this->Conventionregistrationteachers->find()
             ->matching('Conventions', function ($q) {
                 return $q->where(['Conventions.convention_type' => 1]);
             })
@@ -723,6 +723,172 @@ class AdminsController extends AppController {
 		return $this->response;
 	}
 
+	public function conferenceRegistrations() {
+		$this->set('title', ADMIN_TITLE . 'Conference Registrations');
+		$this->viewBuilder()->setLayout('admin');
+		$this->set('manageConference', '1');
+
+		// All registrations for educators' conferences (convention_type=1), regardless of status
+		$registrations = $this->Conventionregistrations->find()
+			->contain(['Users', 'Conventions'])
+			->matching('Conventions', function ($q) {
+				return $q->where(['Conventions.convention_type' => 1]);
+			})
+			->order(['Conventionregistrations.created' => 'DESC'])
+			->all();
+
+		// Build map of registration -> [admin user, conference]
+		$regMap = [];
+		$regIds = [];
+		foreach ($registrations as $r) {
+			$regIds[] = $r->id;
+			$regMap[$r->id] = $r;
+		}
+
+		// Flatten: every attendee becomes a row, carrying its registration + conference + admin
+		$attendees = [];
+		$roleCounts = [
+			'Principal' => 0, 'Administrator' => 0, 'Supervisor' => 0, 'Monitor' => 0, 'Other' => 0
+		];
+		if (!empty($regIds)) {
+			$atts = $this->Conventionregistrationteachers->find()
+				->where(['Conventionregistrationteachers.conventionregistration_id IN' => $regIds])
+				->contain(['Teachers'])
+				->order(['Conventionregistrationteachers.id' => 'DESC'])
+				->all();
+			foreach ($atts as $a) {
+				$reg = $regMap[$a->conventionregistration_id] ?? null;
+				if (!$reg) continue;
+				$attendees[] = [
+					'attendee' => $a,
+					'registration' => $reg,
+				];
+				$role = $a->attendee_role ?: 'Other';
+				if (!isset($roleCounts[$role])) {
+					$role = 'Other';
+				}
+				$roleCounts[$role]++;
+			}
+		}
+		$totalAttendees = count($attendees);
+
+		$this->set(compact('registrations', 'attendees', 'totalAttendees', 'roleCounts'));
+	}
+
+	public function conferenceSchools() {
+		$this->set('title', ADMIN_TITLE . 'Schools Registered');
+		$this->viewBuilder()->setLayout('admin');
+		$this->set('manageConference', '1');
+
+		// Get all active conferences (type=1, status=1)
+		$activeConferences = $this->Conventions->find()
+			->where(['Conventions.convention_type' => 1, 'Conventions.status' => 1])
+			->all();
+
+		// Get all registrations for active conferences, with user info
+		$registrations = $this->Conventionregistrations->find()
+			->contain(['Users'])
+			->matching('Conventions', function ($q) {
+				return $q->where(['Conventions.convention_type' => 1, 'Conventions.status' => 1]);
+			})
+			->order(['Conventionregistrations.created' => 'DESC'])
+			->all();
+
+		$this->set(compact('registrations', 'activeConferences'));
+	}
+
+	public function listConferences() {
+		$this->set('title', ADMIN_TITLE . 'Conferences');
+		$this->viewBuilder()->setLayout('admin');
+		$this->set('manageConference', '1');
+		$this->set('conferenceList', '1');
+
+		$conferences = $this->Conventions->find()
+			->where(['Conventions.convention_type' => 1])
+			->order(['Conventions.status' => 'DESC', 'Conventions.id' => 'DESC'])
+			->all();
+
+		// Attach registration counts per conference
+		$regCounts = [];
+		foreach ($this->Conventionregistrations->find()
+			->select(['Conventionregistrations.convention_id', 'total' => 'COUNT(Conventionregistrations.id)'])
+			->matching('Conventions', function ($q) { return $q->where(['Conventions.convention_type' => 1]); })
+			->group(['Conventionregistrations.convention_id'])
+			->enableHydration(false)
+			->all() as $row) {
+			$regCounts[(int)$row['convention_id']] = (int)$row['total'];
+		}
+
+		$this->set(compact('conferences', 'regCounts'));
+	}
+
+	public function viewConference($slug = null) {
+		$this->set('title', ADMIN_TITLE . 'View Conference');
+		$this->viewBuilder()->setLayout('admin');
+		$this->set('manageConference', '1');
+
+		$convention = $this->Conventions->find()
+			->where(['Conventions.slug' => $slug, 'Conventions.convention_type' => 1])
+			->first();
+
+		if (!$convention) {
+			$this->Flash->error('Conference not found.');
+			return $this->redirect(['action' => 'listConferences']);
+		}
+
+		// Season links
+		$seasons = $this->Conventionseasons->find()
+			->where(['Conventionseasons.convention_id' => $convention->id])
+			->order(['Conventionseasons.season_year' => 'DESC'])
+			->all();
+
+		// Registrations for this conference
+		$registrations = $this->Conventionregistrations->find()
+			->where(['Conventionregistrations.convention_id' => $convention->id])
+			->contain(['Users'])
+			->order(['Conventionregistrations.created' => 'DESC'])
+			->all();
+
+		// Attendees per registration (count + list)
+		$attendeesByReg = [];
+		$totalAttendees = 0;
+		$regIds = [];
+		foreach ($registrations as $r) { $regIds[] = $r->id; }
+		if (!empty($regIds)) {
+			$atts = $this->Conventionregistrationteachers->find()
+				->where(['Conventionregistrationteachers.conventionregistration_id IN' => $regIds])
+				->contain(['Teachers'])
+				->all();
+			foreach ($atts as $a) {
+				$attendeesByReg[$a->conventionregistration_id][] = $a;
+				$totalAttendees++;
+			}
+		}
+
+		$this->set(compact('convention', 'seasons', 'registrations', 'attendeesByReg', 'totalAttendees'));
+	}
+
+	public function deleteConference($slug = null) {
+		$this->request->allowMethod(['post', 'delete']);
+
+		$convention = $this->Conventions->find()
+			->where(['Conventions.slug' => $slug, 'Conventions.convention_type' => 1])
+			->first();
+
+		if (!$convention) {
+			$this->Flash->error('Conference not found.');
+			return $this->redirect(['action' => 'listConferences']);
+		}
+
+		if ($this->Conventions->delete($convention)) {
+			$this->Flash->success('Conference "' . $convention->name . '" has been deleted.');
+		} else {
+			$this->Flash->error('Could not delete the conference. Please try again.');
+		}
+
+		return $this->redirect(['action' => 'listConferences']);
+	}
+
 	public function addConference() {
 		$this->set('title', ADMIN_TITLE . 'Add Conference');
 		$this->viewBuilder()->setLayout('admin');
@@ -755,11 +921,16 @@ class AdminsController extends AppController {
 				if (!empty($data['season_id'])) {
 					$seasonD = $this->Seasons->find()->where(['Seasons.id' => $data['season_id']])->first();
 					if ($seasonD) {
-						$conventionseason = $this->Conventionseasons->newEntity([
-							'convention_id' => $convention->id,
-							'season_id' => $data['season_id'],
-							'season_year' => $seasonD->season_year
-						]);
+						$csData = [
+							'convention_id'             => $convention->id,
+							'season_id'                 => $data['season_id'],
+							'season_year'               => $seasonD->season_year,
+							'currency'                  => $data['currency'] ?? 'FJD',
+							'registration_start_date'   => !empty($data['registration_start_date']) ? $data['registration_start_date'] : null,
+							'registration_end_date'     => !empty($data['registration_end_date']) ? $data['registration_end_date'] : null,
+							'student_registration_fees' => !empty($data['student_registration_fees']) ? $data['student_registration_fees'] : null,
+						];
+						$conventionseason = $this->Conventionseasons->newEntity($csData);
 						$this->Conventionseasons->save($conventionseason);
 					}
 				}
