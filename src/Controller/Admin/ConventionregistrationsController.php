@@ -5,7 +5,7 @@ namespace App\Controller\Admin;
 use App\Controller\AppController;
 use Cake\Core\Configure;
 use Cake\Core\Configure\Engine\PhpConfig;
-use Cake\Mailer\Mailer;
+use App\Mailer\AppMailer as Mailer;
 
 class ConventionregistrationsController extends AppController {
 
@@ -454,7 +454,7 @@ class ConventionregistrationsController extends AppController {
 				->setFrom([HEADERS_FROM_EMAIL => HEADERS_FROM_NAME])
 				->setSubject($subjectToSend)
 				->setViewVars(['content_for_layout' => $messageToSend])
-				->deliver();
+				->send();
 			
 			$this->Flash->success('Registration approved successfully.');
 		
@@ -494,7 +494,7 @@ class ConventionregistrationsController extends AppController {
 				->setFrom([HEADERS_FROM_EMAIL => HEADERS_FROM_NAME])
 				->setSubject($subjectToSend)
 				->setViewVars(['content_for_layout' => $messageToSend])
-				->deliver();
+				->send();
 			
 			$this->Flash->success('Registration approved successfully.');
 		
@@ -605,7 +605,7 @@ class ConventionregistrationsController extends AppController {
 						->setFrom([HEADERS_FROM_EMAIL => HEADERS_FROM_NAME])
 						->setSubject($subjectToSend)
 						->setViewVars(['content_for_layout' => $messageToSend])
-						->deliver();
+						->send();
 					
 					$msgNot = " Email notification sent successfully to judge.";
 				}

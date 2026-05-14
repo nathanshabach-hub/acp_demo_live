@@ -6,7 +6,7 @@ use Cake\Datasource\ConnectionManager;
 use App\Controller\AppController;
 use Cake\Core\Configure;
 use Cake\Core\Configure\Engine\PhpConfig;
-use Cake\Mailer\Mailer;
+use App\Mailer\AppMailer as Mailer;
 use Cake\I18n\I18n;
 
 class HearteventsController extends AppController {
@@ -139,7 +139,7 @@ class HearteventsController extends AppController {
 			// to get convention registration details
 			$conventionRegD = $this->Conventionregistrations->find()->where(['Conventionregistrations.id' => $sess_selected_convention_registration_id])->first();
 			
-			$$conditionCR = array();
+			$conditionCR = array();
 			$conditionCR[] = "(Conventionregistrationstudents.conventionregistration_id = '".$sess_selected_convention_registration_id."')";
 			
 			// to check if teacher is logged in then teacher can only see students assigned to him

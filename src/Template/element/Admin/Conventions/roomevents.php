@@ -46,7 +46,7 @@ $slugConventionSeason = $slug_convention_season ?? null;
                             <?php //pr($datarecord); exit;?> 
                             <tr>
                                 <td data-title="#DB ID Room">#<?php echo $datarecord->id;?></td>
-                                <td data-title="Room"><?php echo $datarecord->Conventionrooms['room_name'];?></td>
+                                <td data-title="Room"><?php echo $datarecord->Conventionrooms['room_name'] ?? '(room deleted)';?></td>
                                 <td data-title="Event(s)">
 								<?php
 								$arrEventN = array();

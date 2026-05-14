@@ -1,7 +1,7 @@
 <?php
-$headerImg    = HTTP_PATH.'/webroot/img/front/certificates/header_division_certificate_portrait.png';
-$footerImg    = HTTP_PATH.'/webroot/img/front/certificates/footer_division_certificate_portrait.png';
-$signatureImg = HTTP_PATH.'/webroot/img/front/certificates/signature.png';
+$headerImg    = HTTP_PATH.'/img/front/certificates/header_division_certificate_portrait.png';
+$footerImg    = HTTP_PATH.'/img/front/certificates/footer_division_certificate_portrait.png';
+$signatureImg = HTTP_PATH.'/img/front/certificates/signature.png';
 ?>
 
 <script type="text/javascript">

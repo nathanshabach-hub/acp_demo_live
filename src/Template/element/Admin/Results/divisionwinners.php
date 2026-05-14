@@ -30,7 +30,12 @@ $this->Users = TableRegistry::getTableLocator()->get('Users');
                         <?php
 						foreach($divisions as $divisionrecord)
 						{
-							$divArr = $arrAllResults[$divisionrecord->id];
+							$divArr = $arrAllResults[$divisionrecord->id] ?? [];
+							
+							// Skip divisions with no scored students
+							if (empty($divArr)) {
+								continue;
+							}
 							
 							// Get max value
 							$maxValue = max($divArr);
@@ -41,15 +46,17 @@ $this->Users = TableRegistry::getTableLocator()->get('Users');
 							//echo $maxValue.'--'.$maxKeys;
 							
 							$studentD = $this->Users->find()->where(["Users.id" => (int)$maxKeys])->contain(['Schools'])->first();
-								
+							if (!$studentD) {
+								continue;
+							}
 							
 						?> 
                             <tr>
                                 <td data-title="Division"><?php echo $divisionrecord->name;?></td>
 								<td data-title="Points"><?php echo $maxValue;?></td>
-                                <td data-title="School"><?php echo $studentD->Schools['first_name'];?></td>
-                                <td data-title="Student Name"><?php echo $studentD->first_name;?> <?php echo $studentD->middle_name;?> <?php echo $studentD->last_name;?> (#<?php echo $maxKeys;?>)</td>
-                                <td data-title="Gender"><?php echo $studentD->gender;?></td>
+                                <td data-title="School"><?php echo isset($studentD->Schools['first_name']) ? h($studentD->Schools['first_name']) : '';?></td>
+                                <td data-title="Student Name"><?php echo h($studentD->first_name);?> <?php echo h($studentD->middle_name);?> <?php echo h($studentD->last_name);?> (#<?php echo $maxKeys;?>)</td>
+                                <td data-title="Gender"><?php echo h($studentD->gender);?></td>
                                 <td data-title="Division Winner Certificate">
 									<?php
 									echo $this->Html->link('<i class="fa fa-file-pdf-o"></i>', ['controller' => 'results', 'action' => 'divisionwinnercertificatepdf',$slug_convention_season,$divisionrecord->slug,$studentD->slug], [ 'escape' => false, 'title' => 'Generate Division Winner Certificate', 'target'=>'_blank']);

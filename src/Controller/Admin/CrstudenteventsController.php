@@ -5,7 +5,7 @@ namespace App\Controller\Admin;
 use App\Controller\AppController;
 use Cake\Core\Configure;
 use Cake\Core\Configure\Engine\PhpConfig;
-use Cake\Mailer\Mailer;
+use App\Mailer\AppMailer as Mailer;
 
 class CrstudenteventsController extends AppController {
 

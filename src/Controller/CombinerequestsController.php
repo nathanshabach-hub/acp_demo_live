@@ -6,7 +6,7 @@ use Cake\Datasource\ConnectionManager;
 use App\Controller\AppController;
 use Cake\Core\Configure;
 use Cake\Core\Configure\Engine\PhpConfig;
-use Cake\Mailer\Mailer;
+use App\Mailer\AppMailer as Mailer;
 use Cake\I18n\I18n;
 
 
@@ -247,7 +247,7 @@ class CombinerequestsController extends AppController {
 						->setFrom([HEADERS_FROM_EMAIL => HEADERS_FROM_NAME])
 						->setSubject($subjectToSend)
 						->setViewVars(['content_for_layout' => $messageToSend])
-						->deliver();
+						->send();
 					
 					
 					

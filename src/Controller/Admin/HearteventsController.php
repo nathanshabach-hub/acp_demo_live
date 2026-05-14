@@ -6,7 +6,7 @@ use App\Controller\AppController;
 use Cake\Core\Configure;
 use Cake\Core\Configure\Engine\PhpConfig;
 use Cake\Datasource\ConnectionManager;
-use Cake\Mailer\Mailer;
+use App\Mailer\AppMailer as Mailer;
 
 class HearteventsController extends AppController {
 
@@ -82,7 +82,7 @@ class HearteventsController extends AppController {
 	public function hearteventcertificatepdf($slug_convention_season = null,$event_heart_slug = null) {
 		
 		if ($slug_convention_season) {
-            $conventionSD 			= $this->Conventionseasons->find()->where(['Conventionseasons.slug' => $slug_convention_season])->first();
+            $conventionSD 			= $this->Conventionseasons->find()->where(['Conventionseasons.slug' => $slug_convention_season])->contain(['Conventions'])->first();
             $season_id 				= $conventionSD->season_id;
 			$this->set('conventionSD', $conventionSD);
         }

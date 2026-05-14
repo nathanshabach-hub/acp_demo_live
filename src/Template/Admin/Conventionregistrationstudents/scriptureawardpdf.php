@@ -55,9 +55,9 @@ foreach($conventionregistrationstudents as $convRegStudentD)
 		$arrCertData['book_names'] 	= $bookNames;
 	
 		// certificate theme
-		$headerImg 		= HTTP_PATH.'/webroot/img/front/certificates/'.$certificateTheme['header_image'];
-		$footerImg 		= HTTP_PATH.'/webroot/img/front/certificates/'.$certificateTheme['footer_image'];
-		$signatureImg 	= HTTP_PATH.'/webroot/img/front/certificates/signature.png';
+		$headerImg 		= HTTP_PATH.'/img/front/certificates/'.$certificateTheme['header_image'];
+		$footerImg 		= HTTP_PATH.'/img/front/certificates/'.$certificateTheme['footer_image'];
+		$signatureImg 	= HTTP_PATH.'/img/front/certificates/signature.png';
 		$borderColor 	= $certificateTheme['border_color'];
 ?>
 

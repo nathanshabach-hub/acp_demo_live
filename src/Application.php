@@ -36,15 +36,15 @@ class Application extends BaseApplication
         $this->addPlugin('Bake');
     }
 
-    public function middleware($middlewareQueue)
+    public function middleware($middleware)
     {
-        $middlewareQueue
+        $middleware
             ->add(new ErrorHandlerMiddleware())
             ->add(new AssetMiddleware(['cacheTime' => Configure::read('Asset.cacheTime') ?? '+1 year']))
             ->add(new RoutingMiddleware($this))
             ->add(new BodyParserMiddleware());
 
-        return $middlewareQueue;
+        return $middleware;
     }
 
     public function routes($routes)

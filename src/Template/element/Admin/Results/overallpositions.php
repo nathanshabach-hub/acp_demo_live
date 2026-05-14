@@ -98,7 +98,7 @@ $this->Crstudentevents = TableRegistry::getTableLocator()->get('Crstudentevents'
 									if($ovpos->student_id>0)
 									{
 										$studentD = $this->Users->find()->where(["Users.id" => $ovpos->student_id])->contain(['Schools'])->first();
-										$showName = $studentD->first_name.' '.$studentD->last_name;
+										$showName = $studentD ? $studentD->first_name.' '.$studentD->last_name : '(student deleted)';
 									}
 									else
 									if(!empty($ovpos->group_name))
@@ -108,6 +108,7 @@ $this->Crstudentevents = TableRegistry::getTableLocator()->get('Crstudentevents'
 										foreach($groupstudents as $grpstudent)
 										{
 											$studentDG = $this->Users->find()->where(["Users.id" => $grpstudent->student_id])->contain(['Schools'])->first();
+											if (!$studentDG) { continue; }
 											$grpStName = $studentDG->first_name.' '.$studentDG->last_name;
 											
 											$arrGrpStudent[] = $grpStName;

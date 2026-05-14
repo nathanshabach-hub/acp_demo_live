@@ -6,7 +6,7 @@ use App\Controller\AppController;
 use Cake\Core\Configure;
 use Cake\Core\Configure\Engine\PhpConfig;
 use Cake\Datasource\ConnectionManager;
-use Cake\Mailer\Mailer;
+use App\Mailer\AppMailer as Mailer;
 
 class ConventionsController extends AppController {
 
@@ -57,7 +57,12 @@ class ConventionsController extends AppController {
 			// To get convention season details
 			$conventionSD = $this->Conventionseasons->find()->where(['Conventionseasons.id' => $sess_admin_header_season_id])->first();
 			
-			$condition[] = "(Conventions.id = '".$conventionSD->convention_id."')";
+			if ($conventionSD) {
+				$condition[] = "(Conventions.id = '".$conventionSD->convention_id."')";
+			} else {
+				// stale session reference (season was deleted) — clear it
+				$this->request->getSession()->delete("sess_admin_header_season_id");
+			}
 		}
 
         if ($this->request->is('post')) {
@@ -469,28 +474,30 @@ class ConventionsController extends AppController {
 		
 		$data = array();
 		
+        $conventionSD = null;
         if ($slug_convention_season) {
-            $conventionSD 			= $this->Conventionseasons->find()->where(['Conventionseasons.slug' => $slug_convention_season])->first();
-            $season_id 				= $conventionSD->season_id;
-            $seasonD 				= $this->Seasons->get($season_id);
-			$this->set('conventionSD', $conventionSD);
+            $conventionSD = $this->Conventionseasons->find()->where(['Conventionseasons.slug' => $slug_convention_season])->first();
         }
 		if (!$conventionSD)
 		{
 			$this->Flash->error('Convention season not found.');
-			$this->redirect(['controller' => 'conventions', 'action' => 'index']);
+			return $this->redirect(['controller' => 'conventions', 'action' => 'index']);
 		}
+		$season_id = $conventionSD->season_id;
+		$seasonD   = $this->Seasons->get($season_id);
+		$this->set('conventionSD', $conventionSD);
 		
+		$conventionD = null;
 		if ($slug_convention) {
-            $conventionD 		= $this->Conventions->find()->where(['Conventions.slug' => $slug_convention])->first();
-            $convention_id 		= $conventionD->id;
-			$this->set('conventionD', $conventionD);
+            $conventionD = $this->Conventions->find()->where(['Conventions.slug' => $slug_convention])->first();
         }
 		if (!$conventionD)
 		{
-			$this->Flash->error('Convention season not found.');
-			$this->redirect(['controller' => 'conventions', 'action' => 'index']);
+			$this->Flash->error('Convention not found.');
+			return $this->redirect(['controller' => 'conventions', 'action' => 'index']);
 		}
+		$convention_id = $conventionD->id;
+		$this->set('conventionD', $conventionD);
 		
 		$this->set('title', ADMIN_TITLE . 'Events > '.$conventionD->name.' > Season '.$conventionSD->season_year);
 		
@@ -639,7 +646,7 @@ class ConventionsController extends AppController {
 		//If ConventionType = 1 then Filter= Only Event Type 1 & 2 visible
 		
 		$condEvents = array();
-		if($conventionD->convention_type == 0)
+		if($conventionD->convention_type == 0 || $conventionD->convention_type == 3)
 		{
 			// no condition apply
 		}
@@ -1284,7 +1291,10 @@ class ConventionsController extends AppController {
 			}
 			$this->set('convSeasEventDD', $convSeasEventDD);
 			
-			
+			// aliases used by the template
+			$this->set('convSeasonEventD', $conventionSD);
+			$this->set('conventionseasonroomevents', $conventionSRoomD);
+			$this->set('convRoomIDS', []);
 			
 			
 		if ($this->request->is('post')) {
@@ -1476,7 +1486,7 @@ class ConventionsController extends AppController {
 								$finalSchoolsList[] = $convreg->user_id;
 							}
 							
-							if(!in_array($steventid,(array)$finalSchoolsEventsList[$convreg->user_id]))
+							if(!in_array($steventid,(array)($finalSchoolsEventsList[$convreg->user_id] ?? [])))
 							{
 								// add school to list
 								$finalSchoolsEventsList[$convreg->user_id][] = $steventid;
@@ -1566,7 +1576,7 @@ class ConventionsController extends AppController {
 					->setFrom([HEADERS_FROM_EMAIL => HEADERS_FROM_NAME])
 					->setSubject($subjectToSend)
 					->setViewVars(['content_for_layout' => $messageToSend])
-					->deliver();
+					->send();
 					
 				$this->Flash->success('Reminder notification sent successfully to judge..');
 				
@@ -1759,7 +1769,7 @@ class ConventionsController extends AppController {
 		$arrCertData = array();
 		
 		$arrCertData['convention_name'] 	= $conventionD->name;
-		$arrCertData['seadon_year'] 		= $conventionSD->season_year;
+		$arrCertData['season_year'] 		= $conventionSD->season_year;
 		$arrCertData['student_name'] 		= $student_name;
 		$arrCertData['school_name'] 		= $school_name;
 		$arrCertData['event_name'] 			= $eventD->event_name;

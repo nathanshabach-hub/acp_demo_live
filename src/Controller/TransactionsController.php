@@ -6,7 +6,7 @@ use Cake\Datasource\ConnectionManager;
 use App\Controller\AppController;
 use Cake\Core\Configure;
 use Cake\Core\Configure\Engine\PhpConfig;
-use Cake\Mailer\Mailer;
+use App\Mailer\AppMailer as Mailer;
 use Cake\I18n\I18n;
 
 class TransactionsController extends AppController {
@@ -146,7 +146,8 @@ class TransactionsController extends AppController {
 		//$this->prx($settingsDiscount);
 		
 		$totalDiscountAmount = 0;
-		if(count($studentApplicableForDiscount))
+		$totalStudentsApplicableDiscount = 0;
+		if(count((array)$studentApplicableForDiscount))
 		{
 			$totalStudentsApplicableDiscount = count((array)$studentApplicableForDiscount);
 			$totalDiscountAmount = (($totalStudentsApplicableDiscount*$pricePerStudent*$settingsDiscount->scripture_trophy_discount)/100);
@@ -416,8 +417,10 @@ class TransactionsController extends AppController {
 			need to send an email to accounts and events team */
 			$settingsD	= $this->Settings->find()->where(['Settings.id' => 1])->first();
 				
-			$emailId = $settingsD->accounts_team_email;
-						
+			$emailId = !empty($settingsD->accounts_team_email)
+				? $settingsD->accounts_team_email
+				: (defined('ACCOUNTS_TEAM_ANOTHER_EMAIL') ? ACCOUNTS_TEAM_ANOTHER_EMAIL : '');
+
 			$emailtemplateMessage = $this->Emailtemplates->find()->where(['Emailtemplates.id' => '10'])->first();
 
 			$toRepArray = array('[!school_name!]','[!customer_code!]','[!convention_name!]','[!season_year!]','[!CURR!]','[!total_amount!]');
@@ -428,15 +431,17 @@ class TransactionsController extends AppController {
 			
 			//echo $messageToSend; exit;
 			
-			$email = new Mailer();
-			$email->viewBuilder()->setTemplate('default')->setLayout('admintemplate');
-				$email->setEmailFormat('html')
-				->setTo($emailId)
-				->setCc(ACCOUNTS_TEAM_ANOTHER_EMAIL)
-				->setFrom([HEADERS_FROM_EMAIL => HEADERS_FROM_NAME])
-				->setSubject($subjectToSend)
-				->setViewVars(['content_for_layout' => $messageToSend])
-				->deliver();
+			if (!empty($emailId)) {
+				$email = new Mailer();
+				$email->viewBuilder()->setTemplate('default')->setLayout('admintemplate');
+					$email->setEmailFormat('html')
+					->setTo($emailId)
+					->setCc(ACCOUNTS_TEAM_ANOTHER_EMAIL)
+					->setFrom([HEADERS_FROM_EMAIL => HEADERS_FROM_NAME])
+					->setSubject($subjectToSend)
+					->setViewVars(['content_for_layout' => $messageToSend])
+					->send();
+			}
 			
 			
 			
@@ -531,7 +536,7 @@ class TransactionsController extends AppController {
 			->setFrom([HEADERS_FROM_EMAIL => HEADERS_FROM_NAME])
 			->setSubject($subjectToSend)
 			->setViewVars(['content_for_layout' => $messageToSend])
-			->deliver();
+			->send();
 		/* For Testing - ends */
 
 		$this->redirect(['controller'=>'users', 'action' => 'dashboard']);
@@ -576,7 +581,7 @@ class TransactionsController extends AppController {
 			->setFrom([HEADERS_FROM_EMAIL => HEADERS_FROM_NAME])
 			->setSubject($subjectToSend)
 			->setViewVars(['content_for_layout' => $messageToSend])
-			->deliver();
+			->send();
 		/* For Testing - ends */
 
         
@@ -668,7 +673,7 @@ class TransactionsController extends AppController {
 			->setFrom([HEADERS_FROM_EMAIL => HEADERS_FROM_NAME])
 			->setSubject($subjectToSend)
 			->setViewVars(['content_for_layout' => $messageToSend])
-			->deliver();
+			->send();
 		/* For Testing - ends */
 		
 		
@@ -694,7 +699,7 @@ class TransactionsController extends AppController {
 					->setFrom([HEADERS_FROM_EMAIL => HEADERS_FROM_NAME])
 					->setSubject($subjectToSend)
 					->setViewVars(['content_for_layout' => $messageToSend])
-					->deliver();
+					->send();
 				/* For Testing - ends */
 				
 				
@@ -729,7 +734,7 @@ class TransactionsController extends AppController {
 					->setFrom([HEADERS_FROM_EMAIL => HEADERS_FROM_NAME])
 					->setSubject($subjectToSend)
 					->setViewVars(['content_for_layout' => $messageToSend])
-					->deliver();
+					->send();
 					
 				
 				/* 2. Send payment confirmation email to accounts team */
@@ -755,7 +760,7 @@ class TransactionsController extends AppController {
 					->setFrom([HEADERS_FROM_EMAIL => HEADERS_FROM_NAME])
 					->setSubject($subjectToSend)
 					->setViewVars(['content_for_layout' => $messageToSend])
-					->deliver();
+					->send();
 				
 				/* EMAIL CODE ends */
 			
@@ -821,21 +826,24 @@ class TransactionsController extends AppController {
 				
 				//echo $messageToSend; exit;
 				
-				$email = new Mailer();
-				$email->viewBuilder()->setTemplate('default')->setLayout('admintemplate');
-					$email->setEmailFormat('html')
-					->setTo($emailId)
-					->setCc(HEADERS_CC)
-					->setFrom([HEADERS_FROM_EMAIL => HEADERS_FROM_NAME])
-					->setSubject($subjectToSend)
-					->setViewVars(['content_for_layout' => $messageToSend])
-					->deliver();
+				if (!empty($emailId)) {
+					$email = new Mailer();
+					$email->viewBuilder()->setTemplate('default')->setLayout('admintemplate');
+						$email->setEmailFormat('html')
+						->setTo($emailId)
+						->setCc(HEADERS_CC)
+						->setFrom([HEADERS_FROM_EMAIL => HEADERS_FROM_NAME])
+						->setSubject($subjectToSend)
+						->setViewVars(['content_for_layout' => $messageToSend])
+						->send();
+				}
 					
-				
 				/* 2. Send invoice request received email to accounts team */
 				$settingsD	= $this->Settings->find()->where(['Settings.id' => 1])->first();
 				
-				$emailId = $settingsD->accounts_team_email;
+				$emailId = !empty($settingsD->accounts_team_email)
+					? $settingsD->accounts_team_email
+					: (defined('ACCOUNTS_TEAM_ANOTHER_EMAIL') ? ACCOUNTS_TEAM_ANOTHER_EMAIL : '');
 						
 				$emailtemplateMessage = $this->Emailtemplates->find()->where(['Emailtemplates.id' => '8'])->first();
 
@@ -847,15 +855,17 @@ class TransactionsController extends AppController {
 				
 				//echo $messageToSend; exit;
 				
-				$email = new Mailer();
-				$email->viewBuilder()->setTemplate('default')->setLayout('admintemplate');
-					$email->setEmailFormat('html')
-					->setTo($emailId)
-					->setCc(ACCOUNTS_TEAM_ANOTHER_EMAIL)
-					->setFrom([HEADERS_FROM_EMAIL => HEADERS_FROM_NAME])
-					->setSubject($subjectToSend)
-					->setViewVars(['content_for_layout' => $messageToSend])
-					->deliver();
+				if (!empty($emailId)) {
+					$email = new Mailer();
+					$email->viewBuilder()->setTemplate('default')->setLayout('admintemplate');
+						$email->setEmailFormat('html')
+						->setTo($emailId)
+						->setCc(ACCOUNTS_TEAM_ANOTHER_EMAIL)
+						->setFrom([HEADERS_FROM_EMAIL => HEADERS_FROM_NAME])
+						->setSubject($subjectToSend)
+						->setViewVars(['content_for_layout' => $messageToSend])
+						->send();
+				}
 				
 				/* EMAIL CODE ends */
 				

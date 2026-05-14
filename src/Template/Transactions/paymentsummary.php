@@ -19,7 +19,7 @@ $onlinetPTxt = '&nbsp;&nbsp;<small><b>(Online payment only available for Austral
 			<!-- dashboard-section-3 start-->
 			<div class="dashboard-form">
 				<!--<h2 class="form-title">Payment Summary</h2>-->
-				<?php echo $this->Form->create($users, ['id'=>'addstudent', 'type' => 'file', 'class' =>' ']); ?>
+				<?php echo $this->Form->create(isset($users) ? $users : null, ['id'=>'addstudent', 'type' => 'file', 'class' =>' ']); ?>
 					
 					<div class="form-group">
 						<label for="name">Price Structure</label>

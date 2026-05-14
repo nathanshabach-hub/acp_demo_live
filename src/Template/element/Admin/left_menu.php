@@ -10,6 +10,7 @@
                 </a>
                 <ul class="treeview-menu">
                     <li class="<?php if(isset($conferenceDashboard)){ echo 'active';} ?>"><?php echo $this->Html->link('<i class="fa fa-circle-o"></i> Dashboard', ['controller'=>'admins', 'action' => 'conference'], ['escape'=>false]); ?></li>
+                    <li class="<?php if(isset($conferenceList)){ echo 'active';} ?>"><?php echo $this->Html->link('<i class="fa fa-circle-o"></i> List Conferences', ['controller'=>'admins', 'action' => 'listConferences'], ['escape'=>false]); ?></li>
                     <li class="<?php if(isset($conferenceYearsList)){ echo 'active';} ?>"><?php echo $this->Html->link('<i class="fa fa-circle-o"></i> List Conference Years', ['controller'=>'seasons', 'action' => 'index', '?' => ['scope' => 'conference']], ['escape'=>false]); ?></li>
                     <li class="<?php if(isset($conferenceYearsAdd)){ echo 'active';} ?>"><?php echo $this->Html->link('<i class="fa fa-circle-o"></i> Add Conference Year', ['controller'=>'seasons', 'action' => 'add', '?' => ['scope' => 'conference']], ['escape'=>false]); ?></li>
                 </ul>

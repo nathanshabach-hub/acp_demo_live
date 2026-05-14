@@ -12,7 +12,7 @@
       <ol class="breadcrumb">
           <li><?php echo $this->Html->link('<i class="fa fa-dashboard"></i> <span>Dashboard</span> ', ['controller'=>'admins', 'action'=>'dashboard'], ['escape'=>false]);?></li>
           <li><?php echo $this->Html->link('<i class="fa fa-bars"></i> Conventions ', ['controller'=>'conventions', 'action'=>'index'], ['escape'=>false]);?></li>
-		  <li><?php echo $this->Html->link('<i class="fa fa-bullhorn"></i> Seasons ', ['controller'=>'conventions', 'action'=>'seasons',$slug], ['escape'=>false]);?></li>
+		  <li><?php echo $this->Html->link('<i class="fa fa-bullhorn"></i> Seasons ', ['controller'=>'conventions', 'action'=>'seasons',$slug_convention], ['escape'=>false]);?></li>
           <li class="active">Broken Record Certificate -  <?php echo $conventionD->name; ?> </li>
       </ol>
     </section>
@@ -58,7 +58,7 @@
                     <div class="box-footer">
                         <label class="col-sm-2 control-label" for="inputPassword3">&nbsp;</label>
                         <?php echo $this->Form->button('Generate Certificate', ['type'=>'submit', 'class' => 'btn btn-info', 'div'=>false]); ?>
-						<?php echo $this->Html->link('Cancel', ['controller'=>'conventions', 'action' => 'seasons',$slug], ['class'=>'btn btn-default canlcel_le']); ?>
+						<?php echo $this->Html->link('Cancel', ['controller'=>'conventions', 'action' => 'seasons',$slug_convention], ['class'=>'btn btn-default canlcel_le']); ?>
                         <?php //echo $this->Form->button('Reset', ['type'=>'reset', 'class' => 'btn btn-default canlcel_le', 'div'=>false]); ?>
                     </div>
                   </div>

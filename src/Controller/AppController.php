@@ -17,7 +17,7 @@ namespace App\Controller;
 use Cake\Controller\Controller;
 use Cake\Event\EventInterface;
 use Cake\Utility\Text;
-use Cake\Mailer\Mailer;
+use App\Mailer\AppMailer as Mailer;
 use Cake\Controller\Component\FlashComponent;
 use Cake\Datasource\ConnectionManager;
 

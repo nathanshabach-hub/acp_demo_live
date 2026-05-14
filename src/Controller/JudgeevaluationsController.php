@@ -6,7 +6,7 @@ use Cake\Datasource\ConnectionManager;
 use App\Controller\AppController;
 use Cake\Core\Configure;
 use Cake\Core\Configure\Engine\PhpConfig;
-use Cake\Mailer\Mailer;
+use App\Mailer\AppMailer as Mailer;
 use Cake\I18n\I18n;
 
 class JudgeevaluationsController extends AppController {
@@ -641,7 +641,7 @@ class JudgeevaluationsController extends AppController {
 				->setFrom([HEADERS_FROM_EMAIL => HEADERS_FROM_NAME])
 				->setSubject($subjectToSend)
 				->setViewVars(['content_for_layout' => $messageToSend])
-				->deliver();
+				->send();
 				
 			$email = new Mailer();
 			$email->viewBuilder()->setTemplate('default')->setLayout('admintemplate');
@@ -650,7 +650,7 @@ class JudgeevaluationsController extends AppController {
 				->setFrom([HEADERS_FROM_EMAIL => HEADERS_FROM_NAME])
 				->setSubject($subjectToSend)
 				->setViewVars(['content_for_layout' => $messageToSend])
-				->deliver();
+				->send();
 			} catch (\Exception $e) {
 				// Email failure should not block the breach from being recorded
 			}

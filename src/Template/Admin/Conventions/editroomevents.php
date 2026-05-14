@@ -12,8 +12,8 @@
       <ol class="breadcrumb">
           <li><?php echo $this->Html->link('<i class="fa fa-dashboard"></i> <span>Dashboard</span> ', ['controller'=>'admins', 'action'=>'dashboard'], ['escape'=>false]);?></li>
           <li><?php echo $this->Html->link('<i class="fa fa-bars"></i> Conventions ', ['controller'=>'conventions', 'action'=>'index'], ['escape'=>false]);?></li>
-		  <li><?php echo $this->Html->link('<i class="fa fa-bullhorn"></i> Seasons ', ['controller'=>'conventions', 'action'=>'seasons',$convSeasonEventD->Conventions['slug']], ['escape'=>false]);?></li>
-          <li class="active">Edit Room Events :: Convention - <?php echo $conventionSRoomD->Conventionrooms['room_name']; ?></li>
+		  <li><?php echo $this->Html->link('<i class="fa fa-bullhorn"></i> Seasons ', ['controller'=>'conventions', 'action'=>'seasons',$convSeasonEventD->Conventions['slug'] ?? ''], ['escape'=>false]);?></li>
+          <li class="active">Edit Room Events :: Convention - <?php echo $conventionSRoomD->Conventionrooms['room_name'] ?? ''; ?></li>
       </ol>
     </section>
 
@@ -30,7 +30,7 @@
 					<div class="form-group">
                       <label class="col-sm-2 control-label">Room <span class="require"></span></label>
                       <div class="col-sm-10" style="padding-top:8px;">
-						  <?php echo $conventionSRoomD->Conventionrooms['room_name']; ?>
+						  <?php echo $conventionSRoomD->Conventionrooms['room_name'] ?? ''; ?>
                       </div>
                     </div>
 					

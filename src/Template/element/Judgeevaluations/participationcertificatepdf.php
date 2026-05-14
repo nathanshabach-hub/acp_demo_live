@@ -1,7 +1,7 @@
 <?php
-$headerImgP 		= HTTP_PATH.'/webroot/img/front/certificates/participation_certificate/participation_certificate_header_new.png';
-$footerImgP 		= HTTP_PATH.'/webroot/img/front/certificates/participation_certificate/participation_certificate_footer_new.png';
-$signatureImgP 	= HTTP_PATH.'/webroot/img/front/certificates/participation_certificate/participation_certificate_signature.png';
+$headerImgP 		= HTTP_PATH.'/img/front/certificates/participation_certificate/participation_certificate_header_new.png';
+$footerImgP 		= HTTP_PATH.'/img/front/certificates/participation_certificate/participation_certificate_footer_new.png';
+$signatureImgP 	= HTTP_PATH.'/img/front/certificates/participation_certificate/participation_certificate_signature.png';
 ?>
 <!DOCTYPE html>
 <html lang="en" class="h-100">

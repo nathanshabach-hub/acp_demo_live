@@ -13,6 +13,9 @@
           <li><?php echo $this->Html->link('<i class="fa fa-dollar"></i> Transactions ', ['controller'=>'transactions', 'action'=>'index'], ['escape'=>false]);?></li>
           <li class="active">Transaction Details </li>
       </ol>
+      <div style="margin-top:10px;">
+          <?php echo $this->Html->link('<i class="fa fa-trash-o"></i> Delete Transaction', ['controller' => 'transactions', 'action' => 'deletetransaction', $transactionD->slug], ['escape' => false, 'class' => 'btn btn-danger btn-sm', 'confirm' => 'Delete this transaction? This will also remove its student and teacher payment rows. This cannot be undone.']); ?>
+      </div>
     </section>
 	
 	<?php

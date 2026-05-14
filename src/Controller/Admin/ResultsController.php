@@ -475,31 +475,32 @@ class ResultsController extends AppController {
 		
 		$this->set('slug_convention_season', $slug_convention_season);
 		$this->set('slug_convention', $slug_convention);
-		$this->set('slug_event', $slug_event);
 		
 		$data = array();
 		
+		$conventionSD = null;
         if ($slug_convention_season) {
-            $conventionSD 			= $this->Conventionseasons->find()->where(['Conventionseasons.slug' => $slug_convention_season])->first();
-            $season_id 				= $conventionSD->season_id;
-			$this->set('conventionSD', $conventionSD);
+            $conventionSD = $this->Conventionseasons->find()->where(['Conventionseasons.slug' => $slug_convention_season])->first();
         }
 		if (!$conventionSD)
 		{
 			$this->Flash->error('Convention season not found.');
-			$this->redirect(['controller' => 'conventions', 'action' => 'index']);
+			return $this->redirect(['controller' => 'conventions', 'action' => 'index']);
 		}
+		$season_id = $conventionSD->season_id;
+		$this->set('conventionSD', $conventionSD);
 		
+		$conventionD = null;
 		if ($slug_convention) {
-            $conventionD 		= $this->Conventions->find()->where(['Conventions.slug' => $slug_convention])->first();
-            $convention_id 		= $conventionD->id;
-			$this->set('conventionD', $conventionD);
+            $conventionD = $this->Conventions->find()->where(['Conventions.slug' => $slug_convention])->first();
         }
 		if (!$conventionD)
 		{
 			$this->Flash->error('Convention not found.');
-			$this->redirect(['controller' => 'conventions', 'action' => 'index']);
+			return $this->redirect(['controller' => 'conventions', 'action' => 'index']);
 		}
+		$convention_id = $conventionD->id;
+		$this->set('conventionD', $conventionD);
 		
 		$this->set('title', 'Points > '.$conventionD->name.' > Season > '.$conventionSD->season_year.' '.ADMIN_TITLE);
 		
@@ -517,7 +518,7 @@ class ResultsController extends AppController {
 				// 1. if its individual student
 				if($allresultcs->student_id>0)
 				{
-					$arrAllResults[$allresultcs->division_id][$allresultcs->student_id] = $arrAllResults[$allresultcs->division_id][$allresultcs->student_id] + $allresultcs->points_obtained;
+					$arrAllResults[$allresultcs->division_id][$allresultcs->student_id] = ($arrAllResults[$allresultcs->division_id][$allresultcs->student_id] ?? 0) + $allresultcs->points_obtained;
 				}
 				
 				// 2. if its a group
@@ -530,7 +531,7 @@ class ResultsController extends AppController {
 					foreach($groupStudents as $groupst)
 					{
 						//$this->prx($groupst);
-						$arrAllResults[$allresultcs->division_id][$groupst->student_id] = $arrAllResults[$allresultcs->division_id][$groupst->student_id] + $allresultcs->points_obtained;
+						$arrAllResults[$allresultcs->division_id][$groupst->student_id] = ($arrAllResults[$allresultcs->division_id][$groupst->student_id] ?? 0) + $allresultcs->points_obtained;
 						//echo $groupst->student_id;echo '<br>';exit;
 					}
 				}
@@ -560,7 +561,6 @@ class ResultsController extends AppController {
 		
 		$this->set('slug_convention_season', $slug_convention_season);
 		$this->set('slug_convention', $slug_convention);
-		$this->set('slug_event', $slug_event);
 		
 		$data = array();
 		
@@ -603,7 +603,7 @@ class ResultsController extends AppController {
 				// 1. if its individual student
 				if($allresultcs->student_id>0)
 				{
-					$arrAllResults[$allresultcs->student_id] = $arrAllResults[$allresultcs->student_id] + $allresultcs->points_obtained;
+					$arrAllResults[$allresultcs->student_id] = ($arrAllResults[$allresultcs->student_id] ?? 0) + $allresultcs->points_obtained;
 				}
 				
 				if(!empty($allresultcs->group_name) && $allresultcs->group_name != NULL)
@@ -614,7 +614,7 @@ class ResultsController extends AppController {
 					$groupStudents = $this->Crstudentevents->find()->where(['Crstudentevents.group_name' => $allresultcs->group_name,'Crstudentevents.conventionregistration_id' => $allresultcs->conventionregistration_id,'Crstudentevents.conventionseason_id' => $allresultcs->conventionseason_id,'Crstudentevents.event_id' => $allresultcs->event_id])->all();
 					foreach($groupStudents as $groupst)
 					{
-						$arrAllResults[$groupst->student_id] = $arrAllResults[$groupst->student_id] + $allresultcs->points_obtained;
+						$arrAllResults[$groupst->student_id] = ($arrAllResults[$groupst->student_id] ?? 0) + $allresultcs->points_obtained;
 					}
 				}
 			}
@@ -2253,7 +2253,6 @@ class ResultsController extends AppController {
 		
 		$this->set('slug_convention_season', $slug_convention_season);
 		$this->set('slug_convention', $slug_convention);
-		$this->set('slug_event', $slug_event);
 		
 		$data = array();
 		
@@ -2300,7 +2299,7 @@ class ResultsController extends AppController {
 				// 1. if its individual student
 				if($allresultcs->student_id>0)
 				{
-					$arrAllResults[$allresultcs->division_id][$allresultcs->student_id] = $arrAllResults[$allresultcs->division_id][$allresultcs->student_id] + $allresultcs->points_obtained;
+					$arrAllResults[$allresultcs->division_id][$allresultcs->student_id] = ($arrAllResults[$allresultcs->division_id][$allresultcs->student_id] ?? 0) + $allresultcs->points_obtained;
 				}
 				
 				// 2. if its a group
@@ -2313,7 +2312,7 @@ class ResultsController extends AppController {
 					foreach($groupStudents as $groupst)
 					{
 						//$this->prx($groupst);
-						$arrAllResults[$allresultcs->division_id][$groupst->student_id] = $arrAllResults[$allresultcs->division_id][$groupst->student_id] + $allresultcs->points_obtained;
+						$arrAllResults[$allresultcs->division_id][$groupst->student_id] = ($arrAllResults[$allresultcs->division_id][$groupst->student_id] ?? 0) + $allresultcs->points_obtained;
 						//echo $groupst->student_id;echo '<br>';exit;
 					}
 				}
@@ -2341,8 +2340,6 @@ class ResultsController extends AppController {
         $this->set('conventionList', '1');
 		
 		$this->set('slug_convention_season', $slug_convention_season);
-		$this->set('slug_convention', $slug_convention);
-		$this->set('slug_event', $slug_event);
 		
 		$data = array();
 		
@@ -2377,7 +2374,7 @@ class ResultsController extends AppController {
 			$this->redirect(['controller' => 'conventions', 'action' => 'index']);
 		}
 		
-		$this->set('title', 'Division Winners > '.$conventionD->name.' > Season > '.$conventionSD->season_year.' '.ADMIN_TITLE);
+		$this->set('title', 'Division Winners > '.$conventionSD->Conventions['name'].' > Season > '.$conventionSD->season_year.' '.ADMIN_TITLE);
 		
 		$arrCertData = array();
 		

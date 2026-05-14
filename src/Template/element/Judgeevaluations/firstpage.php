@@ -15,7 +15,7 @@
 			</div>
 			<!-- Logo Centered -->
 			<div class="logo_m mb-4">
-				<img src="<?php echo $signatureImgP 	= HTTP_PATH.'/webroot/img/front/ace_logo.png'; ?>" alt="Logo"> <!-- Replace 'logo.png' with your logo path -->
+				<img src="<?php echo $signatureImgP 	= HTTP_PATH.'/img/front/ace_logo.png'; ?>" alt="Logo"> <!-- Replace 'logo.png' with your logo path -->
 			</div>
 			<!-- Student Info -->
 			<div class="details_middle">

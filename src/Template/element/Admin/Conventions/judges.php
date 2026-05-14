@@ -30,6 +30,9 @@ $this->Events = TableRegistry::getTableLocator()->get('Events');
                         <?php
 						foreach ($judgeslist as $datarecord)
 						{		
+							if (empty($datarecord->Users)) {
+								continue; // associated user deleted
+							}
 							if($datarecord->Users['user_type'] == 'Judge' || ($datarecord->Users['user_type'] == 'Teacher_Parent' && $datarecord->Users['is_judge'] == 1))
 							{
 								$totalEvents = 0;

@@ -1,8 +1,8 @@
 <?php
 // certificate theme
-$headerImg 		= HTTP_PATH.'/webroot/img/front/certificates/header_24by7_certificate_portrait.png';
-$footerImg 		= HTTP_PATH.'/webroot/img/front/certificates/footer_24by7_certificate_portrait.png';
-//$signatureImg 	= HTTP_PATH.'/webroot/img/front/certificates/signature.png';
+$headerImg 		= HTTP_PATH.'/img/front/certificates/header_24by7_certificate_portrait.png';
+$footerImg 		= HTTP_PATH.'/img/front/certificates/footer_24by7_certificate_portrait.png';
+//$signatureImg 	= HTTP_PATH.'/img/front/certificates/signature.png';
 $borderColor 	= '#5d0b0d';
 ?>
 <!DOCTYPE html>

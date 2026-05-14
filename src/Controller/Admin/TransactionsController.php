@@ -5,7 +5,7 @@ namespace App\Controller\Admin;
 use App\Controller\AppController;
 use Cake\Core\Configure;
 use Cake\Core\Configure\Engine\PhpConfig;
-use Cake\Mailer\Mailer;
+use App\Mailer\AppMailer as Mailer;
 
 class TransactionsController extends AppController {
 
@@ -197,7 +197,7 @@ class TransactionsController extends AppController {
 							->setFrom([HEADERS_FROM_EMAIL => HEADERS_FROM_NAME])
 							->setSubject($subjectToSend)
 							->setViewVars(['content_for_layout' => $messageToSend])
-							->deliver();
+							->send();
 						
 						$this->Flash->success('Payment transaction status confirmed successfully.');
 					}
@@ -224,6 +224,35 @@ class TransactionsController extends AppController {
 		}
 		
     }
+
+	/**
+	 * Delete a single transaction (and its related students/teachers rows).
+	 * Use only for transactions made by accident — for real refunds, refund in
+	 * PayPal first and prefer keeping the audit row with a cancelled status.
+	 */
+	public function deletetransaction($slug = null)
+	{
+		$transactionD = $this->Transactions->find()
+			->where(['Transactions.slug' => $slug])->first();
+
+		if (empty($transactionD)) {
+			$this->Flash->error('Transaction not found.');
+			$this->redirect(['controller' => 'transactions', 'action' => 'index']);
+			return;
+		}
+
+		$txId = $transactionD->id;
+
+		// Remove dependent rows first.
+		$this->Transactionstudents->deleteAll(['transaction_id' => $txId]);
+		$this->Transactionteachers->deleteAll(['transaction_id' => $txId]);
+
+		// Then the transaction itself.
+		$this->Transactions->deleteAll(['id' => $txId]);
+
+		$this->Flash->success('Transaction deleted successfully.');
+		$this->redirect(['controller' => 'transactions', 'action' => 'index']);
+	}
 
 }
 

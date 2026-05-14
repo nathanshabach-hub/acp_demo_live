@@ -49,6 +49,8 @@
                                 <td data-title="Action">
                                     
                                     <?php echo $this->Html->link('<i class="fa fa-eye"></i>', ['controller' => 'transactions', 'action' => 'viewdetails',$datarecord->slug], [ 'escape' => false, 'title' => 'View Details', 'class'=>'btn btn-primary btn-xs']); ?>
+                                    
+                                    <?php echo $this->Html->link('<i class="fa fa-trash-o"></i>', ['controller' => 'transactions', 'action' => 'deletetransaction', $datarecord->slug], ['escape' => false, 'title' => 'Delete Transaction', 'class' => 'btn btn-danger btn-xs', 'confirm' => 'Delete this transaction? This will also remove its student and teacher payment rows. This cannot be undone.']); ?>
 									
                                     <?php //echo $this->Html->link('<i class="fa fa-trash-o"></i>', ['controller' => 'transactions', 'action' => 'deletedivision',$datarecord->slug], [ 'escape' => false, 'title' => 'Delete', 'class'=>'btn btn-danger btn-xs action-list delete-list', 'confirm' => 'Are you sure you want to Delete ?']); ?>
                                 </td>

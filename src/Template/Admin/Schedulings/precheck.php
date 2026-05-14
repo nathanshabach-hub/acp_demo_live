@@ -194,6 +194,19 @@ $stuMsg     = $stuPassed ? 'student(s) eligible for scheduling' : 'No students f
                         ['escape'=>false, 'class'=>'btn btn-success btn-sm']
                     ); ?>
                     <?php echo $this->Html->link(
+                        '<i class="fa fa-sliders"></i> Scheduling Tweaks',
+                        ['controller'=>'schedulingtweaks', 'action'=>'index', $convention_season_slug],
+                        ['escape'=>false, 'class'=>'btn btn-info btn-sm']
+                    ); ?>
+
+                    <div class="pc-nav-divider"></div>
+
+                    <?php echo $this->Html->link(
+                        '<i class="fa fa-clock-o"></i> Overwrite Timings',
+                        ['controller'=>'schedulings', 'action'=>'overwritetimings', $convention_season_slug],
+                        ['escape'=>false, 'class'=>'btn btn-warning btn-sm']
+                    ); ?>
+                    <?php echo $this->Html->link(
                         '<i class="fa fa-play-circle"></i> View / Start Scheduling',
                         ['controller'=>'schedulings', 'action'=>'schedulecategory', $convention_season_slug],
                         ['escape'=>false, 'class'=>'btn btn-success btn-sm']
@@ -201,16 +214,6 @@ $stuMsg     = $stuPassed ? 'student(s) eligible for scheduling' : 'No students f
 
                     <div class="pc-nav-divider"></div>
 
-                    <?php echo $this->Html->link(
-                        '<i class="fa fa-sliders"></i> Scheduling Tweaks',
-                        ['controller'=>'schedulingtweaks', 'action'=>'index', $convention_season_slug],
-                        ['escape'=>false, 'class'=>'btn btn-info btn-sm']
-                    ); ?>
-                    <?php echo $this->Html->link(
-                        '<i class="fa fa-clock-o"></i> Overwrite Timings',
-                        ['controller'=>'schedulings', 'action'=>'overwritetimings', $convention_season_slug],
-                        ['escape'=>false, 'class'=>'btn btn-warning btn-sm']
-                    ); ?>
                     <?php echo $this->Html->link(
                         '<i class="fa fa-file-text-o"></i> Reports',
                         ['controller'=>'schedulings', 'action'=>'reports', $convention_season_slug],

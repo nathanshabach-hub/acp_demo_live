@@ -6,7 +6,7 @@ use Cake\Datasource\ConnectionManager;
 use App\Controller\AppController;
 use Cake\Core\Configure;
 use Cake\Core\Configure\Engine\PhpConfig;
-use Cake\Mailer\Mailer;
+use App\Mailer\AppMailer as Mailer;
 use Cake\I18n\I18n;
 
 class HomesController extends AppController {
@@ -258,7 +258,7 @@ class HomesController extends AppController {
 							->setFrom([HEADERS_FROM_EMAIL => HEADERS_FROM_NAME])
 							->setSubject($subjectToSend)
 							->setViewVars(['content_for_layout' => $messageToSend])
-							->deliver();
+							->send();
 							
 						$this->Flash->success('Registration link sent successfully.');
 					}
@@ -347,7 +347,7 @@ class HomesController extends AppController {
 					->setFrom([HEADERS_FROM_EMAIL => HEADERS_FROM_NAME])
 					->setSubject($subjectToSend)
 					->setViewVars(['content_for_layout' => $messageToSend])
-					->deliver();
+					->send();
 				
 				// confirm school account
 				$this->Users->updateAll(['activation_status' => 1,'modified' => date('Y-m-d H:i:s')], ["id" => $conventionRegD->user_id]);
@@ -1184,7 +1184,7 @@ class HomesController extends AppController {
 			->setFrom([HEADERS_FROM_EMAIL => HEADERS_FROM_NAME])
 			->setSubject($subjectToSend)
 			->setViewVars(['content_for_layout' => $messageToSend])
-			->deliver();
+			->send();
 			
 			$this->prx($email);
 	}

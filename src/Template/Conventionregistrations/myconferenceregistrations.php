@@ -69,7 +69,7 @@ $this->Html->css('/../js/css/print.css', ['inline' => false]);
 										<tr>
 											<td><?php echo h($conference->name); ?></td>
 											<td><?php echo h($seasonD->season_year); ?></td>
-											<td><?php echo $this->Html->link('Register', ['controller' => 'conventionregistrations', 'action' => 'registerfornewconvention', $conference->slug, $seasonD->id], ['escape' => false, 'class' => 'btn btn-primary', 'confirm' => 'Are you sure you want to register for this conference?']); ?></td>
+											<td><?php echo $this->Html->link('Register', ['controller' => 'conventionregistrations', 'action' => 'registerconventionwizard', $conference->slug, $seasonD->id], ['escape' => false, 'class' => 'btn btn-primary']); ?></td>
 										</tr>
 									<?php endforeach; ?>
 								</tbody>

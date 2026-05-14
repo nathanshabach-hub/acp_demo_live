@@ -60,7 +60,8 @@ for($iCntr=$startY;$iCntr<=$endY;$iCntr++)
 global $conventionTypeDD;
 $conventionTypeDD = array(
     '0' 	=> 'In Person Convention (0)',
-	'1' 	=> 'Online Convention (1)'
+	'1' 	=> 'Online Convention (1)',
+	'3' 	=> 'Small Convention (3)'
 );
 
 global $eventTypeDD;

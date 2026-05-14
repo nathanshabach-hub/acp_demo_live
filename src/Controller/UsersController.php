@@ -6,7 +6,7 @@ namespace App\Controller;
 
 use App\Controller\AppController;
 use Cake\Event\EventInterface;
-use Cake\Mailer\Mailer;
+use App\Mailer\AppMailer as Mailer;
 use Cake\ORM\TableRegistry;
 use Cake\Core\Configure;
 use Cake\Core\Configure\Engine\PhpConfig;
@@ -386,7 +386,7 @@ class UsersController extends AppController {
 							->setFrom([HEADERS_FROM_EMAIL => HEADERS_FROM_NAME])
 							->setSubject($subjectToSend)
 							->setViewVars(['content_for_layout' => $messageToSend])
-							->deliver();
+							->send();
 
 						$this->Flash->success('We have successfully sent you reset password link. Please click that link and reset your password.');
 						$this->redirect(['controller' => 'users', 'action' => 'login']);
@@ -860,7 +860,7 @@ class UsersController extends AppController {
 						->setFrom([HEADERS_FROM_EMAIL => HEADERS_FROM_NAME])
 						->setSubject($subjectToSend)
 						->setViewVars(['content_for_layout' => $messageToSend])
-						->deliver();
+						->send();
 					
 					
 					$this->Flash->success('Supervisor details added successfully. Supervisor will receive an email to verify account.');
@@ -1274,7 +1274,7 @@ class UsersController extends AppController {
 						->setFrom([HEADERS_FROM_EMAIL => HEADERS_FROM_NAME])
 						->setSubject($subjectToSend)
 						->setViewVars(['content_for_layout' => $messageToSend])
-						->deliver();
+						->send();
 					
                     $this->Flash->success('Your account has been successfully created. Please check your email for your activation link. If you do not receive it within a few minutes, please check your spam folder or contact our support team.');
 					
@@ -1319,7 +1319,7 @@ class UsersController extends AppController {
 						->setFrom([HEADERS_FROM_EMAIL => HEADERS_FROM_NAME])
 						->setSubject($subjectToSend)
 						->setViewVars(['content_for_layout' => $messageToSend])
-						->deliver();
+						->send();
 					
 					
 					$this->Flash->success('Your account has been successfully verified. Admin will review and activate your account.');
@@ -1428,7 +1428,7 @@ class UsersController extends AppController {
 						->setFrom([HEADERS_FROM_EMAIL => HEADERS_FROM_NAME])
 						->setSubject($subjectToSend)
 						->setViewVars(['content_for_layout' => $messageToSend])
-						->deliver();
+						->send();
 					
 					$this->Flash->success('Your request to apply for judge has been submitted successfully. Please wait while admin review and approve/reject.');
                     $this->redirect(['controller' => 'users', 'action' => 'dashboard']);

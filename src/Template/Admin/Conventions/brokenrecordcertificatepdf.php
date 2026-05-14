@@ -1,8 +1,8 @@
 <?php
 // certificate theme
-$headerImg 		= HTTP_PATH.'/webroot/img/front/certificates/header_broken_record.png';
-$footerImg 		= HTTP_PATH.'/webroot/img/front/certificates/footer_broken_record.png';
-$signatureImg 	= HTTP_PATH.'/webroot/img/front/certificates/signature.png';
+$headerImg 		= HTTP_PATH.'/img/front/certificates/header_broken_record.png';
+$footerImg 		= HTTP_PATH.'/img/front/certificates/footer_broken_record.png';
+$signatureImg 	= HTTP_PATH.'/img/front/certificates/signature.png';
 $borderColor 	= '#fff';
 ?>
 

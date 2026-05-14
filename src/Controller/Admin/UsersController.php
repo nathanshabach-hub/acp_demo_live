@@ -3,7 +3,7 @@ namespace App\Controller\Admin;
 use App\Controller\AppController;
 use Cake\Core\Configure;
 use Cake\Core\Configure\Engine\PhpConfig;
-use Cake\Mailer\Mailer;
+use App\Mailer\AppMailer as Mailer;
 use Cake\Datasource\ConnectionManager;
 
 class UsersController extends AppController{
@@ -1025,7 +1025,7 @@ class UsersController extends AppController{
 				->setFrom([HEADERS_FROM_EMAIL => HEADERS_FROM_NAME])
 				->setSubject($subjectToSend)
 				->setViewVars(['content_for_layout' => $messageToSend])
-				->deliver();
+				->send();
 			
 			$this->Flash->success('Judge details approved successfully.');
 		
@@ -1065,7 +1065,7 @@ class UsersController extends AppController{
 				->setFrom([HEADERS_FROM_EMAIL => HEADERS_FROM_NAME])
 				->setSubject($subjectToSend)
 				->setViewVars(['content_for_layout' => $messageToSend])
-				->deliver();
+				->send();
 			
 			$this->Flash->success('Judge details approved successfully.');
 		
@@ -1119,7 +1119,7 @@ class UsersController extends AppController{
 				->setFrom([HEADERS_FROM_EMAIL => HEADERS_FROM_NAME])
 				->setSubject($subjectToSend)
 				->setViewVars(['content_for_layout' => $messageToSend])
-				->deliver();
+				->send();
 			
 			$this->Flash->success('Supervisor account successfully approvedas judge.');
 		
@@ -1159,7 +1159,7 @@ class UsersController extends AppController{
 				->setFrom([HEADERS_FROM_EMAIL => HEADERS_FROM_NAME])
 				->setSubject($subjectToSend)
 				->setViewVars(['content_for_layout' => $messageToSend])
-				->deliver();
+				->send();
 			
 			$this->Flash->success('Judge details approved successfully.');
 		
