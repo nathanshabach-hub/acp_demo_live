@@ -10,10 +10,12 @@ use App\Mailer\AppMailer as Mailer;
 class AdminsController extends AppController {
 
     public $paginate = ['limit' => 1];
-    public $components = array('PImage');
 
-    public function initialize() {
+    public function initialize(): void {
         parent::initialize();
+        if (class_exists('App\\Controller\\Component\\PImageComponent')) {
+            $this->loadComponent('PImage');
+        }
         $this->loadComponent('Flash');
         $action = $this->request->getParam('action');
         $loggedAdminId = $this->request->getSession()->read('admin_id');
@@ -21,6 +23,12 @@ class AdminsController extends AppController {
             if (!$loggedAdminId && $action != "login" && $action != 'captcha') {
                 $this->redirect(['action' => 'login']);
             }
+        }
+
+        // Keep admin entry points lightweight; avoid loading non-login models
+        // during /admin bootstrap so one broken model cannot block admin login.
+        if (in_array((string)$action, ['login', 'forgotPassword', 'logout', 'captcha'], true)) {
+            return;
         }
 		
 		$this->Emailtemplates = $this->loadModel('Emailtemplates');
@@ -40,7 +48,8 @@ class AdminsController extends AppController {
     }
 
     public function login() {
-        $this->set('title', ADMIN_TITLE . 'Admin Login');
+        $adminTitle = defined('ADMIN_TITLE') ? ADMIN_TITLE : '';
+        $this->set('title', $adminTitle . 'Admin Login');
         $this->viewBuilder()->setLayout('admin_login');
 
         $loggedAdminId = $this->request->getSession()->read('admin_id');
@@ -50,19 +59,19 @@ class AdminsController extends AppController {
 
         // echo Configure::version(); exit;
 
-        $admin = $this->Admins->newEntity();
+        $admin = $this->Admins->newEntity([]);
         if ($this->request->is('post')) {
             $admin = $this->Admins->patchEntity($admin, $this->request->getData());
             if (count($admin->getErrors()) == 0) {
-                $userName = $this->request->getData('Admins.username');
-                $password = $this->request->getData('Admins.password');
+                $userName = $this->request->getData('username');
+                $password = $this->request->getData('password');
                 $adminInfo = $this->Admins->find()->where(['Admins.username' => $userName])->first();
                 if ($adminInfo) {
                     if ($adminInfo->status == 0) {
                         $this->Flash->error('Your account got temporary disabled.');
                     } elseif (!empty($adminInfo) && crypt($password, $adminInfo->password) == $adminInfo->password) {
 
-                        if ($this->request->getData('Admins.remember') !== null && $this->request->getData('Admins.remember') == '1') {
+                        if ($this->request->getData('remember') !== null && $this->request->getData('remember') == '1') {
                             setcookie("admin_username", $userName, time() + 60 * 60 * 24 * 100, "/");
                             setcookie("admin_password", $password, time() + 60 * 60 * 24 * 100, "/");
                         } else {
@@ -83,23 +92,26 @@ class AdminsController extends AppController {
             }
         } else {
             if (isset($_COOKIE["admin_username"]) && isset($_COOKIE["admin_password"])) {
-                $this->request = $this->request->withData('Admins.username', $_COOKIE["admin_username"]);
-                $this->request = $this->request->withData('Admins.password', $_COOKIE["admin_password"]);
-                $this->request = $this->request->withData('Admins.remember', 1);
+                $this->request = $this->request->withData('username', $_COOKIE["admin_username"]);
+                $this->request = $this->request->withData('password', $_COOKIE["admin_password"]);
+                $this->request = $this->request->withData('remember', 1);
             }
         }
         $this->set('admin', $admin);
     }
 
     public function forgotPassword() {
-        $this->set('title', ADMIN_TITLE . 'Forgot Password');
+        $adminTitle = defined('ADMIN_TITLE') ? ADMIN_TITLE : '';
+        $this->set('title', $adminTitle . 'Forgot Password');
         $this->viewBuilder()->setLayout('admin_login');
 
-        $admin = $this->Admins->newEntity();
+        $this->Emailtemplates = $this->loadModel('Emailtemplates');
+
+        $admin = $this->Admins->newEntity([]);
         if ($this->request->is('post')) {
             $admin = $this->Admins->patchEntity($admin, $this->request->getData(), ['validate' => 'forgotPassword']);
             if (count($admin->getErrors()) == 0) {
-                $email = $this->request->getData('Admins.email');
+                $email = $this->request->getData('email');
                 $adminInfo = $this->Admins->find()->where(['Admins.email' => $email])->first();
                 if ($adminInfo) {
                     $new_password = rand(1000000, 999999999);
@@ -189,7 +201,8 @@ class AdminsController extends AppController {
 	}
 	
     public function dashboard() {
-        $this->set('title', ADMIN_TITLE . 'Admin Dashboard');
+        $adminTitle = defined('ADMIN_TITLE') ? ADMIN_TITLE : '';
+        $this->set('title', $adminTitle . 'Admin Dashboard');
         $this->viewBuilder()->setLayout('admin');
         $this->set('dashboard', '1');
 		
@@ -523,7 +536,7 @@ class AdminsController extends AppController {
 	}
 
 	public function runninglistprint($cseId = null, $heatSize = 6) {
-		$this->viewBuilder()->setLayout(false);
+        $this->viewBuilder()->disableAutoLayout();
 		$this->set('title', ADMIN_TITLE . 'Preview Sheet');
 
 		$this->Eventsubmissions = $this->loadModel('Eventsubmissions');
@@ -579,7 +592,7 @@ class AdminsController extends AppController {
 	}
 
 	public function runninglistprintall() {
-        $this->viewBuilder()->setLayout(false);
+        $this->viewBuilder()->disableAutoLayout();
 		$this->set('title', ADMIN_TITLE . 'Running List - Print All');
 
 		$this->Eventsubmissions = $this->loadModel('Eventsubmissions');
@@ -894,7 +907,7 @@ class AdminsController extends AppController {
 		$this->viewBuilder()->setLayout('admin');
 		$this->set('manageConference', '1');
 
-		$convention = $this->Conventions->newEntity();
+		$convention = $this->Conventions->newEntity([]);
 		
 		// Load Seasons for selection
 		$seasons = $this->Seasons->find('list', ['keyField' => 'id', 'valueField' => 'season_year'])->toArray();
@@ -952,7 +965,7 @@ class AdminsController extends AppController {
         $this->set('manageConfig', '1');
         $this->set('changeEmail', '1');
 		
-        $admin = $this->Admins->newEntity();
+        $admin = $this->Admins->newEntity([]);
         if ($this->request->is('post')) {
             $admin = $this->Admins->patchEntity($admin, $this->request->getData(), ['validate' => 'changeEmail']);
             if (count($admin->getErrors()) == 0) {
@@ -976,7 +989,7 @@ class AdminsController extends AppController {
         $this->set('manageConfig', '1');
         $this->set('changeUsername', '1');
 		
-        $admin = $this->Admins->newEntity();
+        $admin = $this->Admins->newEntity([]);
         if ($this->request->is('post')) {
 
             $admin = $this->Admins->patchEntity($admin, $this->request->getData(), ['validate' => 'changeusername']);
@@ -1003,7 +1016,7 @@ class AdminsController extends AppController {
         $this->set('changePassword', '1');
 		
 		
-        $admin = $this->Admins->newEntity();
+        $admin = $this->Admins->newEntity([]);
         if ($this->request->is('post')) {
             $this->request = $this->request->withData('Admins.id', $this->request->getSession()->read('admin_id'));
             $admin = $this->Admins->patchEntity($admin, $this->request->getData(), ['validate' => 'changePassword']);

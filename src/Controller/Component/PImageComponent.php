@@ -1,5 +1,5 @@
 <?php
-namespace Cake\Controller\Component;
+namespace App\Controller\Component;
 
 use Cake\Controller\Component;
 use Cake\I18n\Time;

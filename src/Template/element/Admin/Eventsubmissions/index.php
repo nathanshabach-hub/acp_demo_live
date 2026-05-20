@@ -71,7 +71,7 @@ if (isset($eventsubmissions) && !$eventsubmissions->isEmpty()) {
                                 </td>
                                 <td><?php echo $forLabel; ?></td>
                                 <td><?php echo h(trim(($datarecord->Uploadeduser['first_name'] ?? '') . ' ' . ($datarecord->Uploadeduser['last_name'] ?? ''))); ?></td>
-                                <td><?php echo date('M d, Y', strtotime($datarecord->created)); ?></td>
+                                <td><?php echo safe_date('M d, Y', strtotime($datarecord->created)); ?></td>
                                 <td>
                                     <div style="display:flex; flex-direction:column; gap:4px;">
                                     <?php foreach ($files as $f) {

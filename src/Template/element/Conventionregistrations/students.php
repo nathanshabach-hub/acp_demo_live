@@ -77,7 +77,7 @@ $this->Transactionstudents = TableRegistry::getTableLocator()->get('Transactions
 								
 								?>
 								</td>
-								<td data-title="Created"><?php echo date('M d, Y', strtotime($datarecord->created)); ?></td>
+								<td data-title="Created"><?php echo safe_date('M d, Y', strtotime($datarecord->created)); ?></td>
 								<td data-title="Supervisor">
 								<?php echo $this->Form->select('Conventionregistrationstudents.teacher_parent_id', $teacherDropDownData, ['id' => 'teacher_parent_id_'.$datarecord->id, 'label' => false, 'div' => false, 'class' => 'form-control', 'autocomplete' => 'off', 'empty' => 'Choose', 'value' => $datarecord->teacher_parent_id]); ?>
 									<script>

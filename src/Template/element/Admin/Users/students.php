@@ -60,7 +60,7 @@ $this->Categories = TableRegistry::getTableLocator()->get('Categories');
 								<td data-title="Birth Year"><?php echo $user->birth_year ? $user->birth_year : 'N/A'; ?></td>
 								
 								<td data-title="Gender"><?php echo $user->gender ? $user->gender : 'N/A'; ?></td>
-                                <td data-title="Created"><?php echo date('M d, Y', strtotime($user->created)); ?></td>
+                                <td data-title="Created"><?php echo safe_date('M d, Y', strtotime($user->created)); ?></td>
 								<td data-title="Status">
 									<?php
 									if($user->status == 0) 

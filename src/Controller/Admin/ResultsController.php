@@ -14,7 +14,7 @@ class ResultsController extends AppController {
 
     //public $helpers = array('Javascript', 'Ajax');
 
-    public function initialize() {
+    public function initialize(): void {
         parent::initialize();
         $this->loadComponent('Flash');
         $action = $this->request->getParam('action');
@@ -135,7 +135,7 @@ class ResultsController extends AppController {
 			else
 			{
 				// add new record to results first
-				$results 	= $this->Results->newEntity();
+				$results 	= $this->Results->newEntity([]);
 				$dataR 		= $this->Results->patchEntity($results, array());
 
 				$dataR->slug 						= "result-event-".$eventD->id."-".$conventionSD->id."-".time().'-'.rand(100,1000000);
@@ -167,7 +167,7 @@ class ResultsController extends AppController {
 					$points_obtained = 0;
 				}
 				
-				$resultpositions = $this->Resultpositions->newEntity();
+				$resultpositions = $this->Resultpositions->newEntity([]);
 				$dataRP = $this->Resultpositions->patchEntity($resultpositions, array());
 
 				$dataRP->slug 								= "result-positions-".$result_id."-".$conventionSD->id."-".time().'-'.rand(100,1000000);
@@ -257,7 +257,7 @@ class ResultsController extends AppController {
 		
 		
 		//STEP2 :: SAVE ONE ENTRY IN RESULTS TABLE
-		$results = $this->Results->newEntity();
+		$results = $this->Results->newEntity([]);
 		$dataR = $this->Results->patchEntity($results, array());
 
 		$dataR->slug 						= "result-event-".$eventD->id."-".$conventionSD->id."-".time().'-'.rand(100,1000000);
@@ -309,7 +309,7 @@ class ResultsController extends AppController {
 			}
 			
 			// enter record
-			$resultpositions = $this->Resultpositions->newEntity();
+			$resultpositions = $this->Resultpositions->newEntity([]);
 			$dataRP = $this->Resultpositions->patchEntity($resultpositions, array());
 
 			$dataRP->slug 								= "result-positions-".$result_id."-".$conventionSD->id."-".time().'-'.rand(100,1000000);
@@ -791,7 +791,7 @@ class ResultsController extends AppController {
 		
 		
 		//STEP2 :: SAVE ONE ENTRY IN RESULTS TABLE
-		$results = $this->Results->newEntity();
+		$results = $this->Results->newEntity([]);
 		$dataR = $this->Results->patchEntity($results, array());
 
 		$dataR->slug 						= "result-event-".$eventD->id."-".$conventionSD->id."-".time().'-'.rand(100,1000000);
@@ -842,7 +842,7 @@ class ResultsController extends AppController {
 			}
 			
 			// enter record
-			$resultpositions = $this->Resultpositions->newEntity();
+			$resultpositions = $this->Resultpositions->newEntity([]);
 			$dataRP = $this->Resultpositions->patchEntity($resultpositions, array());
 
 			$dataRP->slug 								= "result-positions-".$result_id."-".$conventionSD->id."-".time().'-'.rand(100,1000000);
@@ -1069,7 +1069,7 @@ class ResultsController extends AppController {
 		
 		
 		//STEP2 :: SAVE ONE ENTRY IN RESULTS TABLE
-		$results = $this->Results->newEntity();
+		$results = $this->Results->newEntity([]);
 		$dataR = $this->Results->patchEntity($results, array());
 
 		$dataR->slug 						= "result-event-".$eventD->id."-".$conventionSD->id."-".time().'-'.rand(100,1000000);
@@ -1122,7 +1122,7 @@ class ResultsController extends AppController {
 			}
 			
 			// enter record
-			$resultpositions = $this->Resultpositions->newEntity();
+			$resultpositions = $this->Resultpositions->newEntity([]);
 			$dataRP = $this->Resultpositions->patchEntity($resultpositions, array());
 
 			$dataRP->slug 								= "result-positions-".$result_id."-".$conventionSD->id."-".time().'-'.rand(100,1000000);
@@ -1341,7 +1341,7 @@ class ResultsController extends AppController {
 		
 		
 		//STEP2 :: SAVE ONE ENTRY IN RESULTS TABLE
-		$results = $this->Results->newEntity();
+		$results = $this->Results->newEntity([]);
 		$dataR = $this->Results->patchEntity($results, array());
 
 		$dataR->slug 						= "result-event-".$eventD->id."-".$conventionSD->id."-".time().'-'.rand(100,1000000);
@@ -1436,7 +1436,7 @@ class ResultsController extends AppController {
 					$lastScore = $datarecord['avg_marks'];
 				}
 
-				$resultpositions = $this->Resultpositions->newEntity();
+				$resultpositions = $this->Resultpositions->newEntity([]);
 				$dataRP = $this->Resultpositions->patchEntity($resultpositions, array());
 
 				$dataRP->slug 								= "result-positions-".$result_id."-".$conventionSD->id."-".time().'-'.rand(100,1000000);
@@ -1499,7 +1499,7 @@ class ResultsController extends AppController {
 					$lastScore = $datarecord->total_marks_obtained;
 				}
 
-				$resultpositions = $this->Resultpositions->newEntity();
+				$resultpositions = $this->Resultpositions->newEntity([]);
 				$dataRP = $this->Resultpositions->patchEntity($resultpositions, array());
 
 				$dataRP->slug 								= "result-positions-".$result_id."-".$conventionSD->id."-".time().'-'.rand(100,1000000);
@@ -1713,7 +1713,7 @@ class ResultsController extends AppController {
 		
 		
 		//STEP2 :: SAVE ONE ENTRY IN RESULTS TABLE
-		$results = $this->Results->newEntity();
+		$results = $this->Results->newEntity([]);
 		$dataR = $this->Results->patchEntity($results, array());
 
 		$dataR->slug 						= "result-event-".$eventD->id."-".$conventionSD->id."-".time().'-'.rand(100,1000000);
@@ -1766,7 +1766,7 @@ class ResultsController extends AppController {
 			
 			
 			// enter record
-			$resultpositions = $this->Resultpositions->newEntity();
+			$resultpositions = $this->Resultpositions->newEntity([]);
 			$dataRP = $this->Resultpositions->patchEntity($resultpositions, array());
 
 			$dataRP->slug 								= "result-positions-".$result_id."-".$conventionSD->id."-".time().'-'.rand(100,1000000);
@@ -1981,7 +1981,7 @@ class ResultsController extends AppController {
 		
 		
 		//STEP2 :: SAVE ONE ENTRY IN RESULTS TABLE
-		$results = $this->Results->newEntity();
+		$results = $this->Results->newEntity([]);
 		$dataR = $this->Results->patchEntity($results, array());
 
 		$dataR->slug 						= "result-event-".$eventD->id."-".$conventionSD->id."-".time().'-'.rand(100,1000000);
@@ -2077,7 +2077,7 @@ class ResultsController extends AppController {
 				$finalPos = null;
 			}
 
-			$resultpositions = $this->Resultpositions->newEntity();
+			$resultpositions = $this->Resultpositions->newEntity([]);
 			$dataRP = $this->Resultpositions->patchEntity($resultpositions, array());
 
 			$dataRP->slug 								= "result-positions-".$result_id."-".$conventionSD->id."-".time().'-'.rand(100,1000000);

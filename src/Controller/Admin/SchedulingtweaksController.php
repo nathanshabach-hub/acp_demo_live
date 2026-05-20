@@ -122,7 +122,7 @@ class SchedulingtweaksController extends AppController {
         if ($existing) {
             $tweak = $existing;
         } else {
-            $tweak = $this->Schedulingeventtweaks->newEntity();
+            $tweak = $this->Schedulingeventtweaks->newEntity([]);
             $tweak->conventionseasons_id = $conventionSD->id;
             $tweak->event_id             = $event_id;
             $tweak->created              = date('Y-m-d H:i:s');
@@ -288,7 +288,7 @@ class SchedulingtweaksController extends AppController {
             if ($existing) {
                 $tweak = $existing;
             } else {
-                $tweak = $this->Schedulingeventtweaks->newEntity();
+                $tweak = $this->Schedulingeventtweaks->newEntity([]);
                 $tweak->conventionseasons_id = $conventionSD->id;
                 $tweak->event_id = $eventId;
                 $tweak->created = date('Y-m-d H:i:s');

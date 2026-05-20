@@ -11,7 +11,7 @@ use Cake\I18n\I18n;
 
 class ConventionsController extends AppController {
 
-    public function initialize() {
+    public function initialize(): void {
         parent::initialize();
 
         // Include the FlashComponent

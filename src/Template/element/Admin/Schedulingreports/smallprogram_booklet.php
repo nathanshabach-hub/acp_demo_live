@@ -35,7 +35,7 @@ if (is_file($logoPath)) {
 
 $lunchBanner = '';
 if (!empty($schedulingD->lunch_time_start) && !empty($schedulingD->lunch_time_end)) {
-    $lunchBanner = 'LUNCH '.date('g:i a', strtotime((string)$schedulingD->lunch_time_start)).' - '.date('g:i a', strtotime((string)$schedulingD->lunch_time_end));
+    $lunchBanner = 'LUNCH '.safe_date('g:i a', strtotime((string)$schedulingD->lunch_time_start)).' - '.safe_date('g:i a', strtotime((string)$schedulingD->lunch_time_end));
 }
 ?>
 
@@ -396,8 +396,8 @@ if (!empty($schedulingD->lunch_time_start) && !empty($schedulingD->lunch_time_en
 
                         <?php foreach ($dayData['sessions'] as $sessionData) { ?>
                             <?php
-                            $sessionStart  = !empty($sessionData['startRaw'])  ? date('g:i a', strtotime($sessionData['startRaw']))  : '';
-                            $sessionFinish = !empty($sessionData['finishRaw']) ? date('g:i a', strtotime($sessionData['finishRaw'])) : '';
+                            $sessionStart  = !empty($sessionData['startRaw'])  ? safe_date('g:i a', strtotime($sessionData['startRaw']))  : '';
+                            $sessionFinish = !empty($sessionData['finishRaw']) ? safe_date('g:i a', strtotime($sessionData['finishRaw'])) : '';
                             $sessionRange  = trim($sessionStart . ($sessionFinish !== '' ? ' – ' . $sessionFinish : ''));
                             ?>
 

@@ -13,7 +13,7 @@ class BooksController extends AppController {
 
     //public $helpers = array('Javascript', 'Ajax');
 
-    public function initialize() {
+    public function initialize(): void {
         parent::initialize();
         $this->loadComponent('Flash');
         $action = $this->request->getParam('action');
@@ -98,7 +98,7 @@ class BooksController extends AppController {
         $this->set('manageBooks', '1');
         $this->set('bookAdd', '1');
 		
-        $books = $this->Books->newEntity();
+        $books = $this->Books->newEntity([]);
         if ($this->request->is('post')) {
 			
 			//$this->prx($this->request->getData());

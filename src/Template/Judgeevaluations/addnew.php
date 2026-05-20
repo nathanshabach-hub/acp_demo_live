@@ -8,6 +8,7 @@ $this->Evaluationquestions 		= TableRegistry::getTableLocator()->get('Evaluation
 $judgingform = $judgingform ?? null;
 $checkEvalJudge = $checkEvalJudge ?? null;
 $selected_division_ids_explode = array();
+$evalFormD = $evalFormD ?? null;
 $selected_tag_ids_explode = array();
 
 $arrAlreadyData = array();
@@ -47,7 +48,7 @@ $(document).ready(function () {
 					<div class="dashboard-text">
 						<h2>Judging Form</h2>
 						<div class="classform-container">
-							<h2>JUDGES FORM - <?php echo $evalFormD->name; ?></h2>
+							<h2>JUDGES FORM - <?php echo (!empty($evalFormD) && !empty($evalFormD->name)) ? $evalFormD->name : 'Not Configured'; ?></h2>
 							<div class="checkboxrow fwbold">
 								<div class="singlechecknox">
 									<input type="checkbox" id="tag_open" name="division_ids[]" value="Open" <?php if(is_array($selected_division_ids_explode) && in_array("Open",$selected_division_ids_explode)) { echo 'checked'; } ?>>
@@ -60,7 +61,7 @@ $(document).ready(function () {
 								<div class="centertext">(Please <i class="fa fa-check"></i> the appropriate box)</div>
 							</div>
 							<?php
-							if(!empty($evalFormD->tag_ids))
+								if(!empty($evalFormD) && !empty($evalFormD->tag_ids))
 							{
 							?>
 							<div class="checkboxrow">
@@ -172,15 +173,14 @@ $(document).ready(function () {
 								$totalPossiblePoints = 0;
 								$cntrCat=1;
 								$cntrQuestOuter=1;
-								$evalFormAreas = $this->Evaluationareas->find()->where(['Evaluationareas.evaluationform_id' => $evalFormD->id,'Evaluationareas.evaluationcategory_id !=' => 16])->order(["Evaluationareas.id" => "ASC"])->contain(["Evaluationcategories"])->all();
+								$evalFormAreas = $this->Evaluationareas->find()->where(['Evaluationareas.evaluationform_id' => ($evalFormD->id ?? 0),'Evaluationareas.evaluationcategory_id !=' => 16])->order(["Evaluationareas.id" => "ASC"])->contain(["Evaluationcategories"])->all();
 								foreach($evalFormAreas as $evalformarea)
 								{
 									$evaluationquestion_ids = $evalformarea->evaluationquestion_ids;
 									
 								?>
 								<div class="subjectcolom">
-									<div class="fulcolm">
-										<?php echo $romanNumbers[$cntrCat]; ?>. <?php echo $evalformarea->Evaluationcategories['name']; ?>
+									<div class="fulcolm" style="text-align: left;"><b><?php echo $romanNumbers[$cntrCat]; ?>. <?php echo $evalformarea->Evaluationcategories['name']; ?></b>
 									</div>
 									<?php
 									$cntrQ=1;
@@ -194,7 +194,7 @@ $(document).ready(function () {
 										$totalPossiblePoints = $totalPossiblePoints+$evalquestion->max_points;
 									?>
 									<div class="wraprow">
-										<div class="seventycolom"><?php echo $alphabetArr[$cntrQ-1]; ?>. <?php echo $evalquestion->question; ?></div>
+									<div class="seventycolom" style="text-align: left;"><?php echo $alphabetArr[$cntrQ-1]; ?>. <?php echo $evalquestion->question; ?></div>
 										<div class="thirtyycolom">
 											<div class="halfcom"><?php echo $evalquestion->max_points; ?></div>
 											<div class="halfcom">
@@ -216,16 +216,16 @@ $(document).ready(function () {
 								$cntrCat++;
 								}
 								?>
-								
-								
-								<?php
-								// to check if any negative marking question added or not
-								$evalAreaNegative = $this->Evaluationareas->find()->where(['Evaluationareas.evaluationform_id' => $evalFormD->id,'Evaluationareas.evaluationcategory_id' => 16])->order(["Evaluationareas.id" => "ASC"])->contain(["Evaluationcategories"])->first();
-								//print_r($evalAreaNegative);
-								if($evalAreaNegative)
+
+
+																<?php
+																// to check if any negative marking question added or not
+																$evalAreaNegative = $this->Evaluationareas->find()->where(['Evaluationareas.evaluationform_id' => ($evalFormD->id ?? 0),'Evaluationareas.evaluationcategory_id' => 16])->order(["Evaluationareas.id" => "ASC"])->contain(["Evaluationcategories"])->first();
+																//print_r($evalAreaNegative);
+																if($evalAreaNegative)
 								{
 									$negativeQuestionD = $this->Evaluationquestions->find()->where(["Evaluationquestions.id" => $evalAreaNegative->evaluationquestion_ids])->first();
-								?>
+																?>
 								<div class="totals" style="border-top:1px solid #000;">
 									<div class="seventycolom" style="border-top:1px solid #000;">
 										<?php echo $negativeQuestionD->question; ?>
@@ -246,7 +246,7 @@ $(document).ready(function () {
 								?>
 								
 								<?php
-								if(!empty($evalFormD->notes))
+								if(!empty($evalFormD) && !empty($evalFormD->notes))
 								{
 								?>
 								<div class="comments">

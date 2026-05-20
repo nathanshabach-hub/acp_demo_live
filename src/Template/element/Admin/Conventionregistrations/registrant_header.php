@@ -69,7 +69,7 @@ if ($type === 'School') { $displayName = (string)($user->first_name ?? ''); }
         <div class="crh-lbl">Status</div>
         <div class="crh-val"><span class="cr-status <?php echo $sm['class']; ?>"><span class="dot"></span><?php echo h($sm['label']); ?></span></div>
         <?php if (!empty($cr->created)) { ?>
-            <div class="crh-sub">Registered <?php echo date('M d, Y', strtotime($cr->created)); ?></div>
+            <div class="crh-sub">Registered <?php echo safe_date('M d, Y', strtotime($cr->created)); ?></div>
         <?php } ?>
     </div>
 </div>

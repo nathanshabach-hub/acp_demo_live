@@ -61,7 +61,7 @@
                                         ?>
                                     </td>
                                     <td><?php echo h($reg->season_year); ?></td>
-                                    <td><?php echo !empty($reg->created) ? date('d M Y', strtotime($reg->created)) : '—'; ?></td>
+                                    <td><?php echo !empty($reg->created) ? safe_date('d M Y', strtotime($reg->created)) : '—'; ?></td>
                                     <td>
                                         <?php if ($reg->status == 1): ?>
                                             <span class="label label-success">Active</span>

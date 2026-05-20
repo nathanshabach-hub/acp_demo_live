@@ -1,0 +1,46 @@
+Event ID Number,Division Name,Event Name,Upload Type,Report ,Context Box,Score Sheet,Additional Documents,Event Type,EventGrpName,EventGender,GroupEvent,MinNo,MaxNo,TeamEvent,SetupTime,RoundTime,JudgingTime,EventKindId,HasToBeConsecutive,CompetitorsPerRound,NeedsSchedule
+70,Physical Education - Athletics,100m (Male) U11,Nil,No,No,No,No,0,5,M,FALSE,1,1,FALSE,0,1,0,Group/Heats,TRUE,8,0
+71,Physical Education - Athletics,200m (Male) U11,Nil,No,No,No,No,0,5,M,FALSE,1,1,FALSE,0,1,0,Group/Heats,TRUE,8,0
+72,Physical Education - Athletics,400m (Male) U11,Nil,No,No,No,No,0,5,M,FALSE,1,1,FALSE,0,1,0,Group/Heats,TRUE,8,0
+73,Physical Education - Athletics,4 x 100m Relay (Male) U11,Nil,No,No,No,No,0,5,M,TRUE,4,5,TRUE,0,1,0,Group/Heats,TRUE,8,0
+74,Physical Education - Sports,Football Kick (Male) U11,Nil,No,No,No,No,0,5,M,FALSE,1,1,FALSE,0,1,0,Sequential,FALSE,0,0
+75,Physical Education - Sports,Soccer Kick (Male) U11,Nil,No,No,No,No,0,5,M,FALSE,1,1,FALSE,0,1,0,Sequential,FALSE,0,0
+76,Physical Education - Sports,Netball Shoot (Male) U11,Nil,No,No,No,No,0,5,M,FALSE,1,1,FALSE,0,1,0,Sequential,FALSE,0,0
+180,Physical Education - Athletics,100m (Female) U11,Nil,No,No,No,No,0,5,F,FALSE,1,1,FALSE,0,1,0,Group/Heats,TRUE,8,0
+181,Physical Education - Athletics,200m (Female) U11,Nil,No,No,No,No,0,5,F,FALSE,1,1,FALSE,0,1,0,Group/Heats,TRUE,8,0
+182,Physical Education - Athletics,400m (Female) U11,Nil,No,No,No,No,0,5,F,FALSE,1,1,FALSE,0,1,0,Group/Heats,TRUE,8,0
+183,Physical Education - Athletics,4 x 100m Relay (Female) U11,Nil,No,No,No,No,0,5,F,TRUE,4,5,TRUE,0,1,0,Group/Heats,TRUE,8,0
+184,Physical Education - Sports,Football Kick (Female) U11,Nil,No,No,No,No,0,5,F,FALSE,1,1,FALSE,0,1,0,Sequential,FALSE,0,0
+185,Physical Education - Sports,Soccer Kick (Female) U11,Nil,No,No,No,No,0,5,F,FALSE,1,1,FALSE,0,1,0,Sequential,FALSE,0,0
+186,Physical Education - Sports,Netball Shoot (Female) U11,Nil,No,No,No,No,0,5,F,FALSE,1,1,FALSE,0,1,0,Sequential,FALSE,0,0
+570,Music - Combined,Self Accompanied Solo U11,Document ,No,Yes,Yes,No,1,5,,FALSE,1,1,FALSE,2,4,0,Sequential,TRUE,0,1
+571,Music - Combined,Self Accompanied Duet U11,Document ,No,Yes,Yes,No,0,5,,TRUE,2,2,TRUE,2,4,0,Sequential,TRUE,0,1
+572,Music - Combined,Self Accompanied Trio U11,Document ,No,Yes,Yes,No,0,5,,TRUE,3,3,TRUE,2,4,0,Sequential,TRUE,0,1
+573,Music - Combined,Self Accompanied Quartet U11,Document ,No,Yes,Yes,No,0,5,,TRUE,4,4,TRUE,2,4,0,Sequential,TRUE,0,1
+580,Music - Instrumental,Piano Solo U11,Document ,No,Yes,Yes,No,1,5,,FALSE,1,1,FALSE,2,4,0,Sequential,TRUE,0,1
+582,Music - Instrumental,Woodwind Solo U11,Document ,No,Yes,Yes,No,1,5,,FALSE,1,1,FALSE,2,4,0,Sequential,TRUE,0,1
+583,Music - Instrumental,String Solo - Plucked U11,Document ,No,Yes,Yes,No,0,5,,FALSE,1,1,FALSE,2,4,0,Sequential,TRUE,0,1
+584,Music - Instrumental,String Solo - Bow U11,Document ,No,Yes,Yes,No,0,5,,FALSE,1,1,FALSE,2,4,0,Sequential,TRUE,0,1
+585,Music - Instrumental,Brass Solo U11,Document ,No,Yes,Yes,No,0,5,,FALSE,1,1,FALSE,2,4,0,Sequential,TRUE,0,1
+586,Music - Instrumental,Tambourine Solo U11,Document ,No,Yes,Yes,No,1,5,,FALSE,1,1,FALSE,2,4,0,Sequential,TRUE,0,1
+587,Music - Instrumental,Miscellaneous Solo U11,Document ,No,Yes,Yes,No,0,5,,FALSE,1,1,FALSE,2,4,0,Sequential,TRUE,0,1
+589,Music - Instrumental,Instrumental Duet U11,Document ,No,Yes,Yes,No,1,5,,TRUE,2,2,TRUE,2,4,0,Sequential,TRUE,0,1
+590,Music - Instrumental,Tambourine Duet U11,Document ,No,Yes,Yes,No,0,5,,TRUE,2,2,TRUE,2,4,0,Sequential,TRUE,0,1
+591,Music - Instrumental,Instrumental Trio U11,Document ,No,Yes,Yes,No,1,5,,TRUE,3,3,TRUE,2,4,0,Sequential,TRUE,0,1
+592,Music - Instrumental,Tambourine Trio U11,Document ,No,Yes,Yes,No,1,5,,TRUE,3,3,TRUE,2,4,0,Sequential,TRUE,0,1
+593,Music - Instrumental,Instrumental Quartet U11,Document ,No,Yes,Yes,No,1,5,,TRUE,4,4,TRUE,2,4,0,Sequential,TRUE,0,1
+594,Music - Instrumental,Tambourine Quartet U11,Document ,No,Yes,Yes,No,1,5,,TRUE,4,4,TRUE,2,4,0,Sequential,TRUE,0,1
+595,Music - Vocal,Male Solo U11,Document ,No,Yes,Yes,No,0,5,M,FALSE,1,1,FALSE,2,4,0,Sequential,TRUE,0,1
+596,Music - Vocal,Female Solo U11,Document ,No,Yes,Yes,No,0,5,F,FALSE,1,1,FALSE,2,4,0,Sequential,TRUE,0,1
+597,Music - Vocal,Mixed Duet U11,Document ,No,Yes,Yes,No,0,5,,TRUE,2,2,TRUE,2,4,0,Sequential,TRUE,0,1
+598,Music - Vocal,Mixed Trio U11,Document ,No,Yes,Yes,No,0,5,,TRUE,2,2,TRUE,2,4,0,Sequential,TRUE,0,1
+599,Music - Vocal,Mixed Quartet U11,Document ,No,Yes,Yes,No,0,5,,TRUE,4,4,TRUE,2,4,0,Sequential,TRUE,0,1
+880,Platform,Dramatic Dialogue U11,Document ,No,Yes,Yes,Yes,1,5,,TRUE,2,2,TRUE,2,6,0,Sequential,TRUE,0,1
+881,Platform,Expressive Reading (Male) U11,Document ,No,No,No,Yes,1,5,M,FALSE,1,1,FALSE,2,6,0,Sequential,TRUE,0,1
+882,Platform,Poetry Recitation (Male) U11,Document ,No,No,No,Yes,1,5,M,FALSE,1,1,FALSE,2,6,0,Sequential,TRUE,0,1
+883,Platform,Famous Speech (Male) U11,Document ,Yes,No,No,Yes,1,5,M,FALSE,1,1,FALSE,2,8,0,Sequential,TRUE,0,1
+884,Platform,Preaching (Male) U11,Document ,No,No,No,Yes,1,5,M,FALSE,1,1,FALSE,2,6,0,Sequential,TRUE,0,1
+885,Platform,Expressive Reading (Female) U11,Document ,No,No,No,Yes,1,5,F,FALSE,1,1,FALSE,2,6,0,Sequential,TRUE,0,1
+886,Platform,Poetry Recitation (Female) U11,Document ,No,No,No,Yes,1,5,F,FALSE,1,1,FALSE,2,6,0,Sequential,TRUE,0,1
+887,Platform,Famous Speech (Female) U11,Document ,No,No,No,Yes,1,5,F,FALSE,1,1,FALSE,2,8,0,Sequential,TRUE,0,1
+888,Platform,Preaching (Female) U11,Document ,No,No,No,Yes,1,5,F,FALSE,1,1,FALSE,2,6,0,Sequential,TRUE,0,1

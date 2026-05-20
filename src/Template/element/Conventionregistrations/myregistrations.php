@@ -16,7 +16,7 @@
                             <tr>
                                 <td data-title="Convention"><?php echo $datarecord->Conventions['name'];?></td>
                                 <td data-title="Season Year"><?php echo $datarecord->season_year;?></td>
-                                <td data-title="Created"><?php echo date('M d, Y', strtotime($datarecord->created)); ?></td>
+                                <td data-title="Created"><?php echo safe_date('M d, Y', strtotime($datarecord->created)); ?></td>
                             </tr>
                         <?php } ?>
                     </tbody>

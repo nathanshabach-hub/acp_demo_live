@@ -72,7 +72,7 @@ $conventionregistrations = $conventionregistrations ?? [];
                                 <td data-title="Request By School"><?php echo $datarecord->Users['first_name'];?></td>
                                 <td data-title="Combine With School School"><?php echo $datarecord->Combineduser['first_name'];?></td>
                                 <td data-title="Student Name"><?php echo $datarecord->student_name;?></td>
-                                <td data-title="Request Date"><?php echo date('M d, Y', strtotime($datarecord->created)); ?></td>
+                                <td data-title="Request Date"><?php echo safe_date('M d, Y', strtotime($datarecord->created)); ?></td>
                                 <td data-title="Status">
 								<?php
 								if($datarecord->status == 0)

@@ -36,7 +36,7 @@
                                 <td data-title="Division Name"><?php echo $datarecord->name;?></td>
                                 <td data-title="Max. Events"><?php echo $datarecord->max_events;?></td>
 								
-                                <td data-title="Created"><?php echo date('M d, Y', strtotime($datarecord->created)); ?></td>
+                                <td data-title="Created"><?php echo safe_date('M d, Y', strtotime($datarecord->created)); ?></td>
                                 <td data-title="Last Modified">
 								<?php 
 								if($datarecord->modified == NULL)
@@ -45,7 +45,7 @@
 								}
 								else
 								{
-									echo date('M d, Y', strtotime($datarecord->modified));
+									echo safe_date('M d, Y', strtotime($datarecord->modified));
 								}
 								
 								?>

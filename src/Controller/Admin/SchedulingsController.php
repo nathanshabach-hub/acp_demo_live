@@ -9,11 +9,10 @@ use Cake\Core\Configure\Engine\PhpConfig;
 class SchedulingsController extends AppController {
 
     public $paginate = ['limit' => 50, 'order' => ['Schedulings.name' => 'asc']];
-    public $components = array('PImage');
 
     //public $helpers = array('Javascript', 'Ajax');
 
-    public function initialize() {
+    public function initialize(): void {
         parent::initialize();
         $this->loadComponent('Flash');
         $action = $this->request->getParam('action');
@@ -58,7 +57,7 @@ class SchedulingsController extends AppController {
 		if(!$checkSchedulingRecord)
 		{
 			// enter new record
-			$schedulings = $this->Schedulings->newEntity();
+			$schedulings = $this->Schedulings->newEntity([]);
 			$dataSch = $this->Schedulings->patchEntity($schedulings, array());
 
 			$dataSch->slug 						= "scheduling-conv-season-".$conventionSD->id.'-'.time();
@@ -317,7 +316,52 @@ class SchedulingsController extends AppController {
 		
 		$schedulings = $this->Schedulings->get($schedulingD->id);
         if ($this->request->is(['post', 'put'])) {
-            $data = $this->Schedulings->patchEntity($schedulings, $this->request->getData());
+			$requestData = (array)$this->request->getData();
+			// Accept both nested payloads and legacy bracket-style keys from older form markup.
+			if (isset($requestData['Schedulings']) && is_array($requestData['Schedulings'])) {
+				$requestData = $requestData['Schedulings'];
+			} else {
+				$normalizedData = [];
+				foreach ($requestData as $key => $value) {
+					if (preg_match('/^Schedulings\\[(.+)\\]$/', (string)$key, $matches)) {
+						$normalizedData[$matches[1]] = $value;
+					}
+				}
+				if (!empty($normalizedData)) {
+					$requestData = $normalizedData;
+				}
+			}
+			$data = $this->Schedulings->patchEntity($schedulings, $requestData);
+
+			$wizardFields = [
+				'start_date',
+				'first_day',
+				'number_of_days',
+				'normal_starting_time',
+				'normal_finish_time',
+				'lunch_time_start',
+				'lunch_time_end',
+				'starting_different_time_first_day_yes_no',
+				'different_first_day_start_time',
+				'different_first_day_end_time',
+				'judging_breaks_yes_no',
+				'judging_breaks_morning_break_starting_time',
+				'judging_breaks_morning_break_finish_time',
+				'judging_breaks_afternoon_break_start_time',
+				'judging_breaks_afternoon_break_finish_time',
+				'sports_day_yes_no',
+				'sports_day',
+				'sports_day_starting_time',
+				'sports_day_finish_time',
+				'sports_day_having_events_after_sport_yes_no',
+				'sports_day_other_starting_time',
+				'sports_day_other_finish_time',
+			];
+			foreach ($wizardFields as $wizardField) {
+				if (array_key_exists($wizardField, $requestData)) {
+					$data->{$wizardField} = $requestData[$wizardField];
+				}
+			}
 			
             if (count($data->getErrors()) == 0) {
 				$data->modified = date("Y-m-d");
@@ -348,11 +392,29 @@ class SchedulingsController extends AppController {
 				$data->normal_finish_time 		= $this->changeToMysqlTimeFormat($data->normal_finish_time);
 				$data->lunch_time_start 		= $this->changeToMysqlTimeFormat($data->lunch_time_start);
 				$data->lunch_time_end 			= $this->changeToMysqlTimeFormat($data->lunch_time_end);
+
+				$timeValidationErrors = [];
+				if (empty($data->normal_starting_time) || empty($data->normal_finish_time)) {
+					$timeValidationErrors[] = 'Normal Starting Time and Normal Finish Time are required.';
+				} elseif (!$this->isValidTimeRange($data->normal_starting_time, $data->normal_finish_time)) {
+					$timeValidationErrors[] = 'Normal Starting Time must be earlier than Normal Finish Time.';
+				}
+
+				if (empty($data->lunch_time_start) || empty($data->lunch_time_end)) {
+					$timeValidationErrors[] = 'Lunch Time Start and Lunch Time End are required.';
+				} elseif (!$this->isValidTimeRange($data->lunch_time_start, $data->lunch_time_end)) {
+					$timeValidationErrors[] = 'Lunch Time Start must be earlier than Lunch Time End.';
+				}
 				
 				if($data->starting_different_time_first_day_yes_no)
 				{
 					$data->different_first_day_start_time 			= $this->changeToMysqlTimeFormat($data->different_first_day_start_time);
 					$data->different_first_day_end_time 			= $this->changeToMysqlTimeFormat($data->different_first_day_end_time);
+					if (empty($data->different_first_day_start_time) || empty($data->different_first_day_end_time)) {
+						$timeValidationErrors[] = 'First day custom start and finish times are required when different first-day timing is enabled.';
+					} elseif (!$this->isValidTimeRange($data->different_first_day_start_time, $data->different_first_day_end_time)) {
+						$timeValidationErrors[] = 'Different First Day Start Time must be earlier than Different First Day End Time.';
+					}
 				}
 				else
 				{
@@ -366,6 +428,16 @@ class SchedulingsController extends AppController {
 					$data->judging_breaks_morning_break_finish_time 			= $this->changeToMysqlTimeFormat($data->judging_breaks_morning_break_finish_time);
 					$data->judging_breaks_afternoon_break_start_time 			= $this->changeToMysqlTimeFormat($data->judging_breaks_afternoon_break_start_time);
 					$data->judging_breaks_afternoon_break_finish_time 			= $this->changeToMysqlTimeFormat($data->judging_breaks_afternoon_break_finish_time);
+
+					if (empty($data->judging_breaks_morning_break_starting_time) || empty($data->judging_breaks_morning_break_finish_time) || empty($data->judging_breaks_afternoon_break_start_time) || empty($data->judging_breaks_afternoon_break_finish_time)) {
+						$timeValidationErrors[] = 'All judging break times are required when judging breaks are enabled.';
+					}
+					if (!empty($data->judging_breaks_morning_break_starting_time) && !empty($data->judging_breaks_morning_break_finish_time) && !$this->isValidTimeRange($data->judging_breaks_morning_break_starting_time, $data->judging_breaks_morning_break_finish_time)) {
+						$timeValidationErrors[] = 'Morning judging break start must be earlier than finish.';
+					}
+					if (!empty($data->judging_breaks_afternoon_break_start_time) && !empty($data->judging_breaks_afternoon_break_finish_time) && !$this->isValidTimeRange($data->judging_breaks_afternoon_break_start_time, $data->judging_breaks_afternoon_break_finish_time)) {
+						$timeValidationErrors[] = 'Afternoon judging break start must be earlier than finish.';
+					}
 				}
 				else
 				{
@@ -384,6 +456,11 @@ class SchedulingsController extends AppController {
 					}
 					$data->sports_day_starting_time 				= $this->changeToMysqlTimeFormat($data->sports_day_starting_time);
 					$data->sports_day_finish_time 					= $this->changeToMysqlTimeFormat($data->sports_day_finish_time);
+					if (empty($data->sports_day_starting_time) || empty($data->sports_day_finish_time)) {
+						$timeValidationErrors[] = 'Sports Day start and finish times are required when Sports Day is enabled.';
+					} elseif (!$this->isValidTimeRange($data->sports_day_starting_time, $data->sports_day_finish_time)) {
+						$timeValidationErrors[] = 'Sports Day Starting Time must be earlier than Sports Day Finish Time.';
+					}
 				}
 				else
 				{
@@ -394,13 +471,29 @@ class SchedulingsController extends AppController {
 				
 				if($data->sports_day_having_events_after_sport_yes_no)
 				{
+					if (!$data->sports_day_yes_no) {
+						$timeValidationErrors[] = 'Enable Sports Day before enabling events after sport.';
+					}
 					$data->sports_day_other_starting_time 			= $this->changeToMysqlTimeFormat($data->sports_day_other_starting_time);
 					$data->sports_day_other_finish_time 			= $this->changeToMysqlTimeFormat($data->sports_day_other_finish_time);
+					if (empty($data->sports_day_other_starting_time) || empty($data->sports_day_other_finish_time)) {
+						$timeValidationErrors[] = 'Post-sport start and finish times are required when events after sport are enabled.';
+					} elseif (!$this->isValidTimeRange($data->sports_day_other_starting_time, $data->sports_day_other_finish_time)) {
+						$timeValidationErrors[] = 'Post-sport Starting Time must be earlier than Post-sport Finish Time.';
+					}
 				}
 				else
 				{
 					$data->sports_day_other_starting_time 				= NULL;
 					$data->sports_day_other_finish_time 				= NULL;
+				}
+
+				if (!empty($timeValidationErrors)) {
+					foreach (array_unique($timeValidationErrors) as $validationError) {
+						$this->Flash->error($validationError);
+					}
+					$this->set('schedulings', $schedulings);
+					return;
 				}
 				
 				//$this->prx($data);
@@ -1116,7 +1209,30 @@ class SchedulingsController extends AppController {
 	private function updateSchedulingForSeason($conventionSeasonId, array $fields)
 	{
 		$fields['modified'] = date('Y-m-d H:i:s');
-		$this->Schedulings->updateAll($fields, ['conventionseasons_id' => $conventionSeasonId]);
+		$allowedColumns = array_flip($this->Schedulings->getSchema()->columns());
+		$safeFields = array_intersect_key($fields, $allowedColumns);
+
+		if (empty($safeFields)) {
+			return;
+		}
+
+		$this->Schedulings->updateAll($safeFields, ['conventionseasons_id' => $conventionSeasonId]);
+	}
+
+	private function isValidTimeRange($startTime, $endTime): bool
+	{
+		if (empty($startTime) || empty($endTime)) {
+			return false;
+		}
+
+		$start = strtotime((string)$startTime);
+		$end = strtotime((string)$endTime);
+
+		if ($start === false || $end === false) {
+			return false;
+		}
+
+		return $start < $end;
 	}
 
 }

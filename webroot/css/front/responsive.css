@@ -112,3 +112,7 @@
 
 
 }
+/* Force left alignment for evaluation form section headers */
+.fulcolm {
+  text-align: left !important;
+}

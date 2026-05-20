@@ -54,7 +54,7 @@ $this->Evaluationquestions = TableRegistry::getTableLocator()->get('Evaluationqu
 								echo implode("<br />",$arrQNames);
 								?>
 								</td>
-                                <td data-title="Created"><?php echo date('M d, Y', strtotime($datarecord->created)); ?></td>
+                                <td data-title="Created"><?php echo safe_date('M d, Y', strtotime($datarecord->created)); ?></td>
                                 <td data-title="Last Modified">
 								<?php 
 								if($datarecord->modified == NULL)
@@ -63,7 +63,7 @@ $this->Evaluationquestions = TableRegistry::getTableLocator()->get('Evaluationqu
 								}
 								else
 								{
-									echo date('M d, Y', strtotime($datarecord->modified));
+									echo safe_date('M d, Y', strtotime($datarecord->modified));
 								}
 								
 								?>

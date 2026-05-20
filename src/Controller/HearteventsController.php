@@ -14,7 +14,7 @@ class HearteventsController extends AppController {
     public $paginate = ['limit' => 50];
     public $components = array('PImage');
 	
-	public function initialize() {
+	public function initialize(): void {
         parent::initialize();
 
         // Include the FlashComponent
@@ -178,7 +178,7 @@ class HearteventsController extends AppController {
 			$this->redirect(['controller' => 'users', 'action' => 'dashboard']);
 		}
 		
-        $heartevents = $this->Heartevents->newEntity();
+        $heartevents = $this->Heartevents->newEntity([]);
         if ($this->request->is('post')) {
             $data = $this->Heartevents->patchEntity($heartevents, $this->request->getData());
             if (count($data->getErrors()) == 0) {

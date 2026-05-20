@@ -4,7 +4,7 @@
 define('DB_HOST','172.24.0.1');
 define('DB_USER','convention_acpdemo');
 define('DB_PASSWORD','p+M9$TRzp9C8');
-define('DB_NAME','convention_acpdemo');
+define('DB_NAME','convention_acpportal');
 
 define('SITE_TITLE','Accelerate');
 define('ADMIN_TITLE', SITE_TITLE.' :: ');
@@ -49,7 +49,7 @@ $genderDD = array(
 );
 
 $startY = date("Y")-20;
-$endY 	= date("Y")-11;
+$endY 	= date("Y")-8;
 
 global $birthYearDD;
 for($iCntr=$startY;$iCntr<=$endY;$iCntr++)
@@ -85,7 +85,8 @@ $eventGroupNameDD = array(
 	'1' 	=> 'U14',
 	'2' 	=> 'U16',
 	'3' 	=> 'U17',
-	'4' 	=> 'Open'
+	'4' 	=> 'Open',
+	'5' 	=> 'U11'
 );
 
 global $eventGenderDD;

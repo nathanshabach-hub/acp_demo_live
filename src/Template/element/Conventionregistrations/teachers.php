@@ -77,7 +77,7 @@ $this->Transactionteachers = TableRegistry::getTableLocator()->get('Transactiont
 								}
 								
 								?>
-                                <td data-title="Created"><?php echo date('M d, Y', strtotime($datarecord->created)); ?></td>
+                                <td data-title="Created"><?php echo safe_date('M d, Y', strtotime($datarecord->created)); ?></td>
                                 <td data-title="Action">
                                     <?php
 									echo $this->Html->link('<i class="fa fa-trash-o"></i>', ['controller' => 'conventionregistrations', 'action' => 'removeteacher',$datarecord->slug], [ 'escape' => false, 'title' => 'Remove', 'class'=>'', 'confirm' => 'Are you sure you want to remove this supervisor from this convention registration ?']);

@@ -64,7 +64,7 @@ $this->Conventionregistrationteachers = TableRegistry::getTableLocator()->get('C
 								echo $total_students_cs;
 								?>
 								</td>
-                                <td data-title="Registration Date"><?php echo date('M d, Y', strtotime($datarecord->created)); ?></td>
+                                <td data-title="Registration Date"><?php echo safe_date('M d, Y', strtotime($datarecord->created)); ?></td>
                             </tr>
 							<?php
 							}

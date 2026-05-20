@@ -61,7 +61,7 @@ $this->Categories = TableRegistry::getTableLocator()->get('Categories');
 								<td data-title="Email Address"><?php echo $user->email_address; ?></td>
 								<td data-title="Telephone 1"><?php echo $user->phone; ?></td>
                                 
-                                <td data-title="Created"><?php echo date('M d, Y', strtotime($user->created)); ?></td>
+                                <td data-title="Created"><?php echo safe_date('M d, Y', strtotime($user->created)); ?></td>
 								<td data-title="Verified">
 									<?php
 									if($user->status != 2)

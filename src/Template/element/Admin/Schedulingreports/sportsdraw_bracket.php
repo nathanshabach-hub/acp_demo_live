@@ -257,7 +257,7 @@ if ($logoPath !== '' && is_file($logoPath)) {
                                     $teamBraw = $schedCat === 3 ? (string)$row->group_name_opponent : (string)$row->user_id_opponent;
                                     $isFuture = trim($teamAraw) === '' && trim($teamBraw) === '';
                                     $rowClass = $isBye ? ' sd-bye' : ($isFuture ? ' sd-future' : '');
-                                    $startTime = !empty($row->start_time) ? date('g:i a', strtotime((string)$row->start_time)) : '';
+                                    $startTime = !empty($row->start_time) ? safe_date('g:i a', strtotime((string)$row->start_time)) : '';
                                     $roomName = isset($row->conventionroom) ? (string)$row->conventionroom->room_name : '';
                                     ?>
                                     <tr class="<?php echo $rowClass; ?>">

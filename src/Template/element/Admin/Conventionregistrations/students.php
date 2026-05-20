@@ -75,7 +75,7 @@ if (isset($conventionregistrationstudents) && !$conventionregistrationstudents->
                                 <td><?php echo h($datarecord->Students['birth_year'] ?? ''); ?></td>
                                 <td><?php echo h($datarecord->Students['gender'] ?? ''); ?></td>
                                 <td><?php echo $supName !== '' ? h($supName) : '<span style="color:#b8c2cc;">—</span>'; ?></td>
-                                <td><?php echo date('M d, Y', strtotime($datarecord->created)); ?></td>
+                                <td><?php echo safe_date('M d, Y', strtotime($datarecord->created)); ?></td>
                                 <td>
                                     <?php if ($eventCount > 0) { ?>
                                         <a href="#info<?php echo $datarecord->id; ?>" rel="facebox" title="View events" class="btn btn-info btn-xs"><i class="fa fa-eye"></i> <?php echo $eventCount; ?></a>

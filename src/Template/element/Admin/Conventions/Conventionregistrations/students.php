@@ -64,7 +64,7 @@ $this->Events = TableRegistry::getTableLocator()->get('Events');
 								<td data-title="Birth Year"><?php echo $datarecord->Students['birth_year'];?></td>
 								<td data-title="Gender"><?php echo $datarecord->Students['gender'];?></td>
 								<td data-title="Supervisor"><?php echo $datarecord->Teachers['first_name'].' '.$datarecord->Teachers['last_name'];?></td>
-                                <td data-title="Registration Date"><?php echo date('M d, Y', strtotime($datarecord->created)); ?></td>
+                                <td data-title="Registration Date"><?php echo safe_date('M d, Y', strtotime($datarecord->created)); ?></td>
                                 <td data-title="Events">
 									<?php
 									if($datarecord->event_ids != '' && $datarecord->event_ids != NULL)

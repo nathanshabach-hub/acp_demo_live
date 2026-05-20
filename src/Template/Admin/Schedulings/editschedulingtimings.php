@@ -30,12 +30,12 @@
 
 if(!empty($schedulingtimingsD->start_time) && isset($schedulingtimingsD->start_time))
 {
-	$currentStartTime= date("h:i A", strtotime($schedulingtimingsD->start_time));
+	$currentStartTime= safe_date("h:i A", strtotime($schedulingtimingsD->start_time));
 }
 
 if(!empty($schedulingtimingsD->finish_time) && isset($schedulingtimingsD->finish_time))
 {
-	$currentFinishTime= date("h:i A", strtotime($schedulingtimingsD->finish_time));
+	$currentFinishTime= safe_date("h:i A", strtotime($schedulingtimingsD->finish_time));
 }
 
 ?>
@@ -97,14 +97,14 @@ if(!empty($schedulingtimingsD->finish_time) && isset($schedulingtimingsD->finish
 					<div class="form-group">
                       <label class="col-sm-2 control-label">Start Time</label>
                       <div class="col-sm-10" style="padding-top:6px;">
-							<?php echo $schedulingtimingsD->start_time!=NULL ? date("H:i A",strtotime($schedulingtimingsD->start_time)) : ''; ?>
+							<?php echo $schedulingtimingsD->start_time!=NULL ? safe_date("H:i A", strtotime($schedulingtimingsD->start_time)) : ''; ?>
                       </div>
                     </div>
 					
 					<div class="form-group">
                       <label class="col-sm-2 control-label">Finish Time</label>
                       <div class="col-sm-10" style="padding-top:6px;">
-							<?php echo $schedulingtimingsD->finish_time!=NULL ? date("H:i A",strtotime($schedulingtimingsD->finish_time)) : ''; ?>
+							<?php echo $schedulingtimingsD->finish_time!=NULL ? safe_date("H:i A", strtotime($schedulingtimingsD->finish_time)) : ''; ?>
                       </div>
                     </div>
 					

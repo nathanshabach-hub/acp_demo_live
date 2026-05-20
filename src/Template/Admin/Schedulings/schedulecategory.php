@@ -74,7 +74,7 @@ $this->Schedulingtimings = TableRegistry::getTableLocator()->get('Schedulingtimi
                                 {
                                     echo $this->Html->link(
                                         '<i class="fa fa-play"></i> Start Scheduling',
-                                        ['controller'=>'schedulingtimings', 'action' => 'startschedulec4',$convention_season_slug],
+                                        ['controller'=>'schedulingtimings', 'action' => 'startschedulec1',$convention_season_slug],
                                         [
                                             'class'=>'btn btn-success btn-lg',
                                             'confirm' => 'Are you sure you want to start scheduling? This will reset all previous scheduling.',

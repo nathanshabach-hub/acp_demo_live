@@ -14,7 +14,7 @@ class JudgeevaluationsController extends AppController {
     public $paginate = ['limit' => 50];
     public $components = array('PImage');
 	
-	public function initialize() {
+	public function initialize(): void {
         parent::initialize();
 
         // Include the FlashComponent
@@ -132,7 +132,7 @@ class JudgeevaluationsController extends AppController {
 				
 				
 				// insert new record in judgeevaluations table
-				$judgeevaluations = $this->Judgeevaluations->newEntity();
+				$judgeevaluations = $this->Judgeevaluations->newEntity([]);
 				$dataJ = $this->Judgeevaluations->patchEntity($judgeevaluations, array());
 				
 				$dataJ->slug 							= "judge-event-evaluation-".$eventsubmissionD->id.'-'.time();
@@ -169,7 +169,7 @@ class JudgeevaluationsController extends AppController {
 					$totalMarksPossible 			= $totalMarksPossible + $question_marks_possible;
 					$totalMarksObtained 			= intval($totalMarksObtained) + intval($question_marks_obtained);
 					
-					$judgeevaluationmarks = $this->Judgeevaluationmarks->newEntity();
+					$judgeevaluationmarks = $this->Judgeevaluationmarks->newEntity([]);
 					$dataM = $this->Judgeevaluationmarks->patchEntity($judgeevaluationmarks, array());
 					
 					$dataM->judgeevaluation_id 			= $resultJ->id;
@@ -198,7 +198,7 @@ class JudgeevaluationsController extends AppController {
 					$negative_question_marks_possible 	= $request_data['negative_question_marks_possible'];
 					
 					// add this negative question in db table
-					$judgeevaluationmarks = $this->Judgeevaluationmarks->newEntity();
+					$judgeevaluationmarks = $this->Judgeevaluationmarks->newEntity([]);
 					$dataM = $this->Judgeevaluationmarks->patchEntity($judgeevaluationmarks, array());
 					
 					$dataM->judgeevaluation_id 			= $resultJ->id;
@@ -338,6 +338,10 @@ class JudgeevaluationsController extends AppController {
 		$evalFormD = $this->Evaluationforms->find()->where($condEvalForm)->order(["Evaluationforms.id" => "DESC"])->first();
 		$this->set('evalFormD', $evalFormD);
 		//$this->prx($condEvalForm);
+		if (empty($evalFormD) || empty($evalFormD->id)) {
+			$this->Flash->error('No judging form is configured for event '.$event_id_number.'. Please contact admin.');
+			return $this->redirect(['controller' => 'conventionregistrations', 'action' => 'judgeevententries', $convRegD->slug, $eventD->slug]);
+		}
 		
 		// to check that if This Judge already submitted evaluation for this submission + event
 		$condEvalJudge = array();
@@ -390,7 +394,7 @@ class JudgeevaluationsController extends AppController {
 				
 				
 				// insert new record in judgeevaluations table
-				$judgeevaluations = $this->Judgeevaluations->newEntity();
+				$judgeevaluations = $this->Judgeevaluations->newEntity([]);
 				$dataJ = $this->Judgeevaluations->patchEntity($judgeevaluations, $this->request->getData());
 				
 				$dataJ->slug 							= "judge-event-evaluation-".$eventsubmissionD->id.'-'.time();
@@ -427,7 +431,7 @@ class JudgeevaluationsController extends AppController {
 					$totalMarksPossible 			= $totalMarksPossible + $question_marks_possible;
 					$totalMarksObtained 			= intval($totalMarksObtained) + intval($question_marks_obtained);
 					
-					$judgeevaluationmarks = $this->Judgeevaluationmarks->newEntity();
+					$judgeevaluationmarks = $this->Judgeevaluationmarks->newEntity([]);
 					$dataM = $this->Judgeevaluationmarks->patchEntity($judgeevaluationmarks, $this->request->getData());
 					
 					$dataM->judgeevaluation_id 			= $resultJ->id;
@@ -456,7 +460,7 @@ class JudgeevaluationsController extends AppController {
 					$negative_question_marks_possible 	= $this->request->getData('negative_question_marks_possible');
 					
 					// add this negative question in db table
-					$judgeevaluationmarks = $this->Judgeevaluationmarks->newEntity();
+					$judgeevaluationmarks = $this->Judgeevaluationmarks->newEntity([]);
 					$dataM = $this->Judgeevaluationmarks->patchEntity($judgeevaluationmarks, $this->request->getData());
 					
 					$dataM->judgeevaluation_id 			= $resultJ->id;
@@ -546,7 +550,7 @@ class JudgeevaluationsController extends AppController {
 		}
 		
 		// insert new record in judgeevaluations table as dis not attent
-		$judgeevaluations = $this->Judgeevaluations->newEntity();
+		$judgeevaluations = $this->Judgeevaluations->newEntity([]);
 		$dataJ = $this->Judgeevaluations->patchEntity($judgeevaluations, $this->request->getData());
 		
 		$dataJ->slug 							= "judge-event-evaluation-".$eventsubmissionD->id.'-'.time();

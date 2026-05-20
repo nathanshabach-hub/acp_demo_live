@@ -38,12 +38,12 @@
 <?php
 if(!empty($seasons->registration_start_date) && $seasons->registration_start_date != NULL)
 {
-	$seasons->registration_start_date = date("Y-m-d",strtotime($seasons->registration_start_date));
+	$seasons->registration_start_date = safe_date("Y-m-d", strtotime($seasons->registration_start_date));
 }
 
 if(!empty($seasons->registration_end_date) && $seasons->registration_end_date != NULL)
 {
-	$seasons->registration_end_date = date("Y-m-d",strtotime($seasons->registration_end_date));
+	$seasons->registration_end_date = safe_date("Y-m-d", strtotime($seasons->registration_end_date));
 }
 ?>
 

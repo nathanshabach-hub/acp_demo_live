@@ -13,7 +13,7 @@ class EventsController extends AppController {
 
     //public $helpers = array('Javascript', 'Ajax');
 
-    public function initialize() {
+    public function initialize(): void {
         parent::initialize();
         $this->loadComponent('Flash');
         $action = $this->request->getParam('action');
@@ -196,7 +196,7 @@ class EventsController extends AppController {
 		global $eventJudgeType;
 		$this->set('eventJudgeType', $eventJudgeType);
 		
-        $events = $this->Events->newEntity();
+        $events = $this->Events->newEntity([]);
         if ($this->request->is('post')) {
 			
 			//$this->prx($this->request->getData());

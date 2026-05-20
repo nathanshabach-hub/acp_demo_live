@@ -13,7 +13,7 @@ class EvaluationformsController extends AppController {
 
     //public $helpers = array('Javascript', 'Ajax');
 
-    public function initialize() {
+    public function initialize(): void {
         parent::initialize();
         $this->loadComponent('Flash');
         $action = $this->request->getParam('action');
@@ -112,7 +112,7 @@ class EvaluationformsController extends AppController {
 		}
 		$this->set('eventNameIDDD', $eventNameIDDD);
 		
-        $evaluationforms = $this->Evaluationforms->newEntity();
+        $evaluationforms = $this->Evaluationforms->newEntity([]);
         if ($this->request->is('post')) {
 			
 			//$this->prx($this->request->getData());

@@ -33,7 +33,7 @@ use Cake\Datasource\ConnectionManager;
 #[\AllowDynamicProperties]
 class AppController extends Controller{
     
-    public function initialize() {
+    public function initialize(): void {
     parent::initialize();
 		$this->Timezones = $this->loadModel('Timezones');
 		$this->Eventtypes = $this->loadModel('Eventtypes');
@@ -57,7 +57,7 @@ class AppController extends Controller{
 		$this->Schedulingeventtweaks = $this->loadModel('Schedulingeventtweaks');
     }
 	
-	public function beforeRender(EventInterface $event) {
+	public function beforeRender(EventInterface $event): void {
         parent::beforeRender($event);
 		
 		$adminInfo = $this->Admins->find()->where(['Admins.id' => 1])->first();
@@ -184,7 +184,7 @@ class AppController extends Controller{
 			if(!$checkSubmission)
 			{
 				// submit event
-				$eventsubmissions = $this->Eventsubmissions->newEntity();
+				$eventsubmissions = $this->Eventsubmissions->newEntity([]);
 				$dataES = $this->Eventsubmissions->patchEntity($eventsubmissions, array());
 
 				$dataES->slug 						= 'event-submission-'.$conventionregistration_id.'-'.time().'-'.rand(100,1000000);
@@ -321,6 +321,12 @@ class AppController extends Controller{
 		if($studentAge>0 && $event_grp_name>0)
 		{;
 			//compare age based on event group
+			if($event_grp_name == 5 && $studentAge>=8 && $studentAge<=11)
+			{
+				// 5. U11
+				$returnVal = 1;
+			}
+			else
 			if($event_grp_name == 1 && $studentAge<14)
 			{
 				// 1. U14
@@ -1164,6 +1170,9 @@ class AppController extends Controller{
 function checkSubmissionsOpen($conventionseason_id = NULL) {
 		if (!$conventionseason_id) return;
 		$this->Conventionseasons = $this->loadModel('Conventionseasons');
+		if (!$this->Conventionseasons->getSchema()->hasColumn('submissions_open')) {
+			return;
+		}
 		$convSeasonD = $this->Conventionseasons->find()->where(['Conventionseasons.id' => $conventionseason_id])->first();
 		if ($convSeasonD && $convSeasonD->submissions_open == 0) {
 			$this->Flash->error('Sorry, submissions are currently closed for this convention season.');

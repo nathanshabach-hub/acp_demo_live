@@ -14,7 +14,7 @@ class EventsubmissionsController extends AppController {
 
     //public $helpers = array('Javascript', 'Ajax');
 
-    public function initialize() {
+    public function initialize(): void {
         parent::initialize();
         $this->loadComponent('Flash');
         $action = $this->request->getParam('action');
@@ -42,6 +42,14 @@ class EventsubmissionsController extends AppController {
 		
 		$separator = array();
         $condition = array();
+
+		// Keep list scoped to the selected convention season to avoid
+		// loading the entire historical submissions dataset at once.
+		$sess_admin_header_season_id = $this->request->getSession()->read("sess_admin_header_season_id");
+		if($sess_admin_header_season_id>0)
+		{
+			$condition[] = "(Eventsubmissions.conventionseason_id = '".$sess_admin_header_season_id."')";
+		}
 
 		$conventionsDD = $this->loadModel('Conventions')->find()->where([])->order(['Conventions.name' => 'ASC'])->all()->combine('id', 'name')->toArray();
 		$this->set('conventionsDD', $conventionsDD);
@@ -73,9 +81,12 @@ class EventsubmissionsController extends AppController {
             $this->render('index');
         } */
 		
-		$eventsubmissions 		= $this->Eventsubmissions->find()->where($condition)->contain(['Conventions','Students','Events','Uploadeduser'])->order(['Eventsubmissions.id' => 'DESC'])->all();
-		
-		$this->set('eventsubmissions', $eventsubmissions);
+		$query = $this->Eventsubmissions->find()
+			->where($condition)
+			->contain(['Conventions','Students','Events','Uploadeduser'])
+			->order(['Eventsubmissions.id' => 'DESC']);
+		$this->paginate = ['limit' => 250];
+		$this->set('eventsubmissions', $this->paginate($query));
     }
 	
 	public function removesubmission($submission_slug = null, $conv_reg_slug = null) {

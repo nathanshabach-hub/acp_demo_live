@@ -11,7 +11,7 @@ use Cake\I18n\I18n;
 
 class TransactionsController extends AppController {
 
-    public function initialize() {
+    public function initialize(): void {
         parent::initialize();
 
         // Include the FlashComponent
@@ -222,7 +222,7 @@ class TransactionsController extends AppController {
 			}
 			
 			// Step 1:: Add 1 record into transactions
-			$transactions = $this->Transactions->newEntity();
+			$transactions = $this->Transactions->newEntity([]);
 			$dataT = $this->Transactions->patchEntity($transactions, array());
 
 			$dataT->slug 										= "transaction-cr-".$sess_selected_convention_registration_id.'-'.time();
@@ -285,7 +285,7 @@ class TransactionsController extends AppController {
 					}
 					
 					// add new record to transactionstudents table
-					$transactionstudents = $this->Transactionstudents->newEntity();
+					$transactionstudents = $this->Transactionstudents->newEntity([]);
 					$dataTS = $this->Transactionstudents->patchEntity($transactionstudents, $this->request->getData());
 					
 					$dataTS->transaction_id							= $transaction_id;
@@ -326,7 +326,7 @@ class TransactionsController extends AppController {
 				if(!$checkTeacherF)
 				{
 					// add new record to Transactionteachers table
-					$transactionteachers = $this->Transactionteachers->newEntity();
+					$transactionteachers = $this->Transactionteachers->newEntity([]);
 					$dataTT = $this->Transactionteachers->patchEntity($transactionteachers, $this->request->getData());
 					
 					$dataTT->transaction_id							= $transaction_id;

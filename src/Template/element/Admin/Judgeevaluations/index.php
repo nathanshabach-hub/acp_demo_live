@@ -98,7 +98,22 @@ $this->Evaluationquestions = TableRegistry::getTableLocator()->get('Evaluationqu
                                         <span class="badge-progress">In Progress</span>
                                     <?php endif; ?>
                                 </td>
-                                <td data-title="Submitted Date"><?php echo !empty($row['submitted_date']) ? date('M d, Y', strtotime($row['submitted_date'])) : '-'; ?></td>
+								<td data-title="Submitted Date">
+									<?php
+									$submittedDisplay = '-';
+									if (!empty($row['submitted_date'])) {
+										if (is_object($row['submitted_date']) && method_exists($row['submitted_date'], 'getTimestamp')) {
+											$submittedTs = (int)$row['submitted_date']->getTimestamp();
+										} else {
+											$submittedTs = strtotime((string)$row['submitted_date']);
+										}
+										if (!empty($submittedTs) && $submittedTs > 0) {
+											$submittedDisplay = date('M d, Y', $submittedTs);
+										}
+									}
+									echo $submittedDisplay;
+									?>
+								</td>
                                 <td data-title="Action">
 									<?php 
 									$judgedCount = count($row['event_evaluations']);

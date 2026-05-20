@@ -12,13 +12,13 @@ use Cake\I18n\I18n;
 class EventsubmissionsController extends AppController {
 
     public $paginate = ['limit' => 50];
-    public $components = array('PImage');
 	
-	public function initialize() {
+	public function initialize(): void {
         parent::initialize();
 
         // Include the FlashComponent
         $this->loadComponent('Flash');
+		$this->loadComponent('PImage');
 
         $this->Users = $this->loadModel('Users');
 		$this->Emailtemplates = $this->loadModel('Emailtemplates');
@@ -31,6 +31,160 @@ class EventsubmissionsController extends AppController {
 		$this->Crstudentevents = $this->loadModel('Crstudentevents');
 		$this->Judgeevaluations = $this->loadModel('Judgeevaluations');
     }
+
+	protected function getSubmissionRequestData(): array
+	{
+		$submissionData = $this->request->getData('Eventsubmissions');
+		if (!is_array($submissionData)) {
+			$submissionData = $this->request->getData('eventsubmissions');
+		}
+		if (is_array($submissionData)) {
+			return $this->sanitizeSubmissionData($submissionData);
+		}
+
+		$allData = $this->request->getData();
+		return is_array($allData) ? $this->sanitizeSubmissionData($allData) : [];
+	}
+
+	protected function sanitizeSubmissionData(array $submissionData): array
+	{
+		foreach ($submissionData as $fieldName => $value) {
+			if ($value instanceof \Psr\Http\Message\UploadedFileInterface) {
+				unset($submissionData[$fieldName]);
+				continue;
+			}
+
+			if (is_array($value)) {
+				if (isset($value['error']) && array_key_exists('tmp_name', $value)) {
+					unset($submissionData[$fieldName]);
+					continue;
+				}
+
+				$submissionData[$fieldName] = $this->sanitizeSubmissionData($value);
+			}
+		}
+
+		return $submissionData;
+	}
+
+	protected function getSubmissionRequestField(string $fieldName)
+	{
+		$nestedValue = $this->request->getData('Eventsubmissions.' . $fieldName);
+		if ($nestedValue !== null) {
+			return $nestedValue;
+		}
+
+		return $this->request->getData($fieldName);
+	}
+
+	protected function processSubmissionUploadField($fieldName)
+	{
+		$uploadedFile = $this->getSubmissionRequestField($fieldName);
+		$uploadArray = null;
+		$clientFilename = '';
+
+		// Handle CakePHP/PSR-7 style uploads.
+		if ($uploadedFile instanceof \Psr\Http\Message\UploadedFileInterface) {
+			if ($uploadedFile->getError() !== UPLOAD_ERR_OK) {
+				return null;
+			}
+
+			$clientFilename = (string)$uploadedFile->getClientFilename();
+			if ($clientFilename === '') {
+				return null;
+			}
+
+			$tmpName = (string)($uploadedFile->getStream()->getMetadata('uri') ?? '');
+			$uploadArray = [
+				'name' => $clientFilename,
+				'type' => (string)$uploadedFile->getClientMediaType(),
+				'tmp_name' => $tmpName,
+				'error' => (int)$uploadedFile->getError(),
+				'size' => (int)$uploadedFile->getSize(),
+			];
+		}
+		// Handle legacy array-style uploads.
+		elseif (is_array($uploadedFile) && isset($uploadedFile['error'])) {
+			if ((int)$uploadedFile['error'] !== UPLOAD_ERR_OK) {
+				return null;
+			}
+
+			$clientFilename = (string)($uploadedFile['name'] ?? '');
+			if ($clientFilename === '') {
+				return null;
+			}
+
+			$uploadArray = [
+				'name' => $clientFilename,
+				'type' => (string)($uploadedFile['type'] ?? ''),
+				'tmp_name' => (string)($uploadedFile['tmp_name'] ?? ''),
+				'error' => (int)$uploadedFile['error'],
+				'size' => (int)($uploadedFile['size'] ?? 0),
+			];
+		}
+
+		if (!$uploadArray || $uploadArray['tmp_name'] === '') {
+			return null;
+		}
+
+		$specialCharacters = ['#', '$', '%', '@', '+', '=', '\\', '/', '"', ' ', "'", ':', '~', '`', '!', '^', '*', '(', ')', '|', "'", '&'];
+		$uploadArray['name'] = str_replace($specialCharacters, '-', $uploadArray['name']);
+
+		$returnedUploadImageArray = $this->PImage->upload($uploadArray, UPLOAD_EVENTS_SUBMISSION_DOCUMENT_PATH);
+
+		return [
+			'original' => $clientFilename,
+			'stored' => $returnedUploadImageArray[0] ?? '',
+		];
+	}
+
+	protected function applySubmissionUploads($data): void
+	{
+		foreach ($this->Eventsubmissions->getSchema()->columns() as $columnName) {
+			if (
+				isset($data->{$columnName})
+				&& (
+					$data->{$columnName} instanceof \Psr\Http\Message\UploadedFileInterface
+					|| is_array($data->{$columnName})
+				)
+			) {
+				$data->{$columnName} = '';
+			}
+		}
+
+		foreach (['report', 'score_sheet', 'additional_documents'] as $fieldName) {
+			if (
+				isset($data->{$fieldName})
+				&& (
+					$data->{$fieldName} instanceof \Psr\Http\Message\UploadedFileInterface
+					|| is_array($data->{$fieldName})
+				)
+			) {
+				$data->{$fieldName} = '';
+			}
+		}
+
+		$eventDocumentUpload = $this->processSubmissionUploadField('event_document');
+		if ($eventDocumentUpload) {
+			$data->mediafile_original_file_name = $eventDocumentUpload['original'];
+			$data->mediafile_file_system_name = $eventDocumentUpload['stored'];
+		}
+
+		$reportUpload = $this->processSubmissionUploadField('report');
+		if ($reportUpload) {
+			$data->report = $reportUpload['stored'];
+		}
+
+		$scoreSheetUpload = $this->processSubmissionUploadField('score_sheet');
+		if ($scoreSheetUpload) {
+			$data->score_sheet = $scoreSheetUpload['stored'];
+		}
+
+		$additionalDocumentsUpload = $this->processSubmissionUploadField('additional_documents');
+		if ($additionalDocumentsUpload) {
+			$data->additional_documents = $additionalDocumentsUpload['stored'];
+		}
+	}
 	
 	public function viewlist() {
 
@@ -131,12 +285,13 @@ class EventsubmissionsController extends AppController {
 			$this->redirect(['controller' => 'users', 'action' => 'dashboard']);
 		}
 		
-        $eventsubmissions = $this->Eventsubmissions->newEntity();
+        $eventsubmissions = $this->Eventsubmissions->newEntity([]);
         if ($this->request->is('post')) {
-            $data = $this->Eventsubmissions->patchEntity($eventsubmissions, $this->request->getData());
+			$submissionData = $this->getSubmissionRequestData();
+			$data = $this->Eventsubmissions->patchEntity($eventsubmissions, $submissionData);
             if (count($data->getErrors()) == 0) {
 				
-				$book_ids = $this->request->getData('Eventsubmissions.book_ids');
+				$book_ids = $submissionData['book_ids'] ?? null;
 				//$this->prx($book_ids);
 				
 				if(isset($book_ids) && count((array)$book_ids))
@@ -150,53 +305,7 @@ class EventsubmissionsController extends AppController {
 				
 				$eventD = $this->Events->find()->where(["Events.id" => $data->event_id])->first();
 				
-				if(!empty($this->request->getData('Eventsubmissions.event_document.name')))
-				{
-					$data->mediafile_original_file_name =  $this->request->getData('Eventsubmissions.event_document.name');
-					
-					$specialCharacters = array('#', '$', '%', '@', '+', '=', '\\', '/', '"', ' ', "'", ':', '~', '`', '!', '^', '*', '(', ')', '|', "'", "&");
-					$toReplace = "-";
-					$this->request = $this->request->withData('Eventsubmissions.event_document.name', str_replace($specialCharacters, $toReplace, $this->request->getData('Eventsubmissions.event_document.name')));
-					$imageArray = $this->request->getData('Eventsubmissions.event_document');
-					$returnedUploadImageArray = $this->PImage->upload($imageArray, UPLOAD_EVENTS_SUBMISSION_DOCUMENT_PATH); 
-					 
-					$data->mediafile_file_system_name =  $returnedUploadImageArray[0];
-				}
-				
-				if(!empty($this->request->getData('Eventsubmissions.report.name')))
-				{
-					$data->report =  $this->request->getData('Eventsubmissions.report.name');
-					
-					$specialCharacters = array('#', '$', '%', '@', '+', '=', '\\', '/', '"', ' ', "'", ':', '~', '`', '!', '^', '*', '(', ')', '|', "'", "&");
-					$toReplace = "-";
-					$this->request = $this->request->withData('Eventsubmissions.report.name', str_replace($specialCharacters, $toReplace, $this->request->getData('Eventsubmissions.report.name')));
-					$imageArray = $this->request->getData('Eventsubmissions.report');
-					$returnedUploadImageArray = $this->PImage->upload($imageArray, UPLOAD_EVENTS_SUBMISSION_DOCUMENT_PATH); 
-					 
-					$data->report =  $returnedUploadImageArray[0];
-				}
-				
-				if(!empty($this->request->getData('Eventsubmissions.score_sheet.name')))
-				{
-					$specialCharacters = array('#', '$', '%', '@', '+', '=', '\\', '/', '"', ' ', "'", ':', '~', '`', '!', '^', '*', '(', ')', '|', "'", "&");
-					$toReplace = "-";
-					$this->request = $this->request->withData('Eventsubmissions.score_sheet.name', str_replace($specialCharacters, $toReplace, $this->request->getData('Eventsubmissions.score_sheet.name')));
-					$imageArray = $this->request->getData('Eventsubmissions.score_sheet');
-					$returnedUploadImageArray = $this->PImage->upload($imageArray, UPLOAD_EVENTS_SUBMISSION_DOCUMENT_PATH); 
-					 
-					$data->score_sheet =  $returnedUploadImageArray[0];
-				}
-				
-				if(!empty($this->request->getData('Eventsubmissions.additional_documents.name')))
-				{
-					$specialCharacters = array('#', '$', '%', '@', '+', '=', '\\', '/', '"', ' ', "'", ':', '~', '`', '!', '^', '*', '(', ')', '|', "'", "&");
-					$toReplace = "-";
-					$this->request = $this->request->withData('Eventsubmissions.additional_documents.name', str_replace($specialCharacters, $toReplace, $this->request->getData('Eventsubmissions.additional_documents.name')));
-					$imageArray = $this->request->getData('Eventsubmissions.additional_documents');
-					$returnedUploadImageArray = $this->PImage->upload($imageArray, UPLOAD_EVENTS_SUBMISSION_DOCUMENT_PATH); 
-					 
-					$data->additional_documents =  $returnedUploadImageArray[0];
-				}
+				$this->applySubmissionUploads($data);
 				
                 $data->slug = 'event-submission-'.$sess_selected_convention_registration_id.'-'.time().'-'.rand(100,1000000);
 				
@@ -349,12 +458,13 @@ class EventsubmissionsController extends AppController {
 		}
 		
 		
-        $eventsubmissions = $this->Eventsubmissions->newEntity();
+        $eventsubmissions = $this->Eventsubmissions->newEntity([]);
         if ($this->request->is('post')) {
-            $data = $this->Eventsubmissions->patchEntity($eventsubmissions, $this->request->getData());
+			$submissionData = $this->getSubmissionRequestData();
+			$data = $this->Eventsubmissions->patchEntity($eventsubmissions, $submissionData);
             if (count($data->getErrors()) == 0) {
 				
-				$book_ids = $this->request->getData('Eventsubmissions.book_ids');
+				$book_ids = $submissionData['book_ids'] ?? null;
 				//$this->prx($book_ids);
 				
 				if(isset($book_ids) && count((array)$book_ids))
@@ -366,53 +476,7 @@ class EventsubmissionsController extends AppController {
 					$data->book_ids = '';
 				}
 				
-				if(!empty($this->request->getData('Eventsubmissions.event_document.name')))
-				{
-					$data->mediafile_original_file_name =  $this->request->getData('Eventsubmissions.event_document.name');
-					
-					$specialCharacters = array('#', '$', '%', '@', '+', '=', '\\', '/', '"', ' ', "'", ':', '~', '`', '!', '^', '*', '(', ')', '|', "'", "&");
-					$toReplace = "-";
-					$this->request = $this->request->withData('Eventsubmissions.event_document.name', str_replace($specialCharacters, $toReplace, $this->request->getData('Eventsubmissions.event_document.name')));
-					$imageArray = $this->request->getData('Eventsubmissions.event_document');
-					$returnedUploadImageArray = $this->PImage->upload($imageArray, UPLOAD_EVENTS_SUBMISSION_DOCUMENT_PATH); 
-					 
-					$data->mediafile_file_system_name =  $returnedUploadImageArray[0];
-				}
-				
-				if(!empty($this->request->getData('Eventsubmissions.report.name')))
-				{
-					$data->report =  $this->request->getData('Eventsubmissions.report.name');
-					
-					$specialCharacters = array('#', '$', '%', '@', '+', '=', '\\', '/', '"', ' ', "'", ':', '~', '`', '!', '^', '*', '(', ')', '|', "'", "&");
-					$toReplace = "-";
-					$this->request = $this->request->withData('Eventsubmissions.report.name', str_replace($specialCharacters, $toReplace, $this->request->getData('Eventsubmissions.report.name')));
-					$imageArray = $this->request->getData('Eventsubmissions.report');
-					$returnedUploadImageArray = $this->PImage->upload($imageArray, UPLOAD_EVENTS_SUBMISSION_DOCUMENT_PATH); 
-					 
-					$data->report =  $returnedUploadImageArray[0];
-				}
-				
-				if(!empty($this->request->getData('Eventsubmissions.score_sheet.name')))
-				{
-					$specialCharacters = array('#', '$', '%', '@', '+', '=', '\\', '/', '"', ' ', "'", ':', '~', '`', '!', '^', '*', '(', ')', '|', "'", "&");
-					$toReplace = "-";
-					$this->request = $this->request->withData('Eventsubmissions.score_sheet.name', str_replace($specialCharacters, $toReplace, $this->request->getData('Eventsubmissions.score_sheet.name')));
-					$imageArray = $this->request->getData('Eventsubmissions.score_sheet');
-					$returnedUploadImageArray = $this->PImage->upload($imageArray, UPLOAD_EVENTS_SUBMISSION_DOCUMENT_PATH); 
-					 
-					$data->score_sheet =  $returnedUploadImageArray[0];
-				}
-				
-				if(!empty($this->request->getData('Eventsubmissions.additional_documents.name')))
-				{
-					$specialCharacters = array('#', '$', '%', '@', '+', '=', '\\', '/', '"', ' ', "'", ':', '~', '`', '!', '^', '*', '(', ')', '|', "'", "&");
-					$toReplace = "-";
-					$this->request = $this->request->withData('Eventsubmissions.additional_documents.name', str_replace($specialCharacters, $toReplace, $this->request->getData('Eventsubmissions.additional_documents.name')));
-					$imageArray = $this->request->getData('Eventsubmissions.additional_documents');
-					$returnedUploadImageArray = $this->PImage->upload($imageArray, UPLOAD_EVENTS_SUBMISSION_DOCUMENT_PATH); 
-					 
-					$data->additional_documents =  $returnedUploadImageArray[0];
-				}
+				$this->applySubmissionUploads($data);
 				
                 $data->slug = 'event-submission-'.$conventionRegD->id.'-'.time().'-'.rand(100,1000000);
 				
@@ -529,12 +593,13 @@ class EventsubmissionsController extends AppController {
 		}
 		
 		
-        $eventsubmissions = $this->Eventsubmissions->newEntity();
+        $eventsubmissions = $this->Eventsubmissions->newEntity([]);
         if ($this->request->is('post')) {
-            $data = $this->Eventsubmissions->patchEntity($eventsubmissions, $this->request->getData());
+			$submissionData = $this->getSubmissionRequestData();
+			$data = $this->Eventsubmissions->patchEntity($eventsubmissions, $submissionData);
             if (count($data->getErrors()) == 0) {
 				
-				$book_ids = $this->request->getData('Eventsubmissions.book_ids');
+				$book_ids = $submissionData['book_ids'] ?? null;
 				//$this->prx($this->request->getData());
 				
 				if(isset($book_ids) && count((array)$book_ids))
@@ -546,53 +611,7 @@ class EventsubmissionsController extends AppController {
 					$data->book_ids = '';
 				}
 				
-				if(!empty($this->request->getData('Eventsubmissions.event_document.name')))
-				{
-					$data->mediafile_original_file_name =  $this->request->getData('Eventsubmissions.event_document.name');
-					
-					$specialCharacters = array('#', '$', '%', '@', '+', '=', '\\', '/', '"', ' ', "'", ':', '~', '`', '!', '^', '*', '(', ')', '|', "'", "&");
-					$toReplace = "-";
-					$this->request = $this->request->withData('Eventsubmissions.event_document.name', str_replace($specialCharacters, $toReplace, $this->request->getData('Eventsubmissions.event_document.name')));
-					$imageArray = $this->request->getData('Eventsubmissions.event_document');
-					$returnedUploadImageArray = $this->PImage->upload($imageArray, UPLOAD_EVENTS_SUBMISSION_DOCUMENT_PATH); 
-					 
-					$data->mediafile_file_system_name =  $returnedUploadImageArray[0];
-				}
-				
-				if(!empty($this->request->getData('Eventsubmissions.report.name')))
-				{
-					$data->report =  $this->request->getData('Eventsubmissions.report.name');
-					
-					$specialCharacters = array('#', '$', '%', '@', '+', '=', '\\', '/', '"', ' ', "'", ':', '~', '`', '!', '^', '*', '(', ')', '|', "'", "&");
-					$toReplace = "-";
-					$this->request = $this->request->withData('Eventsubmissions.report.name', str_replace($specialCharacters, $toReplace, $this->request->getData('Eventsubmissions.report.name')));
-					$imageArray = $this->request->getData('Eventsubmissions.report');
-					$returnedUploadImageArray = $this->PImage->upload($imageArray, UPLOAD_EVENTS_SUBMISSION_DOCUMENT_PATH); 
-					 
-					$data->report =  $returnedUploadImageArray[0];
-				}
-				
-				if(!empty($this->request->getData('Eventsubmissions.score_sheet.name')))
-				{
-					$specialCharacters = array('#', '$', '%', '@', '+', '=', '\\', '/', '"', ' ', "'", ':', '~', '`', '!', '^', '*', '(', ')', '|', "'", "&");
-					$toReplace = "-";
-					$this->request = $this->request->withData('Eventsubmissions.score_sheet.name', str_replace($specialCharacters, $toReplace, $this->request->getData('Eventsubmissions.score_sheet.name')));
-					$imageArray = $this->request->getData('Eventsubmissions.score_sheet');
-					$returnedUploadImageArray = $this->PImage->upload($imageArray, UPLOAD_EVENTS_SUBMISSION_DOCUMENT_PATH); 
-					 
-					$data->score_sheet =  $returnedUploadImageArray[0];
-				}
-				
-				if(!empty($this->request->getData('Eventsubmissions.additional_documents.name')))
-				{
-					$specialCharacters = array('#', '$', '%', '@', '+', '=', '\\', '/', '"', ' ', "'", ':', '~', '`', '!', '^', '*', '(', ')', '|', "'", "&");
-					$toReplace = "-";
-					$this->request = $this->request->withData('Eventsubmissions.additional_documents.name', str_replace($specialCharacters, $toReplace, $this->request->getData('Eventsubmissions.additional_documents.name')));
-					$imageArray = $this->request->getData('Eventsubmissions.additional_documents');
-					$returnedUploadImageArray = $this->PImage->upload($imageArray, UPLOAD_EVENTS_SUBMISSION_DOCUMENT_PATH); 
-					 
-					$data->additional_documents =  $returnedUploadImageArray[0];
-				}
+				$this->applySubmissionUploads($data);
 				
                 $data->slug = 'event-submission-'.$conventionRegD->id.'-'.time().'-'.rand(100,1000000);
 				
@@ -615,7 +634,7 @@ class EventsubmissionsController extends AppController {
 				
 				//$this->prx($data);
 				
-                if ($this->Eventsubmissions->save($data)) {
+				if ($this->Eventsubmissions->save($data)) {
 					
 					$this->Flash->success('Events submission completed successfully for group.');
                     $this->redirect(['controller' => 'conventionregistrations', 'action' => 'packageregistration']);
@@ -740,7 +759,7 @@ class EventsubmissionsController extends AppController {
 				else
 				{
 					// insert new record
-					$judgeevaluations = $this->Judgeevaluations->newEntity();
+					$judgeevaluations = $this->Judgeevaluations->newEntity([]);
 					$dataJ = $this->Judgeevaluations->patchEntity($judgeevaluations, array());
 					
 					$dataJ->slug 							= "judge-times-event-evaluation-".$eventsubmissionD->id.'-'.time();
@@ -924,7 +943,7 @@ class EventsubmissionsController extends AppController {
 				else
 				{
 					// insert new record
-					$judgeevaluations = $this->Judgeevaluations->newEntity();
+					$judgeevaluations = $this->Judgeevaluations->newEntity([]);
 					$dataJ = $this->Judgeevaluations->patchEntity($judgeevaluations, array());
 					
 					$dataJ->slug 							= "judge-times-event-evaluation-".$eventsubmissionD->id.'-'.time();
@@ -1166,7 +1185,7 @@ class EventsubmissionsController extends AppController {
 				else
 				{
 					// insert new record
-					$judgeevaluations = $this->Judgeevaluations->newEntity();
+					$judgeevaluations = $this->Judgeevaluations->newEntity([]);
 					$dataJ = $this->Judgeevaluations->patchEntity($judgeevaluations, array());
 					
 					$dataJ->slug 							= "judge-times-event-evaluation-".$eventsubmissionD->id.'-'.time();
@@ -1360,7 +1379,7 @@ class EventsubmissionsController extends AppController {
 				else
 				{
 					// insert new record
-					$judgeevaluations = $this->Judgeevaluations->newEntity();
+					$judgeevaluations = $this->Judgeevaluations->newEntity([]);
 					$dataJ = $this->Judgeevaluations->patchEntity($judgeevaluations, array());
 					
 					$dataJ->slug 							= "judge-times-event-evaluation-".$eventsubmissionD->id.'-'.time();
@@ -1503,7 +1522,7 @@ class EventsubmissionsController extends AppController {
 				else
 				{
 					// insert new record
-					$judgeevaluations = $this->Judgeevaluations->newEntity();
+					$judgeevaluations = $this->Judgeevaluations->newEntity([]);
 					$dataJ = $this->Judgeevaluations->patchEntity($judgeevaluations, array());
 					
 					$dataJ->slug 							= "judge-times-event-evaluation-".$eventsubmissionD->id.'-'.time();

@@ -15,7 +15,7 @@ class CombinerequestsController extends AppController {
     public $paginate = ['limit' => 50];
     public $components = array('PImage');
 	
-	public function initialize() {
+	public function initialize(): void {
         parent::initialize();
 
         // Include the FlashComponent
@@ -200,7 +200,7 @@ class CombinerequestsController extends AppController {
 			$this->redirect(['controller' => 'users', 'action' => 'dashboard']);
 		}
 		
-        $combinerequests = $this->Combinerequests->newEntity();
+        $combinerequests = $this->Combinerequests->newEntity([]);
 		if ($this->request->is('post')) {
 			
 			$data = $this->Combinerequests->patchEntity($combinerequests, $this->request->getData());

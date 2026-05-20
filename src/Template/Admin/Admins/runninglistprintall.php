@@ -130,7 +130,13 @@ body {
             ? 'Combined: ' . implode(' + ', $eventTitleParts)
             : $firstEventD->event_name;
         $displayEventCodes = implode(', ', $eventCodeParts);
-        $qualifyingTime = !empty($groupQualifyingRaw) ? date('i:s', strtotime($groupQualifyingRaw)) : 'N/A';
+        $qualifyingTime = 'N/A';
+        if (!empty($groupQualifyingRaw)) {
+            $qualifyingTs = strtotime((string)$groupQualifyingRaw);
+            if (!empty($qualifyingTs) && $qualifyingTs > 0) {
+                $qualifyingTime = date('i:s', $qualifyingTs);
+            }
+        }
 
         $uniqueRows = [];
         $seenStudents = [];

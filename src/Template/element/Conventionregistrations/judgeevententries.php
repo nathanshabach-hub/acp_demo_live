@@ -171,7 +171,7 @@ $isPlaceRankingEvent = stripos((string)$eventD->event_name, 'Futsal') !== false 
 							}
 						?>
 						</td>
-						<td data-title="Submission Date" class="col-date"><?php echo date('M d, Y', strtotime($datarecord->created)); ?></td>
+						<td data-title="Submission Date" class="col-date"><?php echo safe_date('M d, Y', strtotime($datarecord->created)); ?></td>
 						
 						<td data-title="Guideline Breach" class="col-breach">
 							<?php

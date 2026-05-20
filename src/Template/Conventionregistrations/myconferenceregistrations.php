@@ -32,7 +32,7 @@ $this->Html->css('/../js/css/print.css', ['inline' => false]);
 										<tr>
 											<td><?php echo h($reg->convention->name ?? $reg->Conventions->name); ?></td>
 											<td><?php echo h($reg->season_year); ?></td>
-											<td><?php echo date('M d, Y', strtotime($reg->created)); ?></td>
+											<td><?php echo safe_date('M d, Y', strtotime($reg->created)); ?></td>
 										</tr>
 									<?php endforeach; ?>
 								</tbody>

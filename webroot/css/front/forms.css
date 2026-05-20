@@ -282,7 +282,7 @@ p.simpletext {
   float: left;
   border-bottom: 1px solid #000;
   padding: 0px 5px;border-top: 1px solid #000;
-  font-weight: 600;
+  text-align: left !important;
 }
 
 .wraprow {
@@ -418,3 +418,29 @@ p.simpletext {
   font-size: 14px;
 }
 }
+/* Force left alignment for all evaluation form labels */
+.seventycolom {
+  text-align: left !important;
+}
+
+/* Keep normal text weight across the form body */
+.classform-container .checkboxrow label,
+.classform-container .tableheader,
+.classform-container .simpletext,
+.classform-container .EVALUATIONtable,
+.classform-container .EVALUATIONtable .wraprow,
+.classform-container .EVALUATIONtable .seventycolom,
+.classform-container .EVALUATIONtable .halfcom,
+.classform-container .EVALUATIONtable .comments,
+.classform-container .footerpart .judgename {
+  font-weight: 400 !important;
+}
+
+/* Bold only the requested elements */
+.classform-container .EVALUATIONtable .fulcolm,
+.classform-container .EVALUATIONtable .fulcolm b,
+.classform-container .EVALUATIONtable .totals .seventycolom b,
+.classform-container .footerpart .judgename b {
+  font-weight: 700 !important;
+}
+

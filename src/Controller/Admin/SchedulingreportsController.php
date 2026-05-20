@@ -9,11 +9,10 @@ use Cake\Core\Configure\Engine\PhpConfig;
 class SchedulingreportsController extends AppController {
 
     public $paginate = ['limit' => 50, 'order' => ['Schedulings.name' => 'asc']];
-    public $components = array('PImage');
 
     //public $helpers = array('Javascript', 'Ajax');
 
-    public function initialize() {
+    public function initialize(): void {
         parent::initialize();
         $this->loadComponent('Flash');
         $action = $this->request->getParam('action');
@@ -36,6 +35,7 @@ class SchedulingreportsController extends AppController {
 		$this->Events = $this->loadModel('Events');
 		$this->Schedulings = $this->loadModel('Schedulings');
 		$this->Schedulingtimings = $this->loadModel('Schedulingtimings');
+		$this->Users = $this->loadModel('Users');
     }
 	
 	/* By Students */
@@ -149,6 +149,11 @@ class SchedulingreportsController extends AppController {
 				$arrStudentsCS[] = $studentEV->student_id;
 			}
 		}
+		if (empty($arrStudentsCS)) {
+			$this->set('arrStudentSorted', []);
+			$this->set('arrStudentNames', []);
+			return;
+		}
 		$arrStudentsCSImploded = implode(',',$arrStudentsCS);
 		//echo $arrStudentsCSImploded;exit;
 		
@@ -218,6 +223,11 @@ class SchedulingreportsController extends AppController {
 			{
 				$arrStudentsCS[] = $studentEV->student_id;
 			}
+		}
+		if (empty($arrStudentsCS)) {
+			$this->set('arrStudentSorted', []);
+			$this->set('arrStudentNames', []);
+			return;
 		}
 		$arrStudentsCSImploded = implode(',',$arrStudentsCS);
 		
@@ -1206,7 +1216,7 @@ class SchedulingreportsController extends AppController {
 			->first();
 
 		if (!$record) {
-			$record = $this->Schedulingprogramnotes->newEntity();
+			$record = $this->Schedulingprogramnotes->newEntity([]);
 			$record->conventionseasons_id = $conventionSeasonId;
 		}
 

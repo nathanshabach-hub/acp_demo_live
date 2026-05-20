@@ -15,7 +15,7 @@ class ConventionsController extends AppController {
 
     //public $helpers = array('Javascript', 'Ajax');
 
-    public function initialize() {
+    public function initialize(): void {
         parent::initialize();
         $this->loadComponent('Flash');
         $action = $this->request->getParam('action');
@@ -190,7 +190,7 @@ class ConventionsController extends AppController {
 		global $conventionTypeDD;
 		$this->set('conventionTypeDD', $conventionTypeDD);
 		
-        $conventions = $this->Conventions->newEntity();
+        $conventions = $this->Conventions->newEntity([]);
         if ($this->request->is('post')) {
 			
 			//$this->prx($this->request->getData());
@@ -366,7 +366,7 @@ class ConventionsController extends AppController {
 		$seasonsDD = $this->Seasons->find()->where([])->order(['Seasons.season_year' => 'ASC'])->all()->combine('id', 'season_year')->toArray();
 		$this->set('seasonsDD', $seasonsDD);
 		
-        $conventionseasons = $this->Conventionseasons->newEntity();
+        $conventionseasons = $this->Conventionseasons->newEntity([]);
         if ($this->request->is('post')) {
 			
 			//$this->prx($this->request->getData());
@@ -640,27 +640,103 @@ class ConventionsController extends AppController {
 			$this->redirect(['controller' => 'conventions', 'action' => 'index']);
 		}
 		
-		// here we need to apply a condition based on convention type
-		//Event Selection section
-		//If ConventionType = 0 then  Filter= All Event Type visible
-		//If ConventionType = 1 then Filter= Only Event Type 1 & 2 visible
-		
-		$condEvents = array();
-		if($conventionD->convention_type == 0 || $conventionD->convention_type == 3)
+		// Build import query based on convention type.
+		$eventsQuery = $this->Events->find();
+		$conventionType = (int)$conventionD->convention_type;
+
+		if ($conventionType === 0)
 		{
-			// no condition apply
+			// In Person: all regular events except U11-only group.
+			$eventsQuery->where(["(Events.event_grp_name <> '5' OR Events.event_grp_name IS NULL OR Events.event_grp_name = '')"]);
 		}
-		if($conventionD->convention_type == 1)
+		elseif ($conventionType === 1)
 		{
-			$condEvents[] = "(Events.event_type = '1' OR Events.event_type = '2')";
+			// Online: only upload-capable event types, and never U11-only group.
+			$eventsQuery->where(["(Events.event_type = '1' OR Events.event_type = '2')"]);
+			$eventsQuery->where(["(Events.event_grp_name <> '5' OR Events.event_grp_name IS NULL OR Events.event_grp_name = '')"]);
 		}
-		
-		// to get entire list of all events
-		$eventsAll = $this->Events->find()->where($condEvents)->order(["Events.id" => "ASC"])->all();
+		elseif ($conventionType === 3)
+		{
+			// Small Convention: import only event IDs listed in the dedicated CSV.
+			$projectRoot = dirname(dirname(dirname(__DIR__)));
+			$candidateCsvPaths = array(
+				$projectRoot . '/Events List 2026 Small Convention.csv',
+				BASE_PATH . '/Events List 2026 Small Convention.csv',
+				'/var/www/html/Events List 2026 Small Convention.csv',
+				$projectRoot . '/webroot/files/csv_files/Events List 2026 Small Convention.csv',
+			);
+
+			$csvFilePath = '';
+			foreach($candidateCsvPaths as $candidateCsvPath)
+			{
+				if($candidateCsvPath && file_exists($candidateCsvPath) && is_readable($candidateCsvPath))
+				{
+					$csvFilePath = $candidateCsvPath;
+					break;
+				}
+			}
+			$smallConventionEventIds = array();
+
+			if ($csvFilePath === '')
+			{
+				$this->Flash->error('Small Convention CSV not found. Checked: ' . implode(' | ', $candidateCsvPaths));
+				$this->redirect(['controller' => 'conventions', 'action' => 'events',$slug_convention_season,$slug_convention]);
+				return;
+			}
+
+			if (($handle = fopen($csvFilePath, 'r')) !== false)
+			{
+				$rowNo = 0;
+				while (($row = fgetcsv($handle, 2000, ',')) !== false)
+				{
+					$rowNo++;
+					if ($rowNo === 1)
+					{
+						continue;
+					}
+
+					if (!isset($row[0]))
+					{
+						continue;
+					}
+
+					$eventIdNumber = trim((string)$row[0]);
+					if ($eventIdNumber === '')
+					{
+						continue;
+					}
+
+					$smallConventionEventIds[$eventIdNumber] = $eventIdNumber;
+
+					// Normalize numeric IDs such as 001 -> 1 to match DB values.
+					if (ctype_digit($eventIdNumber))
+					{
+						$normalizedId = (string)((int)$eventIdNumber);
+						if ($normalizedId !== '')
+						{
+							$smallConventionEventIds[$normalizedId] = $normalizedId;
+						}
+					}
+				}
+				fclose($handle);
+			}
+
+			if (count($smallConventionEventIds) === 0)
+			{
+				$this->Flash->error('No event IDs found in Small Convention CSV.');
+				$this->redirect(['controller' => 'conventions', 'action' => 'events',$slug_convention_season,$slug_convention]);
+				return;
+			}
+
+			$eventsQuery->where(['Events.event_id_number IN' => array_values($smallConventionEventIds)]);
+		}
+
+		// Get filtered event list.
+		$eventsAll = $eventsQuery->order(["Events.id" => "ASC"])->all();
 		
 		foreach($eventsAll as $event)
 		{
-			$conventionseasonevents = $this->Conventionseasonevents->newEntity();
+			$conventionseasonevents = $this->Conventionseasonevents->newEntity([]);
 			$dataCSE = $this->Conventionseasonevents->patchEntity($conventionseasonevents, $this->request->getData());
 
 			$dataCSE->slug 						= "cse-".$convention_id."-".$season_id."-".$event->id."-".time();
@@ -750,8 +826,12 @@ class ConventionsController extends AppController {
 	public function locksubmissions($convention_season_slug = null, $convention_slug = null) {
 		$convSeasonD = $this->Conventionseasons->find()->where(['Conventionseasons.slug' => $convention_season_slug])->first();
 		if ($convSeasonD) {
-			$this->Conventionseasons->updateAll(['submissions_open' => '0'], ['slug' => $convention_season_slug]);
-			$this->Flash->success('Submissions locked. Users can no longer submit or upload.');
+			try {
+				$this->Conventionseasons->updateAll(['submissions_open' => '0'], ['slug' => $convention_season_slug]);
+				$this->Flash->success('Submissions locked. Users can no longer submit or upload.');
+			} catch (\Throwable $exception) {
+				$this->Flash->error('Submission lock feature is unavailable until the database schema is updated.');
+			}
 		} else {
 			$this->Flash->error('Convention season not found.');
 		}
@@ -761,8 +841,12 @@ class ConventionsController extends AppController {
 	public function unlocksubmissions($convention_season_slug = null, $convention_slug = null) {
 		$convSeasonD = $this->Conventionseasons->find()->where(['Conventionseasons.slug' => $convention_season_slug])->first();
 		if ($convSeasonD) {
-			$this->Conventionseasons->updateAll(['submissions_open' => '1'], ['slug' => $convention_season_slug]);
-			$this->Flash->success('Submissions unlocked. Users can now submit and upload.');
+			try {
+				$this->Conventionseasons->updateAll(['submissions_open' => '1'], ['slug' => $convention_season_slug]);
+				$this->Flash->success('Submissions unlocked. Users can now submit and upload.');
+			} catch (\Throwable $exception) {
+				$this->Flash->error('Submission unlock feature is unavailable until the database schema is updated.');
+			}
 		} else {
 			$this->Flash->error('Convention season not found.');
 		}
@@ -919,7 +1003,7 @@ class ConventionsController extends AppController {
 		
 		$this->set('title', ADMIN_TITLE . 'Add Room - '.$conventionD->name);
 		
-        $conventionrooms = $this->Conventionrooms->newEntity();
+        $conventionrooms = $this->Conventionrooms->newEntity([]);
         if ($this->request->is('post')) {
 			
 			//$this->prx($this->request->getData());
@@ -1177,7 +1261,7 @@ class ConventionsController extends AppController {
 		$this->set('convSeasEventDD', $convSeasEventDD);
 		
 		// Set empty entity and no pre-selected events for the add form
-		$this->set('conventionseasonroomevents', $this->Conventionseasonroomevents->newEntity());
+		$this->set('conventionseasonroomevents', $this->Conventionseasonroomevents->newEntity([]));
 		$this->set('convRoomIDS', []);
 
         if ($this->request->is('post')) {
@@ -1191,7 +1275,7 @@ class ConventionsController extends AppController {
 			{
 				$event_ids_implode = implode(",",$event_ids);
 				
-				$conventionseasonroomevents = $this->Conventionseasonroomevents->newEntity();
+				$conventionseasonroomevents = $this->Conventionseasonroomevents->newEntity([]);
 				$data = $this->Conventionseasonroomevents->patchEntity($conventionseasonroomevents, $this->request->getData());
 				
 				$slug = "conv-season-room-event-".time()."-".rand(100,10000);

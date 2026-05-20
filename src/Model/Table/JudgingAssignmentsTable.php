@@ -6,7 +6,7 @@ use Cake\Validation\Validator;
 
 class JudgingAssignmentsTable extends Table
 {
-    public function initialize(array $config)
+    public function initialize(array $config): void
     {
         parent::initialize($config);
         $this->setTable('judging_assignments');

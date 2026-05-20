@@ -80,11 +80,11 @@
             <div class="cs-meta">
                 <div class="m">
                     <span class="lbl">Reg. Start</span>
-                    <span class="val"><?php echo date('M d, Y', strtotime($datarecord->registration_start_date)); ?></span>
+                    <span class="val"><?php echo safe_date('M d, Y', strtotime($datarecord->registration_start_date)); ?></span>
                 </div>
                 <div class="m">
                     <span class="lbl">Reg. End</span>
-                    <span class="val"><?php echo date('M d, Y', strtotime($datarecord->registration_end_date)); ?></span>
+                    <span class="val"><?php echo safe_date('M d, Y', strtotime($datarecord->registration_end_date)); ?></span>
                 </div>
                 <div class="m">
                     <span class="lbl">Student (<?php echo CURR; ?>)</span>

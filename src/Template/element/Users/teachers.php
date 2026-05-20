@@ -22,14 +22,12 @@
                 <table class="table table-bordered table-striped table-condensed cf">
                     <thead class="cf ajshort">
                         <tr>
-                            <th class="sorting_paging"><?php echo $this->Paginator->sort('title', 'Title'); ?></th>
                             <th class="sorting_paging"><?php echo $this->Paginator->sort('first_name', 'First Name'); ?></th>
                             <th class="sorting_paging"><?php echo $this->Paginator->sort('last_name', 'Surname'); ?></th>
                             <th class="sorting_paging"><?php echo $this->Paginator->sort('email_address', 'Email Address'); ?></th>
                             <th class="sorting_paging"><?php echo $this->Paginator->sort('gender', 'Gender'); ?></th>
                             <th class="sorting_paging"><?php echo $this->Paginator->sort('is_judge', 'Judge?'); ?></th>
-                            <th class="sorting_paging"><?php echo $this->Paginator->sort('created', 'Created'); ?></th>
-                            <th class="sorting_paging"><?php echo $this->Paginator->sort('activation_status', 'Verified'); ?></th>
+                            <th class="sorting_paging"><?php echo $this->Paginator->sort('created', 'Sign Up Date'); ?></th>
                             <th class="sorting_paging"><?php echo $this->Paginator->sort('status', 'Status'); ?></th>
                             <th class="action_dvv"><i class=" fa fa-gavel"></i> Action</th>
                         </tr>
@@ -38,23 +36,13 @@
                         <?php foreach ($users as $datarecord) { ?>
                             <?php //pr($datarecord); exit;?> 
                             <tr>
-                                <td data-title="Title"><?php echo $datarecord->title;?></td>
                                 <td data-title="First Name"><?php echo $datarecord->first_name;?></td>
                                 <td data-title="Surname"><?php echo $datarecord->last_name;?></td>
                                 <td data-title="Email Address"><?php echo $datarecord->email_address;?></td>
-                                <td data-title="Gender"><?php echo $datarecord->gender;?></td>
+                                <td data-title="Gender"><?php echo $datarecord->gender ? $datarecord->gender : 'N/A'; ?></td>
                                 <td data-title="Judge?"><?php if($datarecord->is_judge == 1) echo 'Yes'; else echo 'No'; ?></td>
 								
-                                <td data-title="Created"><?php echo date('M d, Y', strtotime($datarecord->created)); ?></td>
-                                
-								<td data-title="Verified">
-									<?php
-									if($datarecord->status != 2)
-									{
-										if($datarecord->activation_status)  echo 'Verified'; else  echo 'Not yet verified';
-									}
-									?>
-								</td>
+							<td data-title="Sign Up Date"><?php echo safe_date('M d, Y', strtotime($datarecord->created)); ?></td>
 								
 								<td data-title="Status">
 									<?php

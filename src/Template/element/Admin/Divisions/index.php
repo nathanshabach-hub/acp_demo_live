@@ -51,7 +51,7 @@ $this->Divisions = TableRegistry::getTableLocator()->get('Divisions');
 								?>
 								</td>
 								<td data-title="Max. Events"><?php echo $datarecord->max_events;?></td>
-                                <td data-title="Created"><?php echo date('M d, Y', strtotime($datarecord->created)); ?></td>
+                                <td data-title="Created"><?php echo safe_date('M d, Y', strtotime($datarecord->created)); ?></td>
                                 <td data-title="Last Modified">
 								<?php 
 								if($datarecord->modified == NULL)
@@ -60,7 +60,7 @@ $this->Divisions = TableRegistry::getTableLocator()->get('Divisions');
 								}
 								else
 								{
-									echo date('M d, Y', strtotime($datarecord->modified));
+									echo safe_date('M d, Y', strtotime($datarecord->modified));
 								}
 								
 								?>

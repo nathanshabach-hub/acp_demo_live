@@ -13,7 +13,7 @@ class EventcategoriesController extends AppController {
 
     //public $helpers = array('Javascript', 'Ajax');
 
-    public function initialize() {
+    public function initialize(): void {
         parent::initialize();
         $this->loadComponent('Flash');
         $action = $this->request->getParam('action');
@@ -133,7 +133,7 @@ class EventcategoriesController extends AppController {
         $this->set('manageEvents', '1');
         $this->set('manageEventcategories', '1');
 		
-        $eventcategories = $this->Eventcategories->newEntity();
+        $eventcategories = $this->Eventcategories->newEntity([]);
         if ($this->request->is('post')) {
 			
 			//$this->prx($this->request->getData());

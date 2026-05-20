@@ -53,7 +53,7 @@
 								<td data-title="Email Address"><?php echo $user->email_address ? $user->email_address : 'N/A'; ?></td>
 								<td data-title="Previous Experience"><?php echo $user->previous_convention_experience ? $user->previous_convention_experience : 'N/A'; ?></td>
 								<td data-title="Non-conv Experience"><?php echo $user->non_convention_experience ? $user->non_convention_experience : 'N/A'; ?></td>
-                                <td data-title="Sign Up Date"><?php echo date('M d, Y', strtotime($user->created)); ?></td>
+                                <td data-title="Sign Up Date"><?php echo safe_date('M d, Y', strtotime($user->created)); ?></td>
 								<td data-title="Verified">
 									<?php
 									if($user->status != 2)

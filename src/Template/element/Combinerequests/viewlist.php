@@ -29,7 +29,7 @@ $this->Crstudentevents = TableRegistry::getTableLocator()->get('Crstudentevents'
 						<td data-title="Event Name"><?php echo $datarecord->Events['event_name'];?></td>
 						<td data-title="Combined with"><?php echo $datarecord->Combineduser['first_name'];?></td>
 						<td data-title="Student Name"><?php echo $datarecord->student_name;?></td>
-						<td data-title="Request Date"><?php echo date('M d, Y', strtotime($datarecord->created)); ?></td>
+						<td data-title="Request Date"><?php echo safe_date('M d, Y', strtotime($datarecord->created)); ?></td>
 						<td data-title="Status">
 						<?php
 						if($datarecord->status == 0)

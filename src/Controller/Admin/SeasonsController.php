@@ -13,7 +13,7 @@ class SeasonsController extends AppController {
 
     //public $helpers = array('Javascript', 'Ajax');
 
-    public function initialize() {
+    public function initialize(): void {
         parent::initialize();
         $this->loadComponent('Flash');
         $action = $this->request->getParam('action');
@@ -161,7 +161,7 @@ class SeasonsController extends AppController {
             $this->set('seasonAdd', '1');
         }
 		
-        $seasons = $this->Seasons->newEntity();
+        $seasons = $this->Seasons->newEntity([]);
         if ($this->request->is('post')) {
 			
 			//$this->prx($this->request->getData());

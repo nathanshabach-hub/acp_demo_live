@@ -1,0 +1,404 @@
+Event ID Number,Division Name,Event Name,Upload Type,Report ,Context Box,Score Sheet,Additional Documents,Event Type,EventGrpName,EventGender,GroupEvent,MinNo,MaxNo,TeamEvent,SetupTime,RoundTime,JudgingTime,EventKindId,HasToBeConsecutive,CompetitorsPerRound,NeedsSchedule
+001,Academics,Checkers U16,Nil,No,No,No,No,0,2,,FALSE,1,1,FALSE,0,10,0,Elimination,FALSE,0,1
+002,Academics,Chess U16,Nil,No,No,No,No,0,2,,FALSE,1,1,FALSE,0,20,0,Elimination,FALSE,0,1
+003,Academics,Spelling U16,Nil,No,No,No,No,0,2,,FALSE,1,1,TRUE,5,40,5,Sequential,TRUE,0,1
+005,Academics,Science Collection U16,Nil,Yes,No,No,No,0,2,,TRUE,1,2,FALSE,0,0,0,Judged,FALSE,0,0
+009,Academics,Social Studies Collection U16,Document ,Yes,No,No,No,0,2,,TRUE,1,2,FALSE,0,0,0,Judged,FALSE,0,0
+012,Academics,Poetry Writing U16,Document ,No,No,No,No,2,2,,FALSE,1,1,FALSE,0,0,4,Pre-Judged,FALSE,0,0
+013,Academics,Short Story Writing U16,Document ,No,No,No,No,2,2,,FALSE,1,1,FALSE,0,0,0,Pre-Judged,FALSE,0,0
+014,Academics,Book Report U16,Document ,Yes,No,No,No,2,2,,FALSE,1,1,FALSE,0,0,0,Pre-Judged,FALSE,0,0
+051,Academics,Checkers OPEN,Nil,No,No,No,No,0,4,,FALSE,1,1,FALSE,0,10,0,Elimination,FALSE,0,1
+052,Academics,Chess OPEN,Nil,No,No,No,No,0,4,,FALSE,1,1,FALSE,0,20,0,Elimination,FALSE,0,1
+053,Academics,Spelling OPEN,Nil,No,No,No,No,0,4,,FALSE,1,1,TRUE,5,40,5,Sequential,TRUE,0,1
+054,Academics,PACE Bowl OPEN,Nil,No,No,No,No,2,4,,TRUE,4,4,TRUE,0,20,1,Elimination,FALSE,0,1
+055,Academics,Science Collection OPEN,Nil,Yes,No,No,No,0,4,,TRUE,1,2,FALSE,0,0,0,Judged,FALSE,0,0
+056,Academics,Science Research OPEN,Nil,Yes,No,No,No,2,4,,TRUE,1,2,FALSE,0,0,0,Judged,FALSE,0,0
+057,Academics,Science Engineering OPEN,Nil,Yes,No,No,No,0,4,,TRUE,1,2,FALSE,0,0,0,Judged,FALSE,0,0
+058,Academics,Science Theoretical OPEN,Nil,Yes,No,No,No,2,4,,TRUE,1,2,FALSE,0,0,0,Judged,FALSE,0,0
+059,Academics,Social Studies Collection OPEN,Document ,No,No,No,No,0,4,,TRUE,1,2,FALSE,0,0,0,Judged,FALSE,0,0
+060,Academics,Social Studies Research OPEN,Document ,No,No,No,No,2,4,,TRUE,1,2,FALSE,0,0,0,Judged,FALSE,0,0
+061,Academics,Persuasive Essay Writing OPEN,Document ,No,No,No,Yes,2,4,,FALSE,1,1,FALSE,0,0,0,Pre-Judged,FALSE,0,0
+062,Academics,Poetry Writing OPEN,Document ,No,No,No,No,2,4,,FALSE,1,1,FALSE,0,0,4,Pre-Judged,FALSE,0,0
+063,Academics,Short Story Writing OPEN,Document ,No,No,No,No,2,4,,FALSE,1,1,FALSE,0,0,0,Pre-Judged,FALSE,0,0
+064,Academics,Book Report OPEN,Document ,No,No,No,No,2,4,,FALSE,1,1,FALSE,0,0,0,Pre-Judged,FALSE,0,0
+070,Physical Education - Athletics,100m (Male) U11,Nil,No,No,No,No,0,5,M,FALSE,1,1,FALSE,0,1,0,Group/Heats,TRUE,8,0
+071,Physical Education - Athletics,200m (Male) U11,Nil,No,No,No,No,0,5,M,FALSE,1,1,FALSE,0,1,0,Group/Heats,TRUE,8,0
+072,Physical Education - Athletics,400m (Male) U11,Nil,No,No,No,No,0,5,M,FALSE,1,1,FALSE,0,1,0,Group/Heats,TRUE,8,0
+073,Physical Education - Athletics,4 x 100m Relay (Male) U11,Nil,No,No,No,No,0,5,M,TRUE,4,5,TRUE,0,1,0,Group/Heats,TRUE,8,0
+074,Physical Education - Sports,Football Kick (Male) U11,Nil,No,No,No,No,0,5,M,FALSE,1,1,FALSE,0,1,0,Sequential,FALSE,0,0
+075,Physical Education - Sports,Soccer Kick (Male) U11,Nil,No,No,No,No,0,5,M,FALSE,1,1,FALSE,0,1,0,Sequential,FALSE,0,0
+076,Physical Education - Sports,Netball Shoot (Male) U11,Nil,No,No,No,No,0,5,M,FALSE,1,1,FALSE,0,1,0,Sequential,FALSE,0,0
+100,Physical Education,100m (Male) U14,Nil,No,No,No,No,0,1,M,FALSE,1,1,FALSE,0,1,0,Group/Heats,TRUE,8,0
+101,Physical Education,200m (Male) U14,Nil,No,No,No,No,0,1,M,FALSE,1,1,FALSE,0,1,0,Group/Heats,TRUE,8,0
+102,Physical Education,400m (Male) U14,Nil,No,No,No,No,0,1,M,FALSE,1,1,FALSE,0,1,0,Group/Heats,TRUE,8,0
+103,Physical Education,800m (Male) U14,Nil,No,No,No,No,0,1,M,FALSE,1,1,FALSE,0,2,0,Group/Heats,TRUE,8,0
+104,Physical Education,1500m (Male) U14,Nil,No,No,No,No,0,1,M,FALSE,1,1,FALSE,0,9,0,Group/Heats,TRUE,20,0
+105,Physical Education,4 x 100m Relay (Male) U14,Nil,No,No,No,No,0,1,M,TRUE,4,5,TRUE,0,1,0,Group/Heats,TRUE,8,0
+106,Physical Education,Long Jump (Male) U14,Nil,No,No,No,No,0,1,M,FALSE,1,1,FALSE,0,3,0,Sequential,FALSE,0,0
+109,Exhibits,Table Tennis - Singles (Male) U14,Nil,No,No,No,No,0,1,M,FALSE,1,1,FALSE,0,5,0,Elimination,FALSE,0,1
+110,Exhibits,Table Tennis - Doubles (Male) U14,Nil,No,No,No,No,0,1,M,TRUE,2,2,TRUE,0,5,3,Elimination,FALSE,0,1
+111,Exhibits,Football Kick (Male) U14,Nil,No,No,No,No,0,1,M,FALSE,1,1,FALSE,0,5,1,Sequential,FALSE,0,0
+112,Exhibits,Soccer Kick (Male) U14,Nil,No,No,No,No,0,1,M,FALSE,1,1,FALSE,0,9,0,Sequential,FALSE,0,0
+113,Exhibits,Netball Shoot (Male) U14,Nil,No,No,No,No,0,1,M,FALSE,1,1,FALSE,0,5,0,Sequential,FALSE,0,0
+130,Physical Education,100m (Male) U17,Nil,No,No,No,No,0,3,M,FALSE,1,1,FALSE,0,1,0,Group/Heats,TRUE,8,0
+131,Physical Education,200m (Male) U17,Nil,No,No,No,No,0,3,M,FALSE,1,1,FALSE,0,1,0,Group/Heats,TRUE,8,0
+132,Physical Education,400m (Male) U17,Nil,No,No,No,No,0,3,M,FALSE,1,1,FALSE,0,1,0,Group/Heats,TRUE,8,0
+133,Physical Education,800m (Male) U17,Nil,No,No,No,No,0,3,M,FALSE,1,1,FALSE,0,2,0,Group/Heats,TRUE,8,0
+134,Physical Education,1500m (Male) U17,Nil,No,No,No,No,0,3,M,FALSE,1,1,FALSE,0,9,0,Group/Heats,TRUE,20,0
+135,Physical Education,4 x 100m Relay (Male) U17,Nil,No,No,No,No,0,3,M,TRUE,4,5,TRUE,0,1,0,Group/Heats,TRUE,8,0
+136,Physical Education,Long Jump (Male) U17,Nil,No,No,No,No,0,3,M,FALSE,1,1,FALSE,0,3,0,Sequential,FALSE,0,0
+137,Physical Education,Shot Put (Male) U17,Nil,No,No,No,No,0,3,M,FALSE,1,1,FALSE,0,5,0,Sequential,FALSE,0,0
+138,Physical Education,Discus (Male) U17,Nil,No,No,No,No,0,3,M,FALSE,1,1,FALSE,0,5,1,Sequential,FALSE,0,0
+139,Exhibits,Table Tennis - Singles (Male) U17,Nil,No,No,No,No,0,3,M,FALSE,1,1,FALSE,0,5,0,Elimination,FALSE,0,1
+140,Exhibits,Table Tennis - Doubles (Male) U17,Nil,No,No,No,No,0,3,M,TRUE,2,2,TRUE,0,5,3,Elimination,FALSE,0,1
+141,Exhibits,Football Kick (Male) U17,Nil,No,No,No,No,0,3,M,FALSE,1,1,FALSE,0,5,1,Sequential,FALSE,0,0
+142,Exhibits,Soccer Kick (Male) U17,Nil,No,No,No,No,0,3,M,FALSE,1,1,FALSE,0,9,0,Sequential,FALSE,0,0
+143,Exhibits,Netball Shoot (Male) U17,Nil,No,No,No,No,0,3,M,FALSE,1,1,FALSE,0,5,0,Sequential,FALSE,0,0
+160,Physical Education,100m (Male) OPEN,Nil,No,No,No,No,0,4,M,FALSE,1,1,FALSE,0,1,0,Group/Heats,TRUE,8,0
+161,Physical Education,200m (Male) OPEN,Nil,No,No,No,No,0,4,M,FALSE,1,1,FALSE,0,1,0,Group/Heats,TRUE,8,0
+162,Physical Education,400m (Male) OPEN,Nil,No,No,No,No,0,4,M,FALSE,1,1,FALSE,0,1,0,Group/Heats,TRUE,8,0
+163,Physical Education,800m (Male) OPEN,Nil,No,No,No,No,0,4,M,FALSE,1,1,FALSE,0,2,0,Group/Heats,TRUE,8,0
+164,Physical Education,1500m (Male) OPEN,Nil,No,No,No,No,0,4,M,FALSE,1,1,FALSE,0,9,0,Group/Heats,TRUE,20,0
+165,Physical Education,4 x 100m Relay (Male) OPEN,Nil,No,No,No,No,0,4,M,TRUE,4,5,TRUE,0,1,0,Group/Heats,TRUE,8,0
+166,Physical Education,Long Jump (Male) OPEN,Nil,No,No,No,No,0,4,M,FALSE,1,1,FALSE,0,3,0,Sequential,FALSE,0,0
+167,Physical Education,Shot Put (Male) OPEN,Nil,No,No,No,No,0,4,M,FALSE,1,1,FALSE,0,5,0,Sequential,FALSE,0,0
+168,Physical Education,Discus (Male) OPEN,Nil,No,No,No,No,0,4,M,FALSE,1,1,FALSE,0,5,1,Sequential,FALSE,0,0
+169,Exhibits,Table Tennis - Singles (Male) OPEN,Nil,No,No,No,No,0,4,M,FALSE,1,1,FALSE,0,5,0,Elimination,FALSE,0,1
+170,Exhibits,Table Tennis - Doubles (Male) OPEN,Nil,No,No,No,No,0,4,M,TRUE,2,2,TRUE,0,5,3,Elimination,FALSE,0,1
+171,Exhibits,Football Kick (Male) OPEN,Nil,No,No,No,No,0,4,M,FALSE,1,1,FALSE,0,5,1,Sequential,FALSE,0,0
+172,Exhibits,Soccer Kick (Male) OPEN,Nil,No,No,No,No,0,4,M,FALSE,1,1,FALSE,0,9,0,Sequential,FALSE,0,0
+173,Exhibits,Netball Shoot (Male) OPEN,Nil,No,No,No,No,0,4,M,FALSE,1,1,FALSE,0,5,0,Sequential,FALSE,0,0
+174,Exhibits,Basketball (Male) OPEN,Nil,No,No,No,No,0,4,M,TRUE,5,10,TRUE,1,20,0,Elimination,FALSE,0,1
+175,Exhibits,Tennis - singles (Male) OPEN,Nil,No,No,No,No,0,4,M,FALSE,1,1,FALSE,0,6,4,Elimination,FALSE,0,1
+176,Exhibits,Futsal (Male) OPEN,Nil,No,No,No,No,0,4,M,TRUE,5,10,TRUE,1,20,0,Elimination,FALSE,0,1
+177,Exhibits,Volleyball (Male) OPEN,Nil,No,No,No,No,0,4,M,TRUE,6,10,FALSE,1,20,0,Elimination,FALSE,0,1
+180,Physical Education - Athletics,100m (Female) U11,Nil,No,No,No,No,0,5,F,FALSE,1,1,FALSE,0,1,0,Group/Heats,TRUE,8,0
+181,Physical Education - Athletics,200m (Female) U11,Nil,No,No,No,No,0,5,F,FALSE,1,1,FALSE,0,1,0,Group/Heats,TRUE,8,0
+182,Physical Education - Athletics,400m (Female) U11,Nil,No,No,No,No,0,5,F,FALSE,1,1,FALSE,0,1,0,Group/Heats,TRUE,8,0
+183,Physical Education - Athletics,4 x 100m Relay (Female) U11,Nil,No,No,No,No,0,5,F,TRUE,4,5,TRUE,0,1,0,Group/Heats,TRUE,8,0
+184,Physical Education - Sports,Football Kick (Female) U11,Nil,No,No,No,No,0,5,F,FALSE,1,1,FALSE,0,1,0,Sequential,FALSE,0,0
+185,Physical Education - Sports,Soccer Kick (Female) U11,Nil,No,No,No,No,0,5,F,FALSE,1,1,FALSE,0,1,0,Sequential,FALSE,0,0
+186,Physical Education - Sports,Netball Shoot (Female) U11,Nil,No,No,No,No,0,5,F,FALSE,1,1,FALSE,0,1,0,Sequential,FALSE,0,0
+200,Physical Education,100m (Female) U14,Nil,No,No,No,No,0,1,F,FALSE,1,1,FALSE,0,1,0,Group/Heats,TRUE,8,0
+201,Physical Education,200m (Female) U14,Nil,No,No,No,No,0,1,F,FALSE,1,1,FALSE,0,1,0,Group/Heats,TRUE,8,0
+202,Physical Education,400m (Female) U14,Nil,No,No,No,No,0,1,F,FALSE,1,1,FALSE,0,1,0,Group/Heats,TRUE,8,0
+203,Physical Education,800m (Female) U14,Nil,No,No,No,No,0,1,F,FALSE,1,1,FALSE,0,2,0,Group/Heats,TRUE,8,0
+204,Physical Education,1500m (Female) U14,Nil,No,No,No,No,0,1,F,FALSE,1,1,FALSE,0,9,0,Group/Heats,TRUE,20,0
+205,Physical Education,4 x 100m Relay (Female) U14,Nil,No,No,No,No,0,1,F,TRUE,4,5,TRUE,0,1,0,Group/Heats,TRUE,8,0
+206,Physical Education,Long Jump (Female) U14,Nil,No,No,No,No,0,1,F,FALSE,1,1,FALSE,0,3,0,Sequential,FALSE,0,0
+209,Exhibits,Table Tennis - Singles (Female) U14,Nil,No,No,No,No,0,1,F,FALSE,1,1,FALSE,0,5,0,Elimination,FALSE,0,1
+210,Exhibits,Table Tennis - Doubles (Female) U14,Nil,No,No,No,No,0,1,F,TRUE,2,2,TRUE,0,5,3,Elimination,FALSE,0,1
+211,Exhibits,Football Kick (Female) U14,Nil,No,No,No,No,0,1,F,FALSE,1,1,FALSE,0,5,1,Sequential,FALSE,0,0
+212,Exhibits,Soccer Kick (Female) U14,Nil,No,No,No,No,0,1,F,FALSE,1,1,FALSE,0,9,0,Sequential,FALSE,0,0
+213,Exhibits,Netball Shoot (Female) U14,Nil,No,No,No,No,0,1,F,FALSE,1,1,FALSE,0,5,0,Sequential,FALSE,0,0
+230,Physical Education,100m (Female) U17,Nil,No,No,No,No,0,3,F,FALSE,1,1,FALSE,0,1,0,Group/Heats,TRUE,8,0
+231,Physical Education,200m (Female) U17,Nil,No,No,No,No,0,3,F,FALSE,1,1,FALSE,0,1,0,Group/Heats,TRUE,8,0
+232,Physical Education,400m (Female) U17,Nil,No,No,No,No,0,3,F,FALSE,1,1,FALSE,0,1,0,Group/Heats,TRUE,8,0
+233,Physical Education,800m (Female) U17,Nil,No,No,No,No,0,3,F,FALSE,1,1,FALSE,0,2,0,Group/Heats,TRUE,8,0
+234,Physical Education,1500m (Female) U17,Nil,No,No,No,No,0,3,F,FALSE,1,1,FALSE,0,9,0,Group/Heats,TRUE,20,0
+235,Physical Education,4 x 100m Relay (Female) U17,Nil,No,No,No,No,0,3,F,TRUE,4,5,TRUE,0,1,0,Group/Heats,TRUE,8,0
+236,Physical Education,Long Jump (Female) U17,Nil,No,No,No,No,0,3,F,FALSE,1,1,FALSE,0,3,0,Sequential,FALSE,0,0
+237,Physical Education,Shot Put (Female) U17,Nil,No,No,No,No,0,3,F,FALSE,1,1,FALSE,0,5,0,Sequential,FALSE,0,0
+238,Physical Education,Discus (Female) U17,Nil,No,No,No,No,0,3,F,FALSE,1,1,FALSE,0,5,1,Sequential,FALSE,0,0
+239,Exhibits,Table Tennis - Singles (Female) U17,Nil,No,No,No,No,0,3,F,FALSE,1,1,FALSE,0,5,0,Elimination,FALSE,0,1
+240,Exhibits,Table Tennis - Doubles (Female) U17,Nil,No,No,No,No,0,3,F,TRUE,2,2,TRUE,0,5,3,Elimination,FALSE,0,1
+241,Exhibits,Football Kick (Female) U17,Nil,No,No,No,No,0,3,F,FALSE,1,1,FALSE,0,5,1,Sequential,FALSE,0,0
+242,Exhibits,Soccer Kick (Female) U17,Nil,No,No,No,No,0,3,F,FALSE,1,1,FALSE,0,9,0,Sequential,FALSE,0,0
+243,Exhibits,Netball Shoot (Female) U17,Nil,No,No,No,No,0,3,F,FALSE,1,1,FALSE,0,5,0,Sequential,FALSE,0,0
+260,Physical Education,100m (Female) OPEN,Nil,No,No,No,No,0,4,F,FALSE,1,1,FALSE,0,1,0,Group/Heats,TRUE,8,0
+261,Physical Education,200m (Female) OPEN,Nil,No,No,No,No,0,4,F,FALSE,1,1,FALSE,0,1,0,Group/Heats,TRUE,8,0
+262,Physical Education,400m (Female) OPEN,Nil,No,No,No,No,0,4,F,FALSE,1,1,FALSE,0,1,0,Group/Heats,TRUE,8,0
+263,Physical Education,800m (Female) OPEN,Nil,No,No,No,No,0,4,F,FALSE,1,1,FALSE,0,2,0,Group/Heats,TRUE,8,0
+264,Physical Education,1500m (Female) OPEN,Nil,No,No,No,No,0,4,F,FALSE,1,1,FALSE,0,9,0,Group/Heats,TRUE,20,0
+265,Physical Education,4 x 100m Relay (Female) OPEN,Nil,No,No,No,No,0,4,F,TRUE,4,5,TRUE,0,1,0,Group/Heats,TRUE,8,0
+266,Physical Education,Long Jump (Female) OPEN,Nil,No,No,No,No,0,4,F,FALSE,1,1,FALSE,0,3,0,Sequential,FALSE,0,0
+267,Physical Education,Shot Put (Female)  OPEN,Nil,No,No,No,No,0,4,F,FALSE,1,1,FALSE,0,5,0,Sequential,FALSE,0,0
+268,Physical Education,Discus (Female) OPEN,Nil,No,No,No,No,0,4,F,FALSE,1,1,FALSE,0,5,1,Sequential,FALSE,0,0
+269,Exhibits,Table Tennis - Singles (Female) OPEN,Nil,No,No,No,No,0,4,F,FALSE,1,1,FALSE,0,5,0,Elimination,FALSE,0,1
+270,Exhibits,Table Tennis - Doubles (Female) OPEN,Nil,No,No,No,No,0,4,F,TRUE,2,2,TRUE,0,5,3,Elimination,FALSE,0,1
+271,Exhibits,Football Kick (Female) OPEN,Nil,No,No,No,No,0,4,F,FALSE,1,1,FALSE,0,5,1,Sequential,FALSE,0,0
+272,Exhibits,Soccer Kick (Female) OPEN,Nil,No,No,No,No,0,4,F,FALSE,1,1,FALSE,0,9,0,Sequential,FALSE,0,0
+273,Exhibits,Netball Shoot (Female) OPEN,Nil,No,No,No,No,0,4,F,FALSE,1,1,FALSE,0,5,0,Sequential,FALSE,0,0
+274,Exhibits,Basketball (Female) OPEN,Nil,No,No,No,No,0,4,F,TRUE,5,10,TRUE,1,20,0,Elimination,FALSE,0,1
+275,Exhibits,Tennis - singles (Female) OPEN,Nil,No,No,No,No,0,4,F,FALSE,1,1,FALSE,0,6,4,Elimination,FALSE,0,1
+276,Exhibits,Futsal (Female) OPEN,Nil,No,No,No,No,0,4,F,TRUE,5,10,TRUE,1,20,0,Elimination,FALSE,0,1
+277,Exhibits,Volleyball (Female) OPEN,Nil,No,No,No,No,0,4,F,TRUE,6,10,FALSE,1,20,0,Elimination,FALSE,0,1
+300,Music,Wood Turning U16,Nil,Yes,No,No,Yes,0,2,,FALSE,1,1,FALSE,0,4,4,Judged,TRUE,0,0
+301,Music,Wood Construction U16,Nil,Yes,No,No,Yes,0,2,,FALSE,1,1,FALSE,0,0,0,Judged,FALSE,0,0
+302,Music,Wood Carving U16,Nil,Yes,No,No,Yes,0,2,,FALSE,1,1,FALSE,0,0,0,Judged,FALSE,0,0
+303,Music,Marquetry U16,Nil,Yes,No,No,Yes,0,2,,FALSE,1,1,FALSE,0,0,0,Judged,FALSE,0,0
+304,Music,Metal Sculpture U16,Nil,Yes,No,No,Yes,0,2,,FALSE,1,1,FALSE,0,0,0,Judged,FALSE,0,0
+306,Music,Metal Fabrication U16,Nil,Yes,No,No,Yes,0,2,,FALSE,1,1,FALSE,0,0,0,Judged,FALSE,0,0
+307,Music,Sheet Metal Work U16,Nil,Yes,No,No,Yes,0,2,,FALSE,1,1,FALSE,0,0,0,Judged,FALSE,0,0
+308,Music,Clay Work - Handbuilt U16,Nil,Yes,No,No,Yes,0,2,,FALSE,1,1,FALSE,0,0,0,Judged,FALSE,0,0
+309,Music,Clay Work - Wheel thrown U16,Nil,Yes,No,No,Yes,0,2,,FALSE,1,1,FALSE,0,0,0,Judged,FALSE,0,0
+310,Music,Scrapbooking U16,Nil,Yes,No,No,No,2,2,,FALSE,1,1,FALSE,0,0,0,Judged,FALSE,0,0
+311,Music,Flax Construction U16,Nil,No,No,No,No,0,2,,FALSE,1,1,FALSE,0,0,0,Judged,FALSE,0,0
+312,Music,Bilum Making U16,Nil,Yes,No,No,Yes,0,2,,FALSE,1,1,FALSE,0,0,0,Judged,FALSE,0,0
+313,Music,Sportswear U16,Nil,Yes,No,No,Yes,0,2,,FALSE,1,1,FALSE,0,0,0,Judged,FALSE,0,0
+314,Music,Coats U16,Nil,Yes,No,No,Yes,0,2,,FALSE,1,1,FALSE,0,0,0,Judged,FALSE,0,0
+315,Music,Female Formals U16,Nil,Yes,No,No,Yes,0,2,F,FALSE,1,1,FALSE,0,0,0,Judged,FALSE,0,0
+316,Music,Female Dresses U16,Nil,Yes,No,No,Yes,0,2,F,FALSE,1,1,FALSE,0,0,0,Judged,FALSE,0,0
+318,Music,Male Three Piece Outfit U16,Nil,Yes,No,No,Yes,0,2,M,FALSE,1,1,FALSE,0,0,0,Judged,FALSE,0,0
+320,Music,Counted Cross Stitch U16,Nil,Yes,No,No,Yes,0,2,,FALSE,1,1,FALSE,0,0,0,Judged,FALSE,0,0
+321,Music,Embroidery U16,Nil,Yes,No,No,Yes,0,2,,FALSE,1,1,FALSE,0,0,0,Judged,FALSE,0,0
+322,Music,Needle Point U16,Nil,Yes,No,No,Yes,0,2,,FALSE,1,1,FALSE,0,0,0,Judged,FALSE,0,0
+323,Music,Crochet U16,Nil,Yes,No,No,Yes,0,2,,FALSE,1,1,FALSE,0,0,0,Judged,FALSE,0,0
+324,Music,Knitting U16,Nil,Yes,No,No,Yes,0,2,,FALSE,1,1,FALSE,0,0,0,Judged,FALSE,0,0
+325,Music,Quilts U16,Nil,Yes,No,No,Yes,0,2,,FALSE,1,1,FALSE,0,0,0,Judged,FALSE,0,0
+326,Music,Patchwork U16,Nil,Yes,No,No,Yes,0,2,,FALSE,1,1,FALSE,0,0,0,Judged,FALSE,0,0
+350,Music,Wood Turning OPEN,Nil,Yes,No,No,Yes,0,4,,FALSE,1,1,FALSE,0,4,4,Judged,TRUE,0,0
+351,Music,Wood Construction OPEN,Nil,Yes,No,No,Yes,0,4,,FALSE,1,1,FALSE,0,0,0,Judged,FALSE,0,0
+352,Music,Wood Carving OPEN,Nil,Yes,No,No,Yes,0,4,,FALSE,1,1,FALSE,0,0,0,Judged,FALSE,0,0
+353,Music,Marquetry OPEN,Nil,Yes,No,No,Yes,0,4,,FALSE,1,1,FALSE,0,0,0,Judged,FALSE,0,0
+354,Music,Metal Sculpture OPEN,Nil,Yes,No,No,Yes,0,4,,FALSE,1,1,FALSE,0,0,0,Judged,FALSE,0,0
+356,Music,Metal Fabrication OPEN,Nil,Yes,No,No,Yes,0,4,,FALSE,1,1,FALSE,0,0,0,Judged,FALSE,0,0
+357,Music,Sheet Metal Work OPEN,Nil,Yes,No,No,Yes,0,4,,FALSE,1,1,FALSE,0,0,0,Judged,FALSE,0,0
+358,Music,Clay Work - Handbuilt OPEN,Nil,Yes,No,No,Yes,0,4,,FALSE,1,1,FALSE,0,0,0,Judged,FALSE,0,0
+359,Music,Clay Work - Wheel thrown OPEN,Nil,Yes,No,No,Yes,0,4,,FALSE,1,1,FALSE,0,0,0,Judged,FALSE,0,0
+360,Music,Scrapbooking OPEN,Nil,Yes,No,No,No,2,4,,FALSE,1,1,FALSE,0,0,0,Judged,FALSE,0,0
+361,Music,Flax Construction OPEN,Nil,Yes,No,No,Yes,0,4,,FALSE,1,1,FALSE,0,0,0,Judged,FALSE,0,0
+362,Music,Bilum Making OPEN,Nil,Yes,No,No,Yes,0,4,,FALSE,1,1,FALSE,0,0,0,Judged,FALSE,0,0
+363,Music,Sportswear OPEN,Nil,No,No,No,No,0,4,,FALSE,1,1,FALSE,0,0,0,Judged,FALSE,0,0
+364,Music,Coats OPEN,Nil,Yes,No,No,Yes,0,4,,FALSE,1,1,FALSE,0,0,0,Judged,FALSE,0,0
+365,Music,Female Formals OPEN,Nil,Yes,No,No,Yes,0,4,F,FALSE,1,1,FALSE,0,0,0,Judged,FALSE,0,0
+366,Music,Female Dresses OPEN,Nil,Yes,No,No,Yes,0,4,F,FALSE,1,1,FALSE,0,0,0,Judged,FALSE,0,0
+368,Music,Male Three Piece Outfit OPEN,Nil,Yes,No,No,Yes,0,4,M,FALSE,1,1,FALSE,0,0,0,Judged,FALSE,0,0
+370,Music,Counted Cross Stitch OPEN,Nil,Yes,No,No,Yes,0,4,,FALSE,1,1,FALSE,0,0,0,Judged,FALSE,0,0
+371,Music,Embroidery OPEN,Nil,Yes,No,No,Yes,0,4,,FALSE,1,1,FALSE,0,0,0,Judged,FALSE,0,0
+372,Music,Needle Point OPEN,Nil,Yes,No,No,Yes,0,4,,FALSE,1,1,FALSE,0,0,0,Judged,FALSE,0,0
+373,Music,Crochet OPEN,Nil,Yes,No,No,Yes,0,4,,FALSE,1,1,FALSE,0,0,0,Judged,FALSE,0,0
+374,Music,Knitting OPEN,Nil,Yes,No,No,Yes,0,4,,FALSE,1,1,FALSE,0,0,0,Judged,FALSE,0,0
+375,Music,Quilts OPEN,Nil,Yes,No,No,Yes,0,4,,FALSE,1,1,FALSE,0,0,0,Judged,FALSE,0,0
+376,Music,Patchwork OPEN,Nil,Yes,No,No,Yes,0,4,,FALSE,1,1,FALSE,0,0,0,Judged,FALSE,0,0
+400,,Portrait Photo U16,Image,Yes,No,No,No,2,2,,FALSE,1,1,FALSE,0,0,0,Judged,FALSE,0,0
+401,,Nature Photo U16,Nil,Yes,No,No,No,2,2,,FALSE,1,1,FALSE,0,0,0,Judged,FALSE,0,0
+402,,Structure/Vehicle Photo U16,Nil,Yes,No,No,No,2,2,,FALSE,1,1,FALSE,0,0,0,Judged,FALSE,0,0
+403,,Scapes Photo U16,Image,Yes,No,No,No,2,2,,FALSE,1,1,FALSE,0,0,0,Judged,FALSE,0,0
+404,,Event/Action Photo U16,Image,Yes,No,No,No,2,2,,FALSE,1,1,FALSE,0,0,0,Judged,FALSE,0,0
+405,,Macro Photo U16,Image,Yes,No,No,No,2,2,,FALSE,1,1,FALSE,0,0,0,Judged,FALSE,0,0
+406,,General Photo U16,Nil,Yes,No,No,No,2,2,,FALSE,1,1,FALSE,0,0,0,Judged,FALSE,0,0
+407,,Composite Photo U16,Image,Yes,No,No,No,2,2,,FALSE,1,1,FALSE,0,0,0,Judged,FALSE,0,0
+411,,Digital Art U16,Image,Yes,Yes,No,No,2,2,,FALSE,0,1,FALSE,0,0,0,Judged,FALSE,0,0
+412,,Posters U16,Nil,Yes,Yes,No,No,0,2,,FALSE,1,1,FALSE,0,0,0,Judged,FALSE,0,0
+413,,Graphic Design U16,Document ,Yes,Yes,No,No,2,2,,FALSE,1,1,FALSE,0,0,0,Judged,FALSE,0,0
+414,,Linear Powerpoint Presentation U16,Document ,No,Yes,No,No,2,2,,TRUE,1,2,FALSE,0,0,0,Pre-Judged,FALSE,0,0
+415,,Non-Linear Powerpoint Presentation U16,Document ,No,Yes,No,No,2,2,,TRUE,1,2,FALSE,0,0,0,Pre-Judged,FALSE,0,0
+450,,Portrait Photo OPEN,Image,Yes,No,No,No,2,4,,FALSE,1,1,FALSE,0,0,0,Judged,FALSE,0,0
+451,,Nature Photo OPEN,Nil,Yes,No,No,No,2,4,,FALSE,1,1,FALSE,0,0,0,Judged,FALSE,0,0
+452,,Structure/Vehicle Photo OPEN,Nil,Yes,No,No,No,2,4,,FALSE,1,1,FALSE,0,0,0,Judged,FALSE,0,0
+453,,Scapes Photo OPEN,Image,Yes,No,No,No,2,4,,FALSE,1,1,FALSE,0,0,0,Judged,FALSE,0,0
+454,,Event/Action Photo OPEN,Image,Yes,No,No,No,2,4,,FALSE,1,1,FALSE,0,0,0,Judged,FALSE,0,0
+455,,Macro Photo OPEN,Image,Yes,No,No,No,2,4,,FALSE,1,1,FALSE,0,0,0,Judged,FALSE,0,0
+456,,General Photo OPEN,Nil,Yes,No,No,No,2,4,,FALSE,1,1,FALSE,0,0,0,Judged,FALSE,0,0
+457,,Composite Photo OPEN,Image,Yes,No,No,No,2,4,,FALSE,1,1,FALSE,0,0,0,Judged,FALSE,0,0
+461,,Digital Art OPEN,Image,Yes,Yes,No,No,2,4,,FALSE,1,1,FALSE,0,0,0,Judged,FALSE,0,0
+462,,Posters OPEN,Nil,Yes,Yes,No,No,0,4,,FALSE,1,1,FALSE,0,0,0,Judged,FALSE,0,0
+463,,Graphic Design OPEN,Document ,Yes,Yes,No,No,2,4,,FALSE,1,1,FALSE,0,0,0,Judged,FALSE,0,0
+464,,Linear Powerpoint Presentation OPEN,Document ,No,Yes,No,No,2,4,,TRUE,1,2,FALSE,0,0,0,Pre-Judged,FALSE,0,0
+465,,Non-Linear Powerpoint Presentation OPEN,Document ,No,Yes,No,No,2,4,,TRUE,1,2,FALSE,0,0,0,Pre-Judged,FALSE,0,0
+466,,Web Site Development OPEN,Document ,No,Yes,No,No,2,4,,TRUE,1,2,FALSE,0,0,0,Judged,FALSE,0,0
+467,,Radio Play OPEN,Video/Audio,Yes,Yes,No,Yes,2,4,,TRUE,1,5,TRUE,0,0,0,Pre-Judged,FALSE,0,0
+468,,Video Production OPEN,Video,Yes,Yes,No,Yes,2,4,,TRUE,1,5,TRUE,1,25,0,Pre-Judged,FALSE,0,0
+500,Scripture,Oil U16,Nil,Yes,No,No,No,0,2,,FALSE,1,1,FALSE,0,0,0,Judged,FALSE,0,0
+501,Scripture,Watercolour U16,Nil,Yes,No,No,No,0,2,,FALSE,1,1,FALSE,0,0,0,Judged,FALSE,0,0
+502,Scripture,Acrylics U16,Nil,Yes,No,No,No,0,2,,FALSE,1,1,FALSE,0,0,0,Judged,FALSE,0,0
+503,Scripture,Sketching U16,Nil,Yes,No,No,No,0,2,,FALSE,1,1,FALSE,0,0,0,Judged,FALSE,0,0
+504,Scripture,Pastels U16,Nil,Yes,No,No,No,0,2,,FALSE,1,1,FALSE,0,0,0,Judged,FALSE,0,0
+505,Scripture,Coloured Pencils U16,Nil,Yes,No,No,No,0,2,,FALSE,1,1,FALSE,0,0,0,Judged,FALSE,0,0
+506,Scripture,Pen and Ink U16,Nil,Yes,No,No,No,0,2,,FALSE,1,1,FALSE,0,0,0,Judged,FALSE,0,0
+507,Scripture,Prints U16,Nil,Yes,No,No,No,0,2,,FALSE,1,1,FALSE,0,0,0,Judged,FALSE,0,0
+508,Scripture,Mixed Media U16,Nil,Yes,No,No,No,0,2,,FALSE,1,1,FALSE,0,0,0,Judged,FALSE,0,0
+509,Scripture,Comic Strip U16,Nil,Yes,No,No,No,2,2,,FALSE,1,1,FALSE,0,0,0,Judged,FALSE,0,0
+510,Scripture,Geometric Abstract U16,Nil,Yes,No,No,No,0,2,,FALSE,1,1,FALSE,0,0,0,Judged,FALSE,0,0
+550,Scripture,Oil OPEN,Nil,Yes,No,No,No,0,4,,FALSE,1,1,FALSE,0,0,0,Judged,FALSE,0,0
+551,Scripture,Watercolour OPEN,Nil,Yes,No,No,No,0,4,,FALSE,1,1,FALSE,0,0,0,Judged,FALSE,0,0
+552,Scripture,Acrylics OPEN,Nil,Yes,No,No,No,0,4,,FALSE,1,1,FALSE,0,0,0,Judged,FALSE,0,0
+553,Scripture,Sketching OPEN,Nil,Yes,No,No,No,0,4,,FALSE,1,1,FALSE,0,0,0,Judged,FALSE,0,0
+554,Scripture,Pastels OPEN,Nil,Yes,No,No,No,0,4,,FALSE,1,1,FALSE,0,0,0,Judged,FALSE,0,0
+555,Scripture,Coloured Pencils OPEN,Nil,Yes,No,No,No,0,4,,FALSE,1,1,FALSE,0,0,0,Judged,FALSE,0,0
+556,Scripture,Pen and Ink OPEN,Nil,Yes,No,No,No,0,4,,FALSE,1,1,FALSE,0,0,0,Judged,FALSE,0,0
+557,Scripture,Prints OPEN,Nil,Yes,No,No,No,0,4,,FALSE,1,1,FALSE,0,0,0,Judged,FALSE,0,0
+558,Scripture,Mixed Media OPEN,Nil,Yes,No,No,No,0,4,,FALSE,1,1,FALSE,0,0,0,Judged,FALSE,0,0
+559,Scripture,Comic Strip OPEN,Nil,Yes,No,No,No,2,4,,FALSE,1,1,FALSE,0,0,0,Judged,FALSE,0,0
+560,Scripture,Geometric Abstract OPEN,Nil,Yes,No,No,No,0,4,,FALSE,1,1,FALSE,0,0,0,Judged,FALSE,0,0
+570,Music - Combined,Self Accompanied Solo U11,Document ,No,Yes,Yes,No,1,5,,FALSE,1,1,FALSE,2,4,0,Sequential,TRUE,0,1
+571,Music - Combined,Self Accompanied Duet U11,Document ,No,Yes,Yes,No,0,5,,TRUE,2,2,TRUE,2,4,0,Sequential,TRUE,0,1
+572,Music - Combined,Self Accompanied Trio U11,Document ,No,Yes,Yes,No,0,5,,TRUE,3,3,TRUE,2,4,0,Sequential,TRUE,0,1
+573,Music - Combined,Self Accompanied Quartet U11,Document ,No,Yes,Yes,No,0,5,,TRUE,4,4,TRUE,2,4,0,Sequential,TRUE,0,1
+580,Music - Instrumental,Piano Solo U11,Document ,No,Yes,Yes,No,1,5,,FALSE,1,1,FALSE,2,4,0,Sequential,TRUE,0,1
+582,Music - Instrumental,Woodwind Solo U11,Document ,No,Yes,Yes,No,1,5,,FALSE,1,1,FALSE,2,4,0,Sequential,TRUE,0,1
+583,Music - Instrumental,String Solo - Plucked U11,Document ,No,Yes,Yes,No,0,5,,FALSE,1,1,FALSE,2,4,0,Sequential,TRUE,0,1
+584,Music - Instrumental,String Solo - Bow U11,Document ,No,Yes,Yes,No,0,5,,FALSE,1,1,FALSE,2,4,0,Sequential,TRUE,0,1
+585,Music - Instrumental,Brass Solo U11,Document ,No,Yes,Yes,No,0,5,,FALSE,1,1,FALSE,2,4,0,Sequential,TRUE,0,1
+586,Music - Instrumental,Tambourine Solo U11,Document ,No,Yes,Yes,No,1,5,,FALSE,1,1,FALSE,2,4,0,Sequential,TRUE,0,1
+587,Music - Instrumental,Miscellaneous Solo U11,Document ,No,Yes,Yes,No,0,5,,FALSE,1,1,FALSE,2,4,0,Sequential,TRUE,0,1
+589,Music - Instrumental,Instrumental Duet U11,Document ,No,Yes,Yes,No,1,5,,TRUE,2,2,TRUE,2,4,0,Sequential,TRUE,0,1
+590,Music - Instrumental,Tambourine Duet U11,Document ,No,Yes,Yes,No,0,5,,TRUE,2,2,TRUE,2,4,0,Sequential,TRUE,0,1
+591,Music - Instrumental,Instrumental Trio U11,Document ,No,Yes,Yes,No,1,5,,TRUE,3,3,TRUE,2,4,0,Sequential,TRUE,0,1
+592,Music - Instrumental,Tambourine Trio U11,Document ,No,Yes,Yes,No,1,5,,TRUE,3,3,TRUE,2,4,0,Sequential,TRUE,0,1
+593,Music - Instrumental,Instrumental Quartet U11,Document ,No,Yes,Yes,No,1,5,,TRUE,4,4,TRUE,2,4,0,Sequential,TRUE,0,1
+594,Music - Instrumental,Tambourine Quartet U11,Document ,No,Yes,Yes,No,1,5,,TRUE,4,4,TRUE,2,4,0,Sequential,TRUE,0,1
+595,Music - Vocal,Male Solo U11,Document ,No,Yes,Yes,No,0,5,M,FALSE,1,1,FALSE,2,4,0,Sequential,TRUE,0,1
+596,Music - Vocal,Female Solo U11,Document ,No,Yes,Yes,No,0,5,F,FALSE,1,1,FALSE,2,4,0,Sequential,TRUE,0,1
+597,Music - Vocal,Mixed Duet U11,Document ,No,Yes,Yes,No,0,5,,TRUE,2,2,TRUE,2,4,0,Sequential,TRUE,0,1
+598,Music - Vocal,Mixed Trio U11,Document ,No,Yes,Yes,No,0,5,,TRUE,2,2,TRUE,2,4,0,Sequential,TRUE,0,1
+599,Music - Vocal,Mixed Quartet U11,Document ,No,Yes,Yes,No,0,5,,TRUE,4,4,TRUE,2,4,0,Sequential,TRUE,0,1
+600,,Self Accompanied Solo U16,Nil,No,Yes,Yes,No,0,2,,FALSE,1,1,FALSE,0,4,4,Sequential,TRUE,0,1
+601,,Self Accompanied Duet U16,Nil,No,Yes,Yes,No,0,2,,TRUE,2,2,TRUE,0,4,4,Sequential,TRUE,0,1
+602,,Self Accompanied Trio U16,Nil,No,Yes,Yes,No,0,2,,TRUE,3,3,TRUE,0,4,4,Sequential,TRUE,0,1
+603,,Self Accompanied Quartet U16,Nil,No,Yes,Yes,No,0,2,,TRUE,4,4,TRUE,2,4,4,Sequential,TRUE,0,1
+605,,Self Accompanied Small Group (Online),Video,No,Yes,Yes,No,1,2,,TRUE,2,4,TRUE,0,4,4,Sequential,TRUE,1,0
+650,,Self Accompanied Solo OPEN,Nil,No,Yes,Yes,No,0,4,,FALSE,1,1,FALSE,0,4,4,Sequential,TRUE,0,1
+651,,Self Accompanied Duet OPEN,Nil,No,Yes,Yes,No,0,4,,TRUE,2,2,TRUE,0,4,4,Sequential,TRUE,0,1
+652,,Self Accompanied Trio OPEN,Nil,No,Yes,Yes,No,0,4,,TRUE,3,3,TRUE,0,4,4,Sequential,TRUE,0,1
+653,,Self Accompanied Quartet OPEN,Nil,No,Yes,Yes,No,0,4,,TRUE,4,4,TRUE,2,4,4,Sequential,TRUE,0,1
+654,,Combined Ensemble (Online),Nil,No,Yes,Yes,No,1,4,,TRUE,5,15,TRUE,5,15,1,Sequential,TRUE,1,0
+655,,Self Accompanied Small Group (Online),Video,No,Yes,Yes,No,1,4,,TRUE,2,4,TRUE,0,4,4,Sequential,TRUE,1,0
+656,,Combined Ensemble OPEN,Nil,No,Yes,Yes,No,0,4,,TRUE,5,15,TRUE,5,8,4,Sequential,TRUE,0,1
+700,,Piano Solo U16,Nil,No,Yes,Yes,No,0,2,,FALSE,1,1,FALSE,0,4,4,Sequential,TRUE,0,1
+702,,Woodwind Solo U16,Nil,No,Yes,Yes,No,0,2,,FALSE,1,1,TRUE,0,4,4,Sequential,TRUE,0,1
+703,,String Solo - Plucked U16,Nil,No,Yes,Yes,No,0,2,,FALSE,1,1,FALSE,0,4,4,Sequential,TRUE,0,1
+704,,String Solo - Bow U16,Nil,No,Yes,Yes,No,0,2,,FALSE,1,1,FALSE,0,4,4,Sequential,TRUE,0,1
+705,,Brass Solo U16,Nil,No,Yes,Yes,No,0,2,,FALSE,1,1,FALSE,0,4,4,Sequential,TRUE,0,1
+706,,Tambourine Solo U16,Nil,No,Yes,Yes,No,0,2,,FALSE,1,1,TRUE,3,4,4,Sequential,TRUE,0,1
+707,,Miscellaneous Solo U16,Nil,No,Yes,Yes,No,0,2,,FALSE,1,1,FALSE,0,4,4,Sequential,TRUE,0,1
+708,,Piano Duet U16,Nil,No,Yes,Yes,No,0,2,,TRUE,2,2,TRUE,0,4,4,Sequential,TRUE,0,1
+709,,Instrumental Duet U16,Nil,No,Yes,Yes,No,0,2,,TRUE,2,2,TRUE,0,4,4,Sequential,TRUE,0,1
+710,,Tambourine Duet U16,Document ,No,Yes,Yes,No,0,2,,TRUE,2,2,TRUE,3,4,4,Sequential,TRUE,0,1
+711,,Instrumental Trio U16,Nil,No,Yes,Yes,No,0,2,,TRUE,3,3,TRUE,2,4,4,Sequential,TRUE,0,1
+712,,Tambourine Trio U16,Document ,No,Yes,No,No,0,2,,TRUE,3,3,TRUE,5,4,4,Sequential,TRUE,0,1
+713,,Instrumental Quartet U16,Nil,No,Yes,Yes,No,0,2,,TRUE,4,4,TRUE,5,4,4,Sequential,TRUE,0,1
+714,,Instrumental Small Group (Online) U16,Video,No,Yes,Yes,No,1,2,,TRUE,2,4,TRUE,5,4,4,Sequential,TRUE,0,0
+715,,Tambourine Quartet U16,Document ,No,Yes,No,No,0,2,,TRUE,4,4,TRUE,5,4,4,Sequential,TRUE,0,1
+716,,Tambourine Small Group (Online) U16,Video,No,Yes,Yes,No,3,2,,TRUE,2,4,FALSE,3,4,4,Sequential,TRUE,0,0
+717,,Music Instrumental Composition U16,Video/Audio,No,Yes,Yes,No,0,2,,TRUE,1,2,TRUE,0,0,0,Pre-Judged,FALSE,0,0
+718,,Music Instrumental Arrangement  U16,Video/Audio,No,Yes,Yes,Yes,2,2,,TRUE,1,2,TRUE,0,0,0,Pre-Judged,FALSE,0,0
+750,,Piano Solo OPEN,Document ,No,Yes,No,No,0,4,,FALSE,1,1,FALSE,0,4,4,Sequential,TRUE,0,1
+752,,Woodwind Solo OPEN,Nil,No,Yes,No,No,0,4,,FALSE,1,1,FALSE,0,4,4,Sequential,TRUE,0,1
+753,,String Solo - Plucked OPEN,Nil,No,Yes,No,No,0,4,,FALSE,1,1,FALSE,0,4,4,Sequential,TRUE,0,1
+754,,String Solo - Bow OPEN,Nil,No,Yes,No,No,0,4,,FALSE,1,1,FALSE,0,4,4,Sequential,TRUE,0,1
+755,,Brass Solo OPEN,Nil,No,Yes,No,No,0,4,,FALSE,1,1,FALSE,0,4,4,Sequential,TRUE,0,1
+756,,Tambourine Solo OPEN,Document ,No,Yes,No,No,0,4,,FALSE,1,1,TRUE,3,4,4,Sequential,TRUE,0,1
+757,,Miscellaneous Solo OPEN,Nil,No,Yes,No,No,0,4,,FALSE,1,1,FALSE,0,4,4,Sequential,TRUE,0,1
+758,,Piano Duet OPEN,Document ,No,Yes,No,No,0,4,,TRUE,2,2,TRUE,0,4,4,Sequential,TRUE,0,1
+759,,Instrumental Duet OPEN,Nil,No,Yes,Yes,No,0,4,,TRUE,1,2,TRUE,5,4,4,Sequential,TRUE,0,1
+760,,Tambourine Duet OPEN,Document ,No,Yes,No,No,0,4,,TRUE,2,2,TRUE,5,4,4,Sequential,TRUE,0,1
+761,,Instrumental Trio OPEN,Nil,No,Yes,Yes,No,0,4,,TRUE,3,3,TRUE,5,4,4,Sequential,TRUE,0,1
+762,,Tambourine Trio OPEN,Document ,No,Yes,No,No,0,4,,TRUE,3,3,TRUE,5,4,4,Sequential,TRUE,0,1
+763,,Instrumental Quartet OPEN,Nil,No,Yes,Yes,No,0,4,,TRUE,4,4,TRUE,5,4,4,Sequential,TRUE,0,1
+764,,Instrumental Small Group (Online) OPEN,Video,No,Yes,Yes,No,1,4,,TRUE,2,4,TRUE,5,4,4,Sequential,TRUE,0,0
+765,,Tambourine Quartet OPEN,Document ,No,Yes,No,No,0,4,,TRUE,4,4,TRUE,5,4,4,Sequential,TRUE,0,1
+766,,Tambourine Small Group (Online) OPEN,Video,No,Yes,Yes,No,2,4,,TRUE,2,4,TRUE,5,4,4,Sequential,TRUE,0,0
+767,,Music Instrumental Composition OPEN,Video/Audio,No,Yes,Yes,No,2,4,,TRUE,1,2,TRUE,0,0,0,Pre-Judged,TRUE,0,0
+768,,Music Instrumental Arranging OPEN,Video/Audio,No,Yes,Yes,Yes,0,4,,TRUE,1,2,TRUE,0,0,0,Pre-Judged,TRUE,0,0
+780,,Instrumental Ensemble OPEN,Nil,No,Yes,Yes,No,0,4,,TRUE,5,20,TRUE,5,5,4,Sequential,TRUE,0,1
+781,,Tambourine Ensemble OPEN,Document ,No,Yes,No,No,0,4,,TRUE,5,20,TRUE,5,5,4,Sequential,TRUE,0,1
+782,,Handbell Ensemble OPEN,Nil,No,Yes,Yes,No,0,4,,TRUE,5,20,TRUE,5,5,4,Sequential,TRUE,0,1
+800,,Male Solo U16,Nil,No,Yes,Yes,No,0,2,M,FALSE,1,1,FALSE,0,4,4,Sequential,TRUE,0,1
+801,,Male Duet U16,Nil,No,Yes,Yes,No,0,2,M,TRUE,2,2,TRUE,0,4,4,Sequential,TRUE,0,1
+802,,Male Trio U16,Nil,No,Yes,Yes,No,0,2,M,TRUE,3,3,TRUE,0,4,4,Sequential,TRUE,0,1
+803,,Male Quartet U16,Nil,No,Yes,Yes,No,0,2,M,TRUE,4,4,TRUE,0,4,4,Sequential,TRUE,0,1
+804,,Male Small Group (Online) U16,Video,No,Yes,Yes,No,1,2,M,TRUE,2,4,TRUE,0,4,4,Sequential,TRUE,0,0
+805,,Female Solo U16,Nil,No,Yes,Yes,No,0,2,F,FALSE,1,1,FALSE,0,4,4,Sequential,TRUE,0,1
+806,,Female Duet U16,Nil,No,Yes,Yes,No,0,2,F,TRUE,2,2,TRUE,0,4,4,Sequential,TRUE,0,1
+807,,Female Trio U16,Nil,No,Yes,Yes,No,0,2,F,TRUE,3,3,TRUE,0,4,4,Sequential,TRUE,0,1
+808,,Female Quartet U16,Nil,No,Yes,Yes,No,0,2,F,TRUE,4,4,TRUE,0,4,4,Sequential,TRUE,0,1
+809,,Female Small Group (Online) U16,Video,No,Yes,Yes,No,1,2,F,TRUE,2,4,TRUE,0,0,0,Sequential,TRUE,0,0
+810,,Mixed Duet U16,Nil,No,Yes,Yes,No,0,2,,TRUE,2,2,TRUE,0,4,4,Sequential,TRUE,0,1
+811,,Mixed Trio U16,Nil,No,Yes,Yes,No,0,2,,TRUE,3,3,TRUE,0,4,4,Sequential,TRUE,0,1
+812,,Mixed Quartet U16,Nil,No,Yes,Yes,No,0,2,,TRUE,4,4,TRUE,0,4,4,Sequential,TRUE,0,1
+813,,Mixed Vocal Small Group (Online) U16,Video,No,Yes,Yes,No,1,2,,TRUE,2,4,TRUE,0,4,4,Sequential,TRUE,0,0
+814,,Music Vocal Composition U16,Video/Audio,No,Yes,No,Yes,2,2,,TRUE,1,2,TRUE,0,0,0,Pre-Judged,FALSE,0,0
+815,,Music Vocal Arranging U16,Video/Audio,No,Yes,Yes,Yes,2,2,,TRUE,1,2,TRUE,0,0,0,Pre-Judged,TRUE,0,0
+850,,Male Solo OPEN,Nil,No,Yes,Yes,No,0,4,M,FALSE,1,1,FALSE,0,4,4,Sequential,TRUE,0,1
+851,,Male Duet OPEN,Nil,No,Yes,Yes,No,0,4,M,TRUE,2,2,TRUE,0,4,4,Sequential,TRUE,0,1
+852,,Male Trio OPEN,Nil,No,Yes,Yes,No,0,4,M,TRUE,3,3,TRUE,0,4,4,Sequential,TRUE,0,1
+853,,Male Quartet OPEN,Nil,No,Yes,Yes,No,0,4,M,TRUE,4,4,TRUE,0,4,4,Sequential,TRUE,0,1
+854,,Male Small Group (Online) OPEN,Video,No,Yes,Yes,No,1,4,M,TRUE,2,4,TRUE,0,4,4,Sequential,TRUE,0,0
+855,,Female Solo OPEN,Nil,No,Yes,Yes,No,0,4,F,FALSE,1,1,FALSE,0,4,4,Sequential,TRUE,0,1
+856,,Female Duet OPEN,Nil,No,Yes,Yes,No,0,4,F,TRUE,1,2,TRUE,0,4,4,Sequential,TRUE,0,1
+857,,Female Trio OPEN,Nil,No,Yes,Yes,No,0,4,F,TRUE,3,3,TRUE,0,4,4,Sequential,TRUE,0,1
+858,,Female Quartet OPEN,Nil,No,Yes,Yes,No,0,4,F,TRUE,4,4,TRUE,0,4,4,Sequential,TRUE,0,1
+859,,Female Small Group (Online) OPEN,Video,No,Yes,Yes,No,1,4,F,TRUE,2,4,FALSE,0,0,0,Sequential,TRUE,0,0
+860,,Mixed Duet OPEN,Nil,No,Yes,Yes,No,0,4,,TRUE,2,2,TRUE,0,4,4,Sequential,TRUE,0,1
+861,,Mixed Trio OPEN,Nil,No,Yes,Yes,No,0,4,,TRUE,3,3,TRUE,0,4,4,Sequential,TRUE,0,1
+862,,Mixed Quartet OPEN,Nil,No,Yes,Yes,No,0,4,,TRUE,4,4,TRUE,0,4,4,Sequential,TRUE,0,1
+863,,Mixed Vocal Small Group (Online) OPEN,Video,No,Yes,Yes,No,1,4,,TRUE,2,4,TRUE,0,4,4,Sequential,TRUE,0,0
+864,,Music Vocal Composition OPEN,Video/Audio,No,Yes,Yes,No,2,4,,TRUE,1,2,FALSE,0,0,0,Pre-Judged,FALSE,0,0
+865,,Music Vocal Arranging OPEN,Video/Audio,No,Yes,Yes,Yes,2,4,,TRUE,1,2,TRUE,0,0,0,Pre-Judged,TRUE,0,0
+870,,Vocal Ensemble OPEN,Nil,No,Yes,Yes,No,0,4,,TRUE,5,15,TRUE,0,5,5,Sequential,TRUE,0,1
+871,,Choir OPEN,Nil,No,Yes,Yes,No,0,4,,TRUE,16,40,TRUE,6,6,6,Sequential,TRUE,0,1
+880,Platform,Dramatic Dialogue U11,Document ,No,Yes,Yes,Yes,1,5,,TRUE,2,2,TRUE,2,6,0,Sequential,TRUE,0,1
+881,Platform,Expressive Reading (Male) U11,Document ,No,No,No,Yes,1,5,M,FALSE,1,1,FALSE,2,6,0,Sequential,TRUE,0,1
+882,Platform,Poetry Recitation (Male) U11,Document ,No,No,No,Yes,1,5,M,FALSE,1,1,FALSE,2,6,0,Sequential,TRUE,0,1
+883,Platform,Famous Speech (Male) U11,Document ,Yes,No,No,Yes,1,5,M,FALSE,1,1,FALSE,2,8,0,Sequential,TRUE,0,1
+884,Platform,Preaching (Male) U11,Document ,No,No,No,Yes,1,5,M,FALSE,1,1,FALSE,2,6,0,Sequential,TRUE,0,1
+885,Platform,Expressive Reading (Female) U11,Document ,No,No,No,Yes,1,5,F,FALSE,1,1,FALSE,2,6,0,Sequential,TRUE,0,1
+886,Platform,Poetry Recitation (Female) U11,Document ,No,No,No,Yes,1,5,F,FALSE,1,1,FALSE,2,6,0,Sequential,TRUE,0,1
+887,Platform,Famous Speech (Female) U11,Document ,No,No,No,Yes,1,5,F,FALSE,1,1,FALSE,2,8,0,Sequential,TRUE,0,1
+888,Platform,Preaching (Female) U11,Document ,No,No,No,Yes,1,5,F,FALSE,1,1,FALSE,2,6,0,Sequential,TRUE,0,1
+900,,Puppets U16,Nil,No,Yes,No,Yes,0,2,,TRUE,1,3,TRUE,0,8,4,Sequential,TRUE,0,1
+901,,Dramatic Dialogue U16,Nil,No,Yes,No,Yes,0,2,,TRUE,2,2,TRUE,0,6,4,Sequential,TRUE,0,1
+902,,Mime Solo U16,Nil,No,Yes,No,Yes,0,2,,FALSE,1,1,FALSE,0,8,4,Sequential,TRUE,0,1
+903,,Mime Group U16,Nil,No,Yes,No,Yes,0,2,,TRUE,2,5,TRUE,0,8,4,Sequential,TRUE,0,1
+906,,Oratory (Male) U16,Nil,No,Yes,No,Yes,0,2,M,FALSE,1,1,FALSE,0,6,4,Sequential,TRUE,0,1
+907,,Dramatic Monologue (Male) U16,Nil,No,Yes,No,Yes,0,2,M,FALSE,1,1,FALSE,0,6,4,Sequential,TRUE,0,1
+908,,Expressive Reading (Male) U16,Nil,No,Yes,No,Yes,0,2,M,FALSE,1,1,FALSE,0,6,4,Sequential,TRUE,0,1
+909,,Dramatic Narrative (Male) U16,Nil,No,Yes,No,Yes,0,2,M,FALSE,1,1,FALSE,0,6,4,Sequential,TRUE,0,1
+910,,Poetry Recitation (Male) U16,Nil,No,Yes,No,Yes,0,2,M,FALSE,1,1,FALSE,0,6,4,Sequential,TRUE,0,1
+911,,Illustrated Storytelling (Male) U16,Nil,No,Yes,No,Yes,0,2,M,FALSE,1,1,FALSE,0,6,4,Sequential,TRUE,0,1
+912,,Ventriloquism (Male) U16,Nil,No,Yes,No,Yes,0,2,M,FALSE,1,1,TRUE,0,4,4,Sequential,TRUE,0,1
+913,,Clown Act (Male) U16,Nil,No,Yes,No,Yes,0,2,M,FALSE,1,1,FALSE,0,6,4,Sequential,TRUE,0,1
+914,,Famous Speech (Male) U16,Nil,No,Yes,No,Yes,0,2,M,FALSE,1,1,FALSE,0,8,4,Sequential,TRUE,0,1
+915,,Preaching (Male) U16,Nil,No,Yes,No,Yes,0,2,M,FALSE,1,1,FALSE,0,8,4,Sequential,TRUE,0,1
+920,,Oratory (Female) U16,Nil,No,Yes,No,Yes,0,2,F,FALSE,1,1,FALSE,0,6,4,Sequential,TRUE,0,1
+921,,Dramatic Monologue (Female) U16,Nil,No,Yes,No,Yes,0,2,F,FALSE,1,1,FALSE,0,6,4,Sequential,TRUE,0,1
+922,,Expressive Reading (Female) U16,Nil,No,Yes,No,Yes,0,2,F,FALSE,1,1,FALSE,0,6,4,Sequential,TRUE,0,1
+923,,Dramatic Narrative (Female) U16,Nil,No,Yes,No,Yes,0,2,F,FALSE,1,1,FALSE,0,6,4,Sequential,TRUE,0,1
+924,,Poetry Recitation (Female) U16,Nil,No,Yes,No,Yes,0,2,F,FALSE,1,1,FALSE,0,6,4,Sequential,TRUE,0,1
+925,,Illustrated Storytelling (Female) U16,Nil,No,Yes,No,Yes,0,2,F,FALSE,1,1,FALSE,0,6,4,Sequential,TRUE,0,1
+926,,Ventriloquism (Female) U16,Nil,No,Yes,No,Yes,0,2,F,FALSE,1,1,FALSE,0,6,4,Sequential,TRUE,0,1
+927,,Clown Act (Female) U16,Nil,No,Yes,No,Yes,0,2,F,FALSE,1,1,FALSE,0,6,4,Sequential,TRUE,0,1
+928,,Famous Speech (Female) U16,Nil,No,Yes,No,Yes,0,2,F,FALSE,1,1,FALSE,0,8,4,Sequential,TRUE,0,1
+929,,Preaching (Female) U16,Nil,No,Yes,No,Yes,0,2,F,FALSE,1,1,FALSE,0,8,4,Sequential,TRUE,0,1
+950,,Puppets OPEN,Nil,No,Yes,No,Yes,0,4,,TRUE,1,3,TRUE,0,8,4,Sequential,TRUE,0,1
+951,,Dramatic Dialogue OPEN,Nil,No,Yes,No,Yes,0,4,,TRUE,2,2,TRUE,0,6,4,Sequential,TRUE,0,1
+952,,Mime Solo OPEN,Nil,No,Yes,No,Yes,0,4,,FALSE,1,1,FALSE,0,8,4,Sequential,TRUE,0,1
+953,,Mime Group OPEN,Nil,No,Yes,No,Yes,0,4,,TRUE,2,5,TRUE,0,8,4,Sequential,TRUE,0,1
+954,,One-Act Play OPEN,Nil,No,Yes,No,Yes,0,4,,TRUE,3,5,TRUE,5,10,4,Sequential,TRUE,0,1
+956,,Oratory (Male) OPEN,Nil,No,Yes,No,Yes,0,4,M,FALSE,1,1,FALSE,0,6,4,Sequential,TRUE,0,1
+957,,Dramatic Monologue (Male) OPEN,Nil,No,Yes,No,Yes,0,4,M,FALSE,1,1,FALSE,0,6,4,Sequential,TRUE,0,1
+958,,Expressive Reading (Male) OPEN,Nil,No,Yes,No,Yes,0,4,M,FALSE,1,1,FALSE,0,6,4,Sequential,TRUE,0,1
+959,,Dramatic Narrative (Male) OPEN,Nil,No,Yes,No,Yes,0,4,M,FALSE,1,1,FALSE,0,6,4,Sequential,TRUE,0,1
+960,,Poetry Recitation (Male) OPEN,Nil,No,Yes,No,Yes,0,4,M,FALSE,1,1,FALSE,0,6,4,Sequential,TRUE,0,1
+961,,Illustrated Storytelling (Male) OPEN,Nil,No,Yes,No,Yes,0,4,M,FALSE,1,1,FALSE,0,6,4,Sequential,TRUE,0,1
+962,,Ventriloquism (Male) OPEN,Nil,No,Yes,No,Yes,0,4,M,FALSE,1,1,TRUE,0,0,0,Sequential,TRUE,0,1
+963,,Clown Act (Male) OPEN,Nil,No,Yes,No,Yes,0,4,M,FALSE,1,1,FALSE,0,6,4,Sequential,TRUE,0,1
+964,,Famous Speech (Male) OPEN,Nil,No,Yes,No,Yes,0,4,M,FALSE,1,1,FALSE,0,8,4,Sequential,TRUE,0,1
+965,,Preaching (Male) OPEN,Nil,No,Yes,No,Yes,0,4,M,FALSE,1,1,FALSE,0,8,4,Sequential,TRUE,0,1
+970,,Oratory (Female) OPEN,Nil,No,Yes,No,Yes,0,4,F,FALSE,1,1,FALSE,0,6,4,Sequential,TRUE,0,1
+971,,Dramatic Monologue (Female) OPEN,Nil,No,Yes,No,Yes,0,4,F,FALSE,1,1,FALSE,0,6,4,Sequential,TRUE,0,1
+972,,Expressive Reading (Female) OPEN,Nil,No,Yes,No,Yes,0,4,F,FALSE,1,1,FALSE,0,6,4,Sequential,TRUE,0,1
+973,,Dramatic Narrative (Female) OPEN,Nil,No,Yes,No,Yes,0,4,F,FALSE,1,1,FALSE,0,6,4,Sequential,TRUE,0,1
+974,,Poetry Recitation (Female) OPEN,Nil,No,Yes,No,Yes,0,4,F,FALSE,1,1,FALSE,0,6,4,Sequential,TRUE,0,1
+975,,Illustrated Storytelling (Female) OPEN,Nil,No,Yes,No,Yes,0,4,F,FALSE,1,1,FALSE,0,6,4,Sequential,TRUE,0,1
+976,,Ventriloquism (Female) OPEN,Nil,No,Yes,No,Yes,0,4,F,FALSE,1,1,FALSE,0,6,4,Sequential,TRUE,0,1
+977,,Clown Act (Female) OPEN,Nil,No,Yes,No,Yes,0,4,F,FALSE,1,1,FALSE,0,6,4,Sequential,TRUE,0,1
+978,,Famous Speech (Female) OPEN,Nil,No,Yes,No,Yes,0,4,F,FALSE,1,1,FALSE,0,8,4,Sequential,TRUE,0,1
+979,,Preaching (Female) OPEN,Nil,No,Yes,No,Yes,0,4,F,FALSE,1,1,FALSE,0,8,4,Sequential,TRUE,0,1
+1000,,Golden Apple Award U16,Document ,No,No,No,No,2,2,,FALSE,1,1,FALSE,0,0,0,Pre-Judged,FALSE,0,0
+1001,,Golden Lamb Award U16,Document ,No,No,No,No,2,2,,FALSE,1,1,FALSE,0,0,0,Pre-Judged,FALSE,0,0
+1002,,Golden Harp Award U16,Document ,No,No,No,No,2,2,,FALSE,1,1,FALSE,0,0,0,Pre-Judged,FALSE,0,0
+1003,,Christian Soldier Award U16,Document ,No,No,No,No,2,2,,FALSE,1,1,FALSE,0,0,0,Pre-Judged,FALSE,0,0
+1004,,Christian Worker Award U16,Document ,No,No,No,No,2,2,,FALSE,1,1,FALSE,0,0,0,Pre-Judged,FALSE,0,0
+1005,,Silver Apple Award U16,Document ,No,No,No,No,2,2,,FALSE,1,1,FALSE,0,0,0,Pre-Judged,FALSE,0,0
+1050,,Golden Apple Award OPEN,Document ,No,No,No,No,2,4,,FALSE,1,1,FALSE,0,0,0,Pre-Judged,FALSE,0,0
+1051,,Golden Lamb Award OPEN,Document ,No,No,No,No,2,4,,FALSE,1,1,FALSE,0,0,0,Pre-Judged,FALSE,0,0
+1052,,Golden Harp Award OPEN,Document ,No,No,No,No,2,4,,FALSE,1,1,FALSE,0,0,0,Pre-Judged,FALSE,0,0
+1053,,Christian Soldier Award OPEN,Document ,No,No,No,No,2,4,,FALSE,1,1,FALSE,0,0,0,Pre-Judged,FALSE,0,0
+1054,,Christian Worker Award OPEN,Document ,No,No,No,No,2,4,,FALSE,1,1,FALSE,0,0,0,Pre-Judged,FALSE,0,0
+1055,,Silver Apple Award OPEN,Document ,No,No,No,No,2,4,,FALSE,1,1,FALSE,0,0,0,Pre-Judged,FALSE,0,0
+1056,,Bible Memory OPEN,Nil,No,Yes,No,No,2,4,,TRUE,1,1,TRUE,0,45,0,Sequential,TRUE,0,1
+1057,,Bible Bowl OPEN,Nil,No,No,No,No,0,4,,TRUE,3,3,TRUE,0,11,0,Sequential,TRUE,0,1
+1058,,Group Bible Speaking OPEN,Nil,No,Yes,No,Yes,0,4,,TRUE,8,30,TRUE,0,6,4,Sequential,TRUE,0,1

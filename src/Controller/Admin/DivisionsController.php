@@ -13,7 +13,7 @@ class DivisionsController extends AppController {
 
     //public $helpers = array('Javascript', 'Ajax');
 
-    public function initialize() {
+    public function initialize(): void {
         parent::initialize();
         $this->loadComponent('Flash');
         $action = $this->request->getParam('action');
@@ -140,7 +140,7 @@ class DivisionsController extends AppController {
 		$eventCatDD = $this->Eventcategories->find()->where([])->order(['Eventcategories.name' => 'ASC'])->all()->combine('id', 'name')->toArray();
 		$this->set('eventCatDD', $eventCatDD);
 		
-        $divisions = $this->Divisions->newEntity();
+        $divisions = $this->Divisions->newEntity([]);
         if ($this->request->is('post')) {
 			
 			//$this->prx($this->request->getData());

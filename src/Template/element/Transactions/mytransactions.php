@@ -41,7 +41,7 @@
 								<td data-title="Price Structure"><?php echo $priceStructureCR[$datarecord->price_structure]; ?></td>
 								<td data-title="Amount"><?php echo number_format($datarecord->total_amount,2); ?></td>
 								<td data-title="Status"><?php echo $paymentStatus[$datarecord->status]; ?></td>
-                                <td data-title="Transaction Date"><?php echo date('M d, Y H:i A', strtotime($datarecord->created)); ?></td>
+                                <td data-title="Transaction Date"><?php echo safe_date('M d, Y H:i A', strtotime($datarecord->created)); ?></td>
                                 <td data-title="Transaction ID"><?php echo $datarecord->transaction_id_received ? $datarecord->transaction_id_received : 'N/A'; ?></td>
 								<td data-title="Action">
                                     <?php echo $this->Html->link('<i class="fa fa-eye"></i>', ['controller' => 'transactions', 'action' => 'viewdetails',$datarecord->slug], [ 'escape' => false, 'title' => 'View Details', 'class'=>'']); ?>

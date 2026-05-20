@@ -9,7 +9,7 @@ class PastorsController extends AppController {
 
     public $paginate = ['limit' => 50, 'order' => ['Pastors.id' => 'desc']];
 
-    public function initialize() {
+    public function initialize(): void {
         parent::initialize();
         $this->loadComponent('Flash');
         
@@ -90,7 +90,7 @@ class PastorsController extends AppController {
         $this->set('managePastors', '1');
         $this->set('addPastor', '1');
 
-        $pastor = $this->Pastors->newEntity();
+        $pastor = $this->Pastors->newEntity([]);
         
         if ($this->request->is('post')) {
             $pastor = $this->Pastors->patchEntity($pastor, $this->request->getData());

@@ -13,7 +13,7 @@ class EvaluationareasController extends AppController {
 
     //public $helpers = array('Javascript', 'Ajax');
 
-    public function initialize() {
+    public function initialize(): void {
         parent::initialize();
         $this->loadComponent('Flash');
         $action = $this->request->getParam('action');
@@ -151,7 +151,7 @@ class EvaluationareasController extends AppController {
 		$questionsDD = $this->Evaluationquestions->find()->where([])->order(['Evaluationquestions.question' => 'ASC'])->all()->combine('id', 'question')->toArray();
 		$this->set('questionsDD', $questionsDD);
 		
-        $evaluationareas = $this->Evaluationareas->newEntity();
+        $evaluationareas = $this->Evaluationareas->newEntity([]);
         if ($this->request->is('post')) {
 			
 			//$this->prx($this->request->getData());

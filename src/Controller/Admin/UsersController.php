@@ -11,7 +11,7 @@ class UsersController extends AppController{
     public $paginate = ['limit' => 50];
     public $components = array('PImage');
    
-    public function initialize() {
+    public function initialize(): void {
         parent::initialize();
         $this->loadComponent('Flash');
         $action = $this->request->getParam('action');
@@ -135,7 +135,7 @@ class UsersController extends AppController{
         $this->set('manageSchools', '1');
         $this->set('schoolAdd', '1');
 		
-        $users = $this->Users->newEntity();
+        $users = $this->Users->newEntity([]);
         if ($this->request->is('post')) {
 			
 			//$this->prx($this->request->getData());
@@ -182,7 +182,7 @@ class UsersController extends AppController{
         $this->set('manageSchools', '1');
         $this->set('schoolAdd', '1');
 		
-        $users = $this->Users->newEntity();
+        $users = $this->Users->newEntity([]);
         if ($this->request->is('post')) {
 			
 			//$this->prx($this->request->getData());
@@ -427,7 +427,7 @@ class UsersController extends AppController{
 		global $yesNoDD;
 		$this->set('yesNoDD', $yesNoDD);
 		
-        $users = $this->Users->newEntity();
+        $users = $this->Users->newEntity([]);
         if ($this->request->is('post')) {
 			
 			//$this->prx($this->request->getData());
@@ -732,7 +732,7 @@ class UsersController extends AppController{
         $this->set('manageSchools', '1');
         $this->set('schoolImport', '1');
 		
-        $users = $this->Users->newEntity();
+        $users = $this->Users->newEntity([]);
         if ($this->request->is('post')) {
 			
 			//$this->prx($this->request->getData());
@@ -795,7 +795,7 @@ class UsersController extends AppController{
 							if($flagCheck == 1)
 							{
 								// import records here
-								$users = $this->Users->newEntity();
+								$users = $this->Users->newEntity([]);
 								$dataU = $this->Users->patchEntity($users, array());
 								
 								$dataU->slug 							= $this->getSlug($getData[2] . ' ' . time(), 'Users');

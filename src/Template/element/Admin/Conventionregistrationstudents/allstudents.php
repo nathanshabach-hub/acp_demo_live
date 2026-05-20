@@ -55,7 +55,7 @@ $this->Eventsubmissions = TableRegistry::getTableLocator()->get('Eventsubmission
 									}
 									?>
 								</td>
-                                <td data-title="Registration Date"><?php echo date('M d, Y', strtotime($datarecord->created)); ?></td>
+                                <td data-title="Registration Date"><?php echo safe_date('M d, Y', strtotime($datarecord->created)); ?></td>
 								
                                 <td data-title="Events">
 								<?php echo $this->Html->link('<i class="fa fa-puzzle-piece"></i>', ['controller' => 'conventionregistrationstudents', 'action' => 'studentevents',$datarecord->slug], [ 'escape' => false, 'title' => 'View student events', 'class' => '']); ?>

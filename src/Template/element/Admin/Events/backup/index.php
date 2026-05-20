@@ -52,7 +52,7 @@
 								<td data-title="Score Sheet"><?php echo ($datarecord->score_sheet == '1') ? "Yes" : "No"; ?></td>
 								<td data-title="Additional Documents"><?php echo ($datarecord->additional_documents == '1') ? "Yes" : "No"; ?></td>
 								<td data-title="Discount?"><?php echo ($datarecord->discount_allowed == '1') ? "Yes" : "No"; ?></td>
-                                <td data-title="Created"><?php echo date('M d, Y', strtotime($datarecord->created)); ?></td>
+                                <td data-title="Created"><?php echo safe_date('M d, Y', strtotime($datarecord->created)); ?></td>
                                 
                                 <td data-title="Action">
                                     <div id="loderstatus<?php echo $datarecord->id; ?>" class="right_action_lo"><?php echo $this->Html->image("loading.gif"); ?></div>

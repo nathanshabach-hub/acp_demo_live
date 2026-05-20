@@ -13,7 +13,7 @@ class EvaluationquestionsController extends AppController {
 
     //public $helpers = array('Javascript', 'Ajax');
 
-    public function initialize() {
+    public function initialize(): void {
         parent::initialize();
         $this->loadComponent('Flash');
         $action = $this->request->getParam('action');
@@ -113,7 +113,7 @@ class EvaluationquestionsController extends AppController {
 		$categoryDD = $this->Evaluationcategories->find()->where([])->order(['Evaluationcategories.name' => 'ASC'])->all()->combine('id', 'name')->toArray();
 		$this->set('categoryDD', $categoryDD);
 		
-        $evaluationquestions = $this->Evaluationquestions->newEntity();
+        $evaluationquestions = $this->Evaluationquestions->newEntity([]);
         if ($this->request->is('post')) {
 			
 			//$this->prx($this->request->getData());

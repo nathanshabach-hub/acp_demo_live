@@ -81,6 +81,42 @@ if (!Configure::read('debug')) {
 }
 
 date_default_timezone_set('Australia/Brisbane');
+
+if (!function_exists('safe_date')) {
+    /**
+     * Format date/time safely and return fallback for invalid/empty timestamps.
+     *
+     * @param string $format PHP date() format string.
+     * @param mixed $value Timestamp, DateTimeInterface, or date string.
+     * @param string $fallback Value to return for invalid/empty dates.
+     * @return string
+     */
+    function safe_date(string $format, $value = null, string $fallback = ''): string
+    {
+        if ($value === null || $value === '' || $value === false) {
+            return $fallback;
+        }
+
+        if ($value instanceof DateTimeInterface) {
+            $timestamp = $value->getTimestamp();
+        } elseif (is_numeric($value)) {
+            $timestamp = (int)$value;
+        } else {
+            $timestamp = strtotime((string)$value);
+            if ($timestamp === false) {
+                return $fallback;
+            }
+            $timestamp = (int)$timestamp;
+        }
+
+        if ($timestamp <= 0) {
+            return $fallback;
+        }
+
+        return date($format, $timestamp);
+    }
+}
+
 mb_internal_encoding(Configure::read('App.encoding'));
 ini_set('intl.default_locale', Configure::read('App.defaultLocale'));
 

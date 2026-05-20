@@ -13,7 +13,7 @@ class EvaluationtagsController extends AppController {
 
     //public $helpers = array('Javascript', 'Ajax');
 
-    public function initialize() {
+    public function initialize(): void {
         parent::initialize();
         $this->loadComponent('Flash');
         $action = $this->request->getParam('action');
@@ -97,7 +97,7 @@ class EvaluationtagsController extends AppController {
         $this->set('manageEvaluations', '1');
         $this->set('tagsList', '1');
 		
-        $evaluationtags = $this->Evaluationtags->newEntity();
+        $evaluationtags = $this->Evaluationtags->newEntity([]);
         if ($this->request->is('post')) {
 			
 			//$this->prx($this->request->getData());

@@ -6,6 +6,7 @@ use App\Controller\AppController;
 use Cake\Core\Configure;
 use Cake\Core\Configure\Engine\PhpConfig;
 use App\Mailer\AppMailer as Mailer;
+use Cake\Datasource\ConnectionManager;
 
 class ConventionregistrationsController extends AppController {
 
@@ -14,7 +15,7 @@ class ConventionregistrationsController extends AppController {
 
     //public $helpers = array('Javascript', 'Ajax');
 
-    public function initialize() {
+    public function initialize(): void {
         parent::initialize();
         $this->loadComponent('Flash');
         $action = $this->request->getParam('action');
@@ -36,6 +37,17 @@ class ConventionregistrationsController extends AppController {
 		$this->Conventionseasonevents = $this->loadModel('Conventionseasonevents');
 		$this->Conventionseasons = $this->loadModel('Conventionseasons');
     }
+
+	protected function hasJudgingAssignmentsTable(): bool
+	{
+		try {
+			$connection = ConnectionManager::get('default');
+			$tables = $connection->getSchemaCollection()->listTables();
+			return in_array('judging_assignments', $tables, true);
+		} catch (\Throwable $e) {
+			return false;
+		}
+	}
 
     public function index() {
 
@@ -563,20 +575,14 @@ class ConventionregistrationsController extends AppController {
 			
 			
 			
-			if ($this->request->is('post'))
+			if ($this->request->is(['post', 'put', 'patch']))
 			{	
 				//$this->prx($this->request->getData());
 				
 				$send_email_notification = $this->request->getData('send_email_notification');
-				
-				if(count($this->request->getData('Conventionregistrations.judges_event_ids')))
-				{
-					$judges_event_ids 			= implode(",",$this->request->getData('Conventionregistrations.judges_event_ids'));
-				}
-				else
-				{
-					$judges_event_ids 			= '';
-				}
+
+				$selectedEventIds = (array)$this->request->getData('Conventionregistrations.judges_event_ids');
+				$judges_event_ids = count($selectedEventIds) ? implode(',', $selectedEventIds) : '';
 				
 				$this->Conventionregistrations->updateAll(['judges_event_ids' => $judges_event_ids, 'modified' => date("Y-m-d H:i:s")], ["slug" => $slug]);
 				
@@ -632,9 +638,18 @@ class ConventionregistrationsController extends AppController {
         $this->viewBuilder()->setLayout('admin');
         $this->set('dashboard', '1');
 
+		$hasJudgingAssignments = true;
 		if(!isset($this->JudgingAssignments))
 		{
-			$this->JudgingAssignments = $this->loadModel('JudgingAssignments');
+			try {
+				$this->JudgingAssignments = $this->loadModel('JudgingAssignments');
+			} catch (\Throwable $e) {
+				$hasJudgingAssignments = false;
+			}
+		}
+		if($hasJudgingAssignments && !$this->hasJudgingAssignmentsTable())
+		{
+			$hasJudgingAssignments = false;
 		}
 
 		$sess_admin_header_season_id = $this->request->getSession()->read("sess_admin_header_season_id");
@@ -647,6 +662,12 @@ class ConventionregistrationsController extends AppController {
 		// Handle save POST
 		if($this->request->is('post'))
 		{
+			if(!$hasJudgingAssignments)
+			{
+				$this->Flash->error('Judging assignments table is unavailable. Please run the latest DB updates and try again.');
+				return $this->redirect(['action' => 'judginglist']);
+			}
+
 			$assignments = $this->request->getData('assignments');
 			if(!empty($assignments) && is_array($assignments))
 			{
@@ -846,9 +867,13 @@ class ConventionregistrationsController extends AppController {
 		$this->set('judgeDD', $judgeDD);
 
 		// Load saved assignments keyed by event_id
-		$savedRows = $this->JudgingAssignments->find()->where([
-			'conventionseason_id' => $sess_admin_header_season_id,
-		])->all();
+		$savedRows = [];
+		if($hasJudgingAssignments)
+		{
+			$savedRows = $this->JudgingAssignments->find()->where([
+				'conventionseason_id' => $sess_admin_header_season_id,
+			])->all();
+		}
 		$savedAssignments = [];
 		foreach($savedRows as $row)
 		{
@@ -859,6 +884,7 @@ class ConventionregistrationsController extends AppController {
 			];
 		}
 		$this->set('savedAssignments', $savedAssignments);
+		$this->set('hasJudgingAssignments', $hasJudgingAssignments);
 
 		// Build workload data: how many events each judge is currently assigned to
 		$workloadCounts = [];
@@ -931,8 +957,21 @@ class ConventionregistrationsController extends AppController {
 
 		$this->viewBuilder()->setLayout('admin');
 
+		$hasJudgingAssignments = true;
 		if(!isset($this->JudgingAssignments)) {
-			$this->JudgingAssignments = $this->loadModel('JudgingAssignments');
+			try {
+				$this->JudgingAssignments = $this->loadModel('JudgingAssignments');
+			} catch (\Throwable $e) {
+				$hasJudgingAssignments = false;
+			}
+		}
+		if($hasJudgingAssignments && !$this->hasJudgingAssignmentsTable()) {
+			$hasJudgingAssignments = false;
+		}
+
+		if(!$hasJudgingAssignments) {
+			$this->Flash->error('Judging assignments table is unavailable.');
+			return $this->redirect(['action' => 'judginglist']);
 		}
 
 		$sess_admin_header_season_id = $this->request->getSession()->read("sess_admin_header_season_id");

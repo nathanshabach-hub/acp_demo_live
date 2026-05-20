@@ -101,7 +101,7 @@ $conventionregistrationstudents = $conventionregistrationstudents ?? [];
 								?>
 								</td>
 								
-                                <td data-title="Submitted Date"><?php echo date('M d, Y', strtotime($datarecord->modified)); ?></td>
+                                <td data-title="Submitted Date"><?php echo safe_date('M d, Y', strtotime($datarecord->modified)); ?></td>
 								
 								<td data-title="Action">
 									

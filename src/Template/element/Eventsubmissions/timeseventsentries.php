@@ -124,7 +124,7 @@ $this->Crstudentevents 		= TableRegistry::getTableLocator()->get('Crstudentevent
 						?>
 						</td>
 						<td data-title="School"><?php echo $datarecord->Users['first_name']; ?></td>
-						<td data-title="Submission Date"><?php echo date('M d, Y', strtotime($datarecord->created)); ?></td>
+						<td data-title="Submission Date"><?php echo safe_date('M d, Y', strtotime($datarecord->created)); ?></td>
 						
 						<td data-title="Time">
 						<?php

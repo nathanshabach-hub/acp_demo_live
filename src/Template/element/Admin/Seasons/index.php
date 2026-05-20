@@ -39,7 +39,7 @@ if ($isConferenceScope) {
                             <?php //pr($datarecord); exit;?> 
                             <tr>
                                 <td data-title="Season Year"><?php echo $datarecord->season_year;?></td>
-                                <td data-title="Created"><?php echo date('M d, Y', strtotime($datarecord->created)); ?></td>
+                                <td data-title="Created"><?php echo safe_date('M d, Y', strtotime($datarecord->created)); ?></td>
                                 <td data-title="Action">
                                    
 									<div id="loderstatus<?php echo $datarecord->id; ?>" class="right_action_lo"><?php echo $this->Html->image("loading.gif"); ?></div>

@@ -15,7 +15,7 @@ class GroupsController extends AppController {
     public $paginate = ['limit' => 50];
     public $components = array('PImage');
 	
-	public function initialize() {
+	public function initialize(): void {
         parent::initialize();
 
         // Include the FlashComponent
@@ -199,7 +199,7 @@ class GroupsController extends AppController {
 					if(!$checkSubmission)
 					{
 						// submit event
-						$eventsubmissions = $this->Eventsubmissions->newEntity();
+						$eventsubmissions = $this->Eventsubmissions->newEntity([]);
 						$dataES = $this->Eventsubmissions->patchEntity($eventsubmissions, array());
 
 						$dataES->slug 						= 'event-submission-'.$conventionRegD->id.'-'.time().'-'.rand(100,1000000);

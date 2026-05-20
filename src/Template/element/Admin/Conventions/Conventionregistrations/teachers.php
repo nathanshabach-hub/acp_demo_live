@@ -48,7 +48,7 @@
 								<td data-title="Gender"><?php echo $datarecord->Teachers['gender'];?></td>
 								<td data-title="Judge"><?php if($datarecord->Teachers['is_judge'] == 1) echo 'Yes'; else echo 'No'; ?></td>
 								
-                                <td data-title="Registration Date"><?php echo date('M d, Y', strtotime($datarecord->created)); ?></td>
+                                <td data-title="Registration Date"><?php echo safe_date('M d, Y', strtotime($datarecord->created)); ?></td>
 								
                                 
                             </tr>

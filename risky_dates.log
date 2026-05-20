@@ -1,0 +1,81 @@
+src/Template/element/Conventionregistrations/judgesregistrations.php:21:                                <td data-title="Created"><?php echo date('M d, Y', strtotime($datarecord->created)); ?></td>
+src/Controller/AppController.php:455:		$convStartDate        = date('Y-m-d', strtotime($schedulingD->start_date));
+src/Controller/AppController.php:457:		$convEndDate          = date('Y-m-d', strtotime($convStartDate . ' +' . ($numberOfDays - 1) . ' day'));
+src/Controller/AppController.php:468:				$eventStart = date('H:i:s', strtotime($eventTweak->available_from_time));
+src/Controller/AppController.php:471:				$eventEnd = date('H:i:s', strtotime($eventTweak->available_to_time));
+src/Controller/AppController.php:487:			if ($eventTweak && !empty($eventTweak->pinned_day) && date('l', strtotime($candidateDate)) !== $eventTweak->pinned_day) {
+src/Controller/AppController.php:488:				$candidateDate = date('Y-m-d', strtotime($candidateDate . ' +1 day'));
+src/Controller/AppController.php:497:					$roomStart = date('H:i:s', strtotime($roomD->available_from));
+src/Controller/AppController.php:500:					$roomEnd = date('H:i:s', strtotime($roomD->available_to));
+src/Controller/AppController.php:519:				$candidateDate = date('Y-m-d', strtotime($candidateDate . ' +1 day'));
+src/Controller/AppController.php:552:		$schDateTime	= date('Y-m-d', strtotime($base_sch_date_time));
+src/Controller/AppController.php:566:		$convStartDate        = date('Y-m-d', strtotime($schedulingD->start_date));
+src/Controller/AppController.php:568:		$convEndDate          = date('Y-m-d', strtotime($convStartDate . ' +' . ($numberOfDays - 1) . ' day'));
+src/Controller/AppController.php:571:			$nextDate = date('Y-m-d', strtotime($schDateTime . ' +1 day'));
+src/Controller/AppController.php:601:		$conflict['day']			= date('l', strtotime($schDateTime));
+src/Controller/AppController.php:740:		$schDateTime		= date('Y-m-d', strtotime($base_sch_date_time));
+src/Controller/AppController.php:825:			$date = date('Y-m-d', strtotime($userConflictRecord->sch_date_time));
+src/Controller/AppController.php:831:				'start_time_with_date'  => $date . ' ' . date('H:i:s', strtotime($userConflictRecord->start_time)),
+src/Controller/AppController.php:832:				'finish_time_with_date' => $date . ' ' . date('H:i:s', strtotime($userConflictRecord->finish_time)),
+src/Controller/AppController.php:887:		$schDate 					= date('Y-m-d', strtotime($base_sch_date_time));
+src/Controller/AppController.php:888:		$schDateTime 				= date('Y-m-d', strtotime($base_sch_date_time));
+src/Controller/AppController.php:901:			$fnt_convStartDate        = date('Y-m-d', strtotime($schedulingDFNT->start_date));
+src/Controller/AppController.php:903:			$fnt_convEndDate          = date('Y-m-d', strtotime($fnt_convStartDate . ' +' . ($fnt_numberOfDays - 1) . ' day'));
+src/Controller/AppController.php:906:				$fnt_nextDate = date('Y-m-d', strtotime($schDate . ' +1 day'));
+src/Controller/AppController.php:942:		$conflict->day              = date('l', strtotime($schDateTime));
+src/Template/element/Conventionregistrations/judgeevententries.php:174:						<td data-title="Submission Date" class="col-date"><?php echo date('M d, Y', strtotime($datarecord->created)); ?></td>
+src/Template/element/Transactions/mytransactions.php:44:                                <td data-title="Transaction Date"><?php echo date('M d, Y H:i A', strtotime($datarecord->created)); ?></td>
+src/Template/element/Conventionregistrations/teachers.php:80:                                <td data-title="Created"><?php echo date('M d, Y', strtotime($datarecord->created)); ?></td>
+src/Template/element/Conventionregistrations/myregistrations.php:19:                                <td data-title="Created"><?php echo date('M d, Y', strtotime($datarecord->created)); ?></td>
+src/Template/element/Conventionregistrations/students.php:80:								<td data-title="Created"><?php echo date('M d, Y', strtotime($datarecord->created)); ?></td>
+src/Template/element/Heartevents/viewlist.php:73:                                <td data-title="Created"><?php echo date('M d, Y', strtotime($datarecord->created)); ?></td>
+src/Template/element/Admin/Evaluationcategories/index.php:39:                                <td data-title="Created"><?php echo date('M d, Y', strtotime($datarecord->created)); ?></td>
+src/Template/element/Admin/Evaluationcategories/index.php:48:									echo date('M d, Y', strtotime($datarecord->modified));
+src/Template/element/Combinerequests/viewlist.php:32:						<td data-title="Request Date"><?php echo date('M d, Y', strtotime($datarecord->created)); ?></td>
+src/Template/element/Eventsubmissions/scoreseventsentries.php:149:						<td data-title="Submission Date"><?php echo date('M d, Y', strtotime($datarecord->created)); ?></td>
+src/Template/element/Admin/Evaluationquestions/index.php:42:                                <td data-title="Created"><?php echo date('M d, Y', strtotime($datarecord->created)); ?></td>
+src/Template/element/Admin/Evaluationquestions/index.php:51:									echo date('M d, Y', strtotime($datarecord->modified));
+src/Template/element/Eventsubmissions/distanceseventsentries.php:131:						<td data-title="Submission Date"><?php echo date('M d, Y', strtotime($datarecord->created)); ?></td>
+src/Template/element/Eventsubmissions/soccerkickeventsentries.php:142:						<td data-title="Submission Date"><?php echo date('M d, Y', strtotime($datarecord->created)); ?></td>
+src/Template/element/Admin/Evaluationareas/index.php:57:                                <td data-title="Created"><?php echo date('M d, Y', strtotime($datarecord->created)); ?></td>
+src/Template/element/Admin/Evaluationareas/index.php:66:									echo date('M d, Y', strtotime($datarecord->modified));
+src/Template/element/Eventsubmissions/spellingseventsentries.php:135:						<td data-title="Submission Date"><?php echo date('M d, Y', strtotime($datarecord->created)); ?></td>
+src/Template/element/Users/teachers.php:48:                                <td data-title="Created"><?php echo date('M d, Y', strtotime($datarecord->created)); ?></td>
+src/Template/element/Eventsubmissions/timeseventsentries.php:127:						<td data-title="Submission Date"><?php echo date('M d, Y', strtotime($datarecord->created)); ?></td>
+src/Template/element/Users/students.php:49:                                <td data-title="Sign Up Date"><?php echo date('M d, Y', strtotime($datarecord->created)); ?></td>
+src/Template/element/Admin/Combinerequests/index.php:75:                                <td data-title="Request Date"><?php echo date('M d, Y', strtotime($datarecord->created)); ?></td>
+src/Controller/Admin/AdminsController.php:372:        $startMonth = new \DateTime(date('Y-m-01', strtotime('-5 months')));
+src/Controller/Admin/AdminsController.php:389:            ->where(['Conventionregistrations.created >=' => date('Y-m-01', strtotime('-5 months'))])
+src/Controller/Admin/AdminsController.php:589:		$qualifyingTime = !empty($cse->qualifying_time_score) ? date('i:s', strtotime($cse->qualifying_time_score)) : 'N/A';
+src/Template/element/Admin/Transactions/index.php:45:                                <td data-title="Transaction Date"><?php echo date('M d, Y H:i A', strtotime($datarecord->created)); ?></td>
+src/Template/element/Admin/Eventcategories/index.php:39:                                <td data-title="Created"><?php echo date('M d, Y', strtotime($datarecord->created)); ?></td>
+src/Template/element/Admin/Eventcategories/index.php:48:									echo date('M d, Y', strtotime($datarecord->modified));
+src/Template/element/Admin/Divisions/index.php:54:                                <td data-title="Created"><?php echo date('M d, Y', strtotime($datarecord->created)); ?></td>
+src/Template/element/Admin/Divisions/index.php:63:									echo date('M d, Y', strtotime($datarecord->modified));
+src/Template/element/Admin/Evaluationtags/index.php:39:                                <td data-title="Created"><?php echo date('M d, Y', strtotime($datarecord->created)); ?></td>
+src/Template/element/Admin/Evaluationtags/index.php:48:									echo date('M d, Y', strtotime($datarecord->modified));
+src/Template/element/Admin/Conventionregistrationstudents/allstudents.php:58:                                <td data-title="Registration Date"><?php echo date('M d, Y', strtotime($datarecord->created)); ?></td>
+src/Template/element/Admin/Events/backup/index.php:55:                                <td data-title="Created"><?php echo date('M d, Y', strtotime($datarecord->created)); ?></td>
+src/Template/element/Admin/Evaluationforms/index.php:97:                                <td data-title="Created"><?php echo date('M d, Y', strtotime($datarecord->created)); ?></td>
+src/Template/element/Admin/Evaluationforms/index.php:106:									echo date('M d, Y', strtotime($datarecord->modified));
+src/Template/element/Admin/Conventionregistrations/alljudges.php:62:                                <td data-title="Registration Date"><?php echo date('M d, Y', strtotime($datarecord->created)); ?></td>
+src/Template/element/Admin/Seasons/index.php:42:                                <td data-title="Created"><?php echo date('M d, Y', strtotime($datarecord->created)); ?></td>
+src/Template/Conventionregistrations/registerconventionwizard.php:222:                            <span><i class="fa fa-clock-o"></i> <?php echo date('d M Y', strtotime($convSeasonD->registration_start_date)); ?> – <?php echo date('d M Y', strtotime($convSeasonD->registration_end_date)); ?></span>
+src/Template/Conventionregistrations/registerconventionwizard.php:280:                                    <?php echo date('D, d M Y', strtotime($convSeasonD->registration_start_date)); ?>
+src/Template/Conventionregistrations/registerconventionwizard.php:282:                                    <?php echo date('D, d M Y', strtotime($convSeasonD->registration_end_date)); ?>
+src/Template/element/Admin/Conventionregistrations/teachers.php:67:                                <td><?php echo date('M d, Y', strtotime($datarecord->created)); ?></td>
+src/Template/element/Admin/Conventionregistrations/allschools.php:67:                                <td data-title="Registration Date"><?php echo date('M d, Y', strtotime($datarecord->created)); ?></td>
+src/Template/Conventionregistrations/myconferenceregistrations.php:35:											<td><?php echo date('M d, Y', strtotime($reg->created)); ?></td>
+src/Template/element/Admin/Conventionregistrations/students.php:78:                                <td><?php echo date('M d, Y', strtotime($datarecord->created)); ?></td>
+src/Template/element/Admin/Eventsubmissions/commandperformance.php:104:                                <td data-title="Submitted Date"><?php echo date('M d, Y', strtotime($datarecord->modified)); ?></td>
+src/Template/element/Admin/Conventions/seasons.php:83:                    <span class="val"><?php echo date('M d, Y', strtotime($datarecord->registration_start_date)); ?></span>
+src/Template/element/Admin/Conventions/seasons.php:87:                    <span class="val"><?php echo date('M d, Y', strtotime($datarecord->registration_end_date)); ?></span>
+src/Template/element/Admin/Conventionregistrations/heartevents.php:65:                                <td data-title="Uploaded Date"><?php echo date('M d, Y', strtotime($datarecord->created)); ?></td>
+src/Template/element/Admin/Conventionregistrations/registrant_header.php:72:            <div class="crh-sub">Registered <?php echo date('M d, Y', strtotime($cr->created)); ?></div>
+src/Template/element/Admin/Eventsubmissions/index.php:74:                                <td><?php echo date('M d, Y', strtotime($datarecord->created)); ?></td>
+src/Template/element/Admin/Conventionregistrations/index.php:131:                                <td><?php echo $datarecord->created ? date('M d, Y', strtotime($datarecord->created)) : ''; ?></td>
+src/Template/element/Admin/Conventions/Conventionregistrations/teachers.php:51:                                <td data-title="Registration Date"><?php echo date('M d, Y', strtotime($datarecord->created)); ?></td>
+src/Template/element/Admin/Conventions/Conventionregistrations/students.php:67:                                <td data-title="Registration Date"><?php echo date('M d, Y', strtotime($datarecord->created)); ?></td>
+src/Template/element/Admin/Libraries/index.php:67:                                <td data-title="Created"><?php echo date('M d, Y', strtotime($library->created)); ?></td>
+src/Template/element/Admin/Conventions/Conventionregistrations/heartevents.php:65:                                <td data-title="Uploaded Date"><?php echo date('M d, Y', strtotime($datarecord->created)); ?></td>
+src/Template/element/Admin/index.php:116:								<td data-title="Created"><?php echo date('M d, Y', strtotime($truck->created)); ?></td>

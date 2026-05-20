@@ -16,7 +16,7 @@ private $scheduleWindowWarningShown = false;
 
     //public $helpers = array('Javascript', 'Ajax');
 
-    public function initialize() {
+    public function initialize(): void {
         parent::initialize();
         $this->loadComponent('Flash');
         $action = $this->request->getParam('action');
@@ -64,9 +64,14 @@ private $scheduleWindowWarningShown = false;
     }
 
     public function startschedulec1($convention_season_slug=null) {
+        @set_time_limit(0);
+        @ini_set('max_execution_time', '0');
         
 		
         $this->set('convention_season_slug', $convention_season_slug);
+		$this->request->getSession()->delete('Scheduling.windowWarningShown');
+		$this->scheduleWindowWarningShown = false;
+		$this->clearSchedulingtimings($convention_season_slug);
 		
 		$conventionSD = $this->getConventionSeasonBySlug($convention_season_slug);
 		
@@ -77,17 +82,19 @@ private $scheduleWindowWarningShown = false;
 		}
 		$start_date 			= date("Y-m-d",strtotime($schedulingsD->start_date));
 		$first_day 				= $schedulingsD->first_day;
-		$normal_starting_time 	= date("H:i:s",strtotime($schedulingsD->normal_starting_time));
-		$normal_finish_time 	= date("H:i:s",strtotime($schedulingsD->normal_finish_time));
+		$normal_starting_time 	= $this->normalizeWizardTime($schedulingsD->normal_starting_time);
+		$normal_finish_time 	= $this->normalizeWizardTime($schedulingsD->normal_finish_time);
 		
-		$lunch_time_start 		= date("H:i:s",strtotime($schedulingsD->lunch_time_start));
-		$lunch_time_end 		= date("H:i:s",strtotime($schedulingsD->lunch_time_end));
+		$lunch_time_start 		= $this->normalizeWizardTime($schedulingsD->lunch_time_start);
+		$lunch_time_end 		= $this->normalizeWizardTime($schedulingsD->lunch_time_end);
+		
+		\Cake\Log\Log::error('C1 parsed window season '.$conventionSD->id.': start_date_raw='.(string)$schedulingsD->start_date.', first_day='.(string)$first_day.', normal_start_raw='.(string)$schedulingsD->normal_starting_time.', normal_finish_raw='.(string)$schedulingsD->normal_finish_time.', lunch_start_raw='.(string)$schedulingsD->lunch_time_start.', lunch_end_raw='.(string)$schedulingsD->lunch_time_end.', normal_start_parsed='.$normal_starting_time.', normal_finish_parsed='.$normal_finish_time.', lunch_start_parsed='.$lunch_time_start.', lunch_end_parsed='.$lunch_time_end.', number_of_days='.(string)$schedulingsD->number_of_days);
 		
 		$starting_different_time_first_day_yes_no = $schedulingsD->starting_different_time_first_day_yes_no;
 		if($starting_different_time_first_day_yes_no == 1)
 		{
-			$different_first_day_start_time = date("H:i:s",strtotime($schedulingsD->different_first_day_start_time));
-			$different_first_day_end_time 	= date("H:i:s",strtotime($schedulingsD->different_first_day_end_time));
+			$different_first_day_start_time = $this->normalizeWizardTime($schedulingsD->different_first_day_start_time);
+			$different_first_day_end_time 	= $this->normalizeWizardTime($schedulingsD->different_first_day_end_time);
 		}
 		
 		
@@ -120,6 +127,25 @@ private $scheduleWindowWarningShown = false;
 		$c1EventsWithoutGroups = 0;
 		$c1RecordsCreated = 0;
 		$c1UngroupedFallbackCount = 0;
+		$c1EventsUsingSeasonRoomFallback = 0;
+		$c1SaveFailures = 0;
+		$c1FirstSaveError = '';
+		$c1EventsWithGroups = 0;
+		$c1AttemptedRows = 0;
+		$c1WindowExceededEvents = 0;
+
+		$seasonFallbackRoomIds = [];
+		$condSeasonRooms = array();
+		$condSeasonRooms[] = "(Conventionseasonroomevents.conventionseasons_id = '".$conventionSD->id."' AND Conventionseasonroomevents.convention_id = '".$conventionSD->convention_id."' AND Conventionseasonroomevents.season_id = '".$conventionSD->season_id."' AND Conventionseasonroomevents.season_year = '".$conventionSD->season_year."')";
+		$seasonRoomRows = $this->Conventionseasonroomevents->find()->select(['room_id'])->where($condSeasonRooms)->all();
+		foreach($seasonRoomRows as $seasonRoomRow)
+		{
+			$roomId = (int)$seasonRoomRow->room_id;
+			if($roomId > 0 && !in_array($roomId, $seasonFallbackRoomIds, true))
+			{
+				$seasonFallbackRoomIds[] = $roomId;
+			}
+		}
 		//$this->prx($condEVCS);
 		foreach($allEventsCS as $eventcs)
 		{
@@ -146,6 +172,12 @@ private $scheduleWindowWarningShown = false;
 			foreach($roomCSEvent as $roomeventcs)
 			{
 				$roomArrCSEvent[] = $roomeventcs->room_id;
+			}
+
+			if(!count((array)$roomArrCSEvent) && count((array)$seasonFallbackRoomIds))
+			{
+				$roomArrCSEvent = $seasonFallbackRoomIds;
+				$c1EventsUsingSeasonRoomFallback++;
 			}
 			//$this->prx($roomArrCSEvent);
 			
@@ -224,6 +256,7 @@ private $scheduleWindowWarningShown = false;
 			
 				if(count((array)$mainArrForEvent))
 				{
+					$c1EventsWithGroups++;
 					$cntrDays = 1;
 					$resetTime = 1;
 					$schDay = $first_day;
@@ -339,8 +372,8 @@ private $scheduleWindowWarningShown = false;
 								}
 							}
 							
-							$normal_starting_time 	= date("H:i:s",strtotime($schedulingsD->normal_starting_time));
-							$normal_finish_time 	= date("H:i:s",strtotime($schedulingsD->normal_finish_time));
+							$normal_starting_time 	= $this->normalizeWizardTime($schedulingsD->normal_starting_time);
+							$normal_finish_time 	= $this->normalizeWizardTime($schedulingsD->normal_finish_time);
 							
 							$start_time 	= $normal_starting_time;
 							$finish_time 	= date("H:i:s", strtotime('+ '.$eventSetupRoundJudTime.' minutes', strtotime($normal_starting_time)));
@@ -376,8 +409,8 @@ private $scheduleWindowWarningShown = false;
 									break;
 								}
 								
-								$normal_starting_time 	= date("H:i:s",strtotime($schedulingsD->normal_starting_time));
-								$normal_finish_time 	= date("H:i:s",strtotime($schedulingsD->normal_finish_time));
+								$normal_starting_time 	= $this->normalizeWizardTime($schedulingsD->normal_starting_time);
+								$normal_finish_time 	= $this->normalizeWizardTime($schedulingsD->normal_finish_time);
 								
 								$start_time 	= $normal_starting_time;
 								$finish_time 	= date("H:i:s", strtotime('+ '.$eventSetupRoundJudTime.' minutes', strtotime($normal_starting_time)));
@@ -396,6 +429,7 @@ private $scheduleWindowWarningShown = false;
 						
 						
 						/* Validate slot against all break periods (lunch, judging, sports) with loop to prevent blind jumps */
+						$c1AttemptedRows++;
 						$validSlot = $this->findValidSlot($start_time, $finish_time, $schDay, $schStartDate, $cntrDays, $normal_starting_time, $normal_finish_time, $eventSetupRoundJudTime, $schedulingsD, $lunch_time_start, $lunch_time_end, $roomID, (int)$eventIDCS);
 						if (!empty($validSlot['window_exhausted'])) {
 							$windowExceeded = true;
@@ -421,7 +455,7 @@ private $scheduleWindowWarningShown = false;
 						$fetchUserType = $this->fetchUserType($stData[7]);
 						
 						//now enter schedule timings
-						$schedulingtimings = $this->Schedulingtimings->newEntity();
+						$schedulingtimings = $this->Schedulingtimings->newEntity([]);
 						$dataST = $this->Schedulingtimings->patchEntity($schedulingtimings, array());
 
 						$dataST->schedule_category				= 1;
@@ -456,9 +490,18 @@ private $scheduleWindowWarningShown = false;
 						{
 							$c1RecordsCreated++;
 						}
+						else
+						{
+							$c1SaveFailures++;
+							if($c1FirstSaveError === '')
+							{
+								$c1FirstSaveError = json_encode($dataST->getErrors());
+							}
+						}
 					}
 
 					if ($windowExceeded) {
+						$c1WindowExceededEvents++;
 						continue;
 					}
 				}
@@ -478,15 +521,25 @@ private $scheduleWindowWarningShown = false;
 		{
 			$this->Flash->warning('Category 1 has no generated schedule rows yet. Possible reasons: rooms not assigned for '.$c1EventsWithoutRooms.' event(s), no grouped participants found for '.$c1EventsWithoutGroups.' event(s), or the configured day window ran out before slots could be assigned.');
 		}
+		if($c1EventsUsingSeasonRoomFallback > 0)
+		{
+			$this->Flash->warning('Category 1 used season-level room fallback for '.$c1EventsUsingSeasonRoomFallback.' event(s) because per-event room mappings were missing.');
+		}
 		if($c1UngroupedFallbackCount > 0)
 		{
 			$this->Flash->warning('Category 1 used Ungrouped fallback for '.$c1UngroupedFallbackCount.' registration/event entry(ies) where group name was missing.');
 		}
+		if($c1SaveFailures > 0)
+		{
+			$this->Flash->warning('Category 1 failed to save '.$c1SaveFailures.' row(s). First save error: '.$c1FirstSaveError);
+		}
+
+		\Cake\Log\Log::error('C1 summary season '.$conventionSD->id.': events='.count((array)$allEventsCS).', events_with_groups='.$c1EventsWithGroups.', attempted_rows='.$c1AttemptedRows.', window_exceeded_events='.$c1WindowExceededEvents.', created='.$c1RecordsCreated.', save_failures='.$c1SaveFailures.', no_rooms='.$c1EventsWithoutRooms.', no_groups='.$c1EventsWithoutGroups.', season_room_fallback='.$c1EventsUsingSeasonRoomFallback.', ungrouped_fallback='.$c1UngroupedFallbackCount.', first_save_error='.$c1FirstSaveError);
 		
 		//exit;
 		
 		//$this->Flash->success($msgSuccess);
-		$this->redirect(['controller' => 'schedulingtimings', 'action' => 'fillgroupuserids', $convention_season_slug]);
+		return $this->redirect(['controller' => 'schedulingtimings', 'action' => 'startschedulec2', $convention_season_slug]);
 		
     }
 	
@@ -503,11 +556,11 @@ private $scheduleWindowWarningShown = false;
 			return $redirect;
 		}
 		$first_day 				= $schedulingsD->first_day;
-		$normal_starting_time 	= date("H:i:s",strtotime($schedulingsD->normal_starting_time));
-		$normal_finish_time 	= date("H:i:s",strtotime($schedulingsD->normal_finish_time));
+		$normal_starting_time 	= $this->normalizeWizardTime($schedulingsD->normal_starting_time);
+		$normal_finish_time 	= $this->normalizeWizardTime($schedulingsD->normal_finish_time);
 		
-		$lunch_time_start 		= date("H:i:s",strtotime($schedulingsD->lunch_time_start));
-		$lunch_time_end 		= date("H:i:s",strtotime($schedulingsD->lunch_time_end));
+		$lunch_time_start 		= $this->normalizeWizardTime($schedulingsD->lunch_time_start);
+		$lunch_time_end 		= $this->normalizeWizardTime($schedulingsD->lunch_time_end);
 		
 		$start_date 			= date("Y-m-d",strtotime($schedulingsD->start_date));
 		
@@ -515,8 +568,8 @@ private $scheduleWindowWarningShown = false;
 		$starting_different_time_first_day_yes_no = $schedulingsD->starting_different_time_first_day_yes_no;
 		if($starting_different_time_first_day_yes_no == 1)
 		{
-			$different_first_day_start_time = date("H:i:s",strtotime($schedulingsD->different_first_day_start_time));
-			$different_first_day_end_time 	= date("H:i:s",strtotime($schedulingsD->different_first_day_end_time));
+			$different_first_day_start_time = $this->normalizeWizardTime($schedulingsD->different_first_day_start_time);
+			$different_first_day_end_time 	= $this->normalizeWizardTime($schedulingsD->different_first_day_end_time);
 		}
 		
 		/* TO GET ALL THE EVENTS WITH FOLLOWING CONDITIONS */
@@ -611,7 +664,7 @@ private $scheduleWindowWarningShown = false;
 					$fetchUserType = $this->fetchUserType($byeStudentID);
 					
 					//now save bye player in database, opponent of bye player id will be 0
-					$schedulingtimings = $this->Schedulingtimings->newEntity();
+					$schedulingtimings = $this->Schedulingtimings->newEntity([]);
 					$dataBye = $this->Schedulingtimings->patchEntity($schedulingtimings, array());
 
 					$dataBye->schedule_category				= 2;
@@ -673,7 +726,7 @@ private $scheduleWindowWarningShown = false;
 				$fetchUserType = $this->fetchUserType($first_student_id);
 				
 				//now save remaining player in database with opponent user id
-				$schedulingtimings = $this->Schedulingtimings->newEntity();
+				$schedulingtimings = $this->Schedulingtimings->newEntity([]);
 				$dataBye = $this->Schedulingtimings->patchEntity($schedulingtimings, array());
 
 				$dataBye->schedule_category				= 2;
@@ -767,7 +820,7 @@ private $scheduleWindowWarningShown = false;
 					$second_id    = $tempNR[$randSecondID];
 					array_splice($tempNR, $randSecondID, 1);
 
-					$schedulingtimings = $this->Schedulingtimings->newEntity();
+					$schedulingtimings = $this->Schedulingtimings->newEntity([]);
 					$dataBye = $this->Schedulingtimings->patchEntity($schedulingtimings, array());
 					$dataBye->schedule_category			= 2;
 					$dataBye->conventionseasons_id		= $conventionSD->id;
@@ -799,7 +852,7 @@ private $scheduleWindowWarningShown = false;
 				// Odd player out — give them a bye into the next round
 				if (count($tempNR) === 1) {
 					$byeMatchId = $tempNR[0];
-					$schedulingtimings = $this->Schedulingtimings->newEntity();
+					$schedulingtimings = $this->Schedulingtimings->newEntity([]);
 					$dataBye = $this->Schedulingtimings->patchEntity($schedulingtimings, array());
 					$dataBye->schedule_category			= 2;
 					$dataBye->conventionseasons_id		= $conventionSD->id;
@@ -939,8 +992,8 @@ private $scheduleWindowWarningShown = false;
 								break;
 							}
 							
-							$normal_starting_time 	= date("H:i:s",strtotime($schedulingsD->normal_starting_time));
-							$normal_finish_time 	= date("H:i:s",strtotime($schedulingsD->normal_finish_time));
+							$normal_starting_time 	= $this->normalizeWizardTime($schedulingsD->normal_starting_time);
+							$normal_finish_time 	= $this->normalizeWizardTime($schedulingsD->normal_finish_time);
 							
 							$start_time 	= $normal_starting_time;
 							$finish_time 	= date("H:i:s", strtotime('+ '.$eventSetupRoundJudTime.' minutes', strtotime($normal_starting_time)));
@@ -996,8 +1049,8 @@ private $scheduleWindowWarningShown = false;
 								}
 							}
 							
-							$normal_starting_time 	= date("H:i:s",strtotime($schedulingsD->normal_starting_time));
-							$normal_finish_time 	= date("H:i:s",strtotime($schedulingsD->normal_finish_time));
+							$normal_starting_time 	= $this->normalizeWizardTime($schedulingsD->normal_starting_time);
+							$normal_finish_time 	= $this->normalizeWizardTime($schedulingsD->normal_finish_time);
 							
 							$start_time 	= $normal_starting_time;
 							$finish_time 	= date("H:i:s", strtotime('+ '.$eventSetupRoundJudTime.' minutes', strtotime($normal_starting_time)));
@@ -1081,7 +1134,7 @@ private $scheduleWindowWarningShown = false;
 		//exit;
 		
 		//$this->Flash->success('Scheduling completed successfully for category 2.');
-		$this->redirect(['controller' => 'schedulingtimings', 'action' => 'startschedulec3', $convention_season_slug]);
+		return $this->redirect(['controller' => 'schedulingtimings', 'action' => 'startschedulec3', $convention_season_slug]);
 		
 	}
 	
@@ -1099,19 +1152,19 @@ private $scheduleWindowWarningShown = false;
 		}
 		$first_day 				= $schedulingsD->first_day;
 		
-		$normal_starting_time 	= date("H:i:s",strtotime($schedulingsD->normal_starting_time));
-		$normal_finish_time 	= date("H:i:s",strtotime($schedulingsD->normal_finish_time));
+		$normal_starting_time 	= $this->normalizeWizardTime($schedulingsD->normal_starting_time);
+		$normal_finish_time 	= $this->normalizeWizardTime($schedulingsD->normal_finish_time);
 		
-		$lunch_time_start 		= date("H:i:s",strtotime($schedulingsD->lunch_time_start));
-		$lunch_time_end 		= date("H:i:s",strtotime($schedulingsD->lunch_time_end));
+		$lunch_time_start 		= $this->normalizeWizardTime($schedulingsD->lunch_time_start);
+		$lunch_time_end 		= $this->normalizeWizardTime($schedulingsD->lunch_time_end);
 		
 		$start_date 			= date("Y-m-d",strtotime($schedulingsD->start_date));
 		
 		$starting_different_time_first_day_yes_no = $schedulingsD->starting_different_time_first_day_yes_no;
 		if($starting_different_time_first_day_yes_no == 1)
 		{
-			$different_first_day_start_time = date("H:i:s",strtotime($schedulingsD->different_first_day_start_time));
-			$different_first_day_end_time 	= date("H:i:s",strtotime($schedulingsD->different_first_day_end_time));
+			$different_first_day_start_time = $this->normalizeWizardTime($schedulingsD->different_first_day_start_time);
+			$different_first_day_end_time 	= $this->normalizeWizardTime($schedulingsD->different_first_day_end_time);
 		}
 		
 		
@@ -1250,7 +1303,7 @@ private $scheduleWindowWarningShown = false;
 						
 						
 						//now save bye player in database, opponent of bye player id will be 0
-						$schedulingtimings = $this->Schedulingtimings->newEntity();
+						$schedulingtimings = $this->Schedulingtimings->newEntity([]);
 						$dataBye = $this->Schedulingtimings->patchEntity($schedulingtimings, array());
 
 						$dataBye->schedule_category				= 3;
@@ -1310,7 +1363,7 @@ private $scheduleWindowWarningShown = false;
 					$fetchUserType = $this->fetchUserType($dataGExplodeFirst[7]);
 					
 					//now save remaining player in database with opponent user id
-					$schedulingtimings = $this->Schedulingtimings->newEntity();
+					$schedulingtimings = $this->Schedulingtimings->newEntity([]);
 					$dataBye = $this->Schedulingtimings->patchEntity($schedulingtimings, array());
 
 					$dataBye->schedule_category				= 3;
@@ -1360,6 +1413,10 @@ private $scheduleWindowWarningShown = false;
 			
 			// to get the last match number for this event
 			$evLastMatch = $this->Schedulingtimings->find()->where(['Schedulingtimings.schedule_category' => 3,'Schedulingtimings.conventionseasons_id' => $conventionSD->id,'Schedulingtimings.convention_id' => $conventionSD->convention_id,'Schedulingtimings.season_id' => $conventionSD->season_id,'Schedulingtimings.season_year' => $conventionSD->season_year,'Schedulingtimings.event_id' => $event_id_c3,'Schedulingtimings.round_number' => 1])->order(['Schedulingtimings.match_number' => 'DESC'])->first();
+			if(!$evLastMatch || (int)$countTotalMatR1Event === 0)
+			{
+				continue;
+			}
 			$lastMatchNumber = $evLastMatch->match_number;
 			
 			$lastMatchNumber = $lastMatchNumber+1;
@@ -1402,7 +1459,7 @@ private $scheduleWindowWarningShown = false;
 					$second_id    = $tempNR[$randSecondID];
 					array_splice($tempNR, $randSecondID, 1);
 
-					$schedulingtimings = $this->Schedulingtimings->newEntity();
+					$schedulingtimings = $this->Schedulingtimings->newEntity([]);
 					$dataBye = $this->Schedulingtimings->patchEntity($schedulingtimings, array());
 					$dataBye->schedule_category			= 3;
 					$dataBye->conventionseasons_id		= $conventionSD->id;
@@ -1433,7 +1490,7 @@ private $scheduleWindowWarningShown = false;
 				// Odd group out — give them a bye into the next round
 				if (count($tempNR) === 1) {
 					$byeMatchId = $tempNR[0];
-					$schedulingtimings = $this->Schedulingtimings->newEntity();
+					$schedulingtimings = $this->Schedulingtimings->newEntity([]);
 					$dataBye = $this->Schedulingtimings->patchEntity($schedulingtimings, array());
 					$dataBye->schedule_category			= 3;
 					$dataBye->conventionseasons_id		= $conventionSD->id;
@@ -1577,8 +1634,8 @@ private $scheduleWindowWarningShown = false;
 							}
 						}
 						
-						$normal_starting_time 	= date("H:i:s",strtotime($schedulingsD->normal_starting_time));
-						$normal_finish_time 	= date("H:i:s",strtotime($schedulingsD->normal_finish_time));
+						$normal_starting_time 	= $this->normalizeWizardTime($schedulingsD->normal_starting_time);
+						$normal_finish_time 	= $this->normalizeWizardTime($schedulingsD->normal_finish_time);
 						
 						$start_time 	= $normal_starting_time;
 						$finish_time 	= date("H:i:s", strtotime('+ '.$eventSetupRoundJudTime.' minutes', strtotime($normal_starting_time)));
@@ -1628,8 +1685,8 @@ private $scheduleWindowWarningShown = false;
 								break;
 							}
 							
-							$normal_starting_time 	= date("H:i:s",strtotime($schedulingsD->normal_starting_time));
-							$normal_finish_time 	= date("H:i:s",strtotime($schedulingsD->normal_finish_time));
+							$normal_starting_time 	= $this->normalizeWizardTime($schedulingsD->normal_starting_time);
+							$normal_finish_time 	= $this->normalizeWizardTime($schedulingsD->normal_finish_time);
 							
 							$start_time 	= $normal_starting_time;
 							$finish_time 	= date("H:i:s", strtotime('+ '.$eventSetupRoundJudTime.' minutes', strtotime($normal_starting_time)));
@@ -1637,8 +1694,8 @@ private $scheduleWindowWarningShown = false;
 						
 						if($schDay != $first_day)
 						{
-							$normal_starting_time 	= date("H:i:s",strtotime($schedulingsD->normal_starting_time));
-							$normal_finish_time 	= date("H:i:s",strtotime($schedulingsD->normal_finish_time));
+							$normal_starting_time 	= $this->normalizeWizardTime($schedulingsD->normal_starting_time);
+							$normal_finish_time 	= $this->normalizeWizardTime($schedulingsD->normal_finish_time);
 						}
 						
 						/* echo $schDay.'->'.$start_time.' :: '.$finish_time.'==eventid--'.$event_id.'---availID=====>'.$availID.'-----normal_starting_time==>'.$normal_starting_time.'--normal_finish_time==>'.$normal_finish_time;
@@ -1703,7 +1760,7 @@ private $scheduleWindowWarningShown = false;
 		//echo $cntrEVSCH;exit;
 		
 		//$this->Flash->success('Scheduling completed successfully for category 3.');
-		$this->redirect(['controller' => 'schedulingtimings', 'action' => 'startschedulec1', $convention_season_slug]);
+		return $this->redirect(['controller' => 'schedulingtimings', 'action' => 'startschedulec4', $convention_season_slug]);
 		
 	}
 	
@@ -1712,8 +1769,6 @@ private $scheduleWindowWarningShown = false;
 		@set_time_limit(0);
 		@ini_set('max_execution_time', '0');
 		$this->set('convention_season_slug', $convention_season_slug);
-		$this->request->getSession()->delete('Scheduling.windowWarningShown');
-		$this->scheduleWindowWarningShown = false;
 		$defaultConnection = ConnectionManager::get('default');
 		if (method_exists($defaultConnection, 'enableQueryLogging')) {
 			$defaultConnection->enableQueryLogging(false);
@@ -1723,8 +1778,7 @@ private $scheduleWindowWarningShown = false;
 		
 		$conventionSD = $this->getConventionSeasonBySlug($convention_season_slug);
 
-		/* Start a fresh full run now that Category 4 is first in chain */
-		$this->clearSchedulingtimings($convention_season_slug);
+		/* Category 4 now runs after categories 1-3 in full chain. */
 		
 		//$this->prx($conventionSD);
 		
@@ -1810,7 +1864,7 @@ private $scheduleWindowWarningShown = false;
 				$fetchUserType = $this->fetchUserType($student_id);
 				
 				//now enter schedule timings
-				$schedulingtimings = $this->Schedulingtimings->newEntity();
+				$schedulingtimings = $this->Schedulingtimings->newEntity([]);
 				$dataST = $this->Schedulingtimings->patchEntity($schedulingtimings, array());
 
 				$dataST->schedule_category				= 4;
@@ -1994,8 +2048,8 @@ private $scheduleWindowWarningShown = false;
 								break;
 							}
 							
-							$normal_starting_time 	= date("H:i:s",strtotime($schedulingsD->normal_starting_time));
-							$normal_finish_time 	= date("H:i:s",strtotime($schedulingsD->normal_finish_time));
+							$normal_starting_time 	= $this->normalizeWizardTime($schedulingsD->normal_starting_time);
+							$normal_finish_time 	= $this->normalizeWizardTime($schedulingsD->normal_finish_time);
 							
 							$start_time 	= $normal_starting_time;
 							$finish_time 	= date("H:i:s", strtotime('+ '.$eventSetupRoundJudTime.' minutes', strtotime($normal_starting_time)));
@@ -2052,8 +2106,8 @@ private $scheduleWindowWarningShown = false;
 								}
 							}
 							
-							$normal_starting_time 	= date("H:i:s",strtotime($schedulingsD->normal_starting_time));
-							$normal_finish_time 	= date("H:i:s",strtotime($schedulingsD->normal_finish_time));
+							$normal_starting_time 	= $this->normalizeWizardTime($schedulingsD->normal_starting_time);
+							$normal_finish_time 	= $this->normalizeWizardTime($schedulingsD->normal_finish_time);
 							
 							$start_time 	= $normal_starting_time;
 							$finish_time 	= date("H:i:s", strtotime('+ '.$eventSetupRoundJudTime.' minutes', strtotime($normal_starting_time)));
@@ -2113,8 +2167,8 @@ private $scheduleWindowWarningShown = false;
 									break;
 								}
 							}
-							$normal_starting_time 	= date("H:i:s",strtotime($schedulingsD->normal_starting_time));
-							$normal_finish_time 	= date("H:i:s",strtotime($schedulingsD->normal_finish_time));
+							$normal_starting_time 	= $this->normalizeWizardTime($schedulingsD->normal_starting_time);
+							$normal_finish_time 	= $this->normalizeWizardTime($schedulingsD->normal_finish_time);
 							$start_time 	= $normal_starting_time;
 							$finish_time 	= date("H:i:s", strtotime('+ '.$eventSetupRoundJudTime.' minutes', strtotime($normal_starting_time)));
 						}
@@ -2167,7 +2221,7 @@ private $scheduleWindowWarningShown = false;
 		}
 		
 		//$this->Flash->success('Scheduling done for category 4.');
-		$this->redirect(['controller' => 'schedulingtimings', 'action' => 'startschedulec2', $convention_season_slug]);
+		return $this->redirect(['controller' => 'schedulingtimings', 'action' => 'fillgroupuserids', $convention_season_slug]);
 		
 	}
 	
@@ -2266,7 +2320,7 @@ private $scheduleWindowWarningShown = false;
 		//exit;
 		
 		// Now check for conflicts
-		$this->redirect(['controller' => 'schedulingtimings', 'action' => 'listconflicts', $convention_season_slug]);
+		return $this->redirect(['controller' => 'schedulingtimings', 'action' => 'listconflicts', $convention_season_slug]);
 	}
 	
 	
@@ -2417,7 +2471,7 @@ private $scheduleWindowWarningShown = false;
 		}
 		
 		$this->Flash->success($msG);
-		$this->redirect(['controller' => 'schedulings', 'action' => 'schedulecategory', $convention_season_slug]);
+		return $this->redirect(['controller' => 'schedulings', 'action' => 'schedulecategory', $convention_season_slug]);
 	}
 	
 	
@@ -2430,7 +2484,7 @@ private $scheduleWindowWarningShown = false;
 		
 		$this->Flash->success('Scheduling completed successfully. Overlapping and conflicts removed successfully.');
 		
-		$this->redirect(['controller' => 'schedulings', 'action' => 'schedulecategory', $convention_season_slug]);
+		return $this->redirect(['controller' => 'schedulings', 'action' => 'schedulecategory', $convention_season_slug]);
 		
 	}
 
@@ -2440,6 +2494,10 @@ private $scheduleWindowWarningShown = false;
 		$actualFirstDay = $this->getWeekDayFromDate($startDate);
 		$configuredFirstDay = (string)($schedulingsD->first_day ?? '');
 		$numberOfDays = (int)($schedulingsD->number_of_days ?? 0);
+		$normalStartingTime = $this->normalizeWizardTime($schedulingsD->normal_starting_time ?? null);
+		$normalFinishTime = $this->normalizeWizardTime($schedulingsD->normal_finish_time ?? null);
+		$lunchStartTime = $this->normalizeWizardTime($schedulingsD->lunch_time_start ?? null);
+		$lunchEndTime = $this->normalizeWizardTime($schedulingsD->lunch_time_end ?? null);
 
 		if ($numberOfDays < 1) {
 			$this->Flash->error('Scheduling wizard configuration is incomplete. Number of Days must be at least 1 before schedules can be generated.');
@@ -2456,7 +2514,70 @@ private $scheduleWindowWarningShown = false;
 			return $this->redirect(['controller' => 'schedulings', 'action' => 'wizard', $convention_season_slug]);
 		}
 
+		if (empty($normalStartingTime) || empty($normalFinishTime) || empty($lunchStartTime) || empty($lunchEndTime)) {
+			$this->Flash->error('Scheduling wizard configuration is incomplete. Normal and lunch start/finish times are required before schedules can be generated.');
+			return $this->redirect(['controller' => 'schedulings', 'action' => 'wizard', $convention_season_slug]);
+		}
+
+		if (!$this->isValidTimeRange($normalStartingTime, $normalFinishTime)) {
+			$this->Flash->error('Scheduling wizard time window is invalid. Normal Starting Time must be earlier than Normal Finish Time.');
+			return $this->redirect(['controller' => 'schedulings', 'action' => 'wizard', $convention_season_slug]);
+		}
+
+		if (!$this->isValidTimeRange($lunchStartTime, $lunchEndTime)) {
+			$this->Flash->error('Scheduling wizard lunch window is invalid. Lunch Time Start must be earlier than Lunch Time End.');
+			return $this->redirect(['controller' => 'schedulings', 'action' => 'wizard', $convention_season_slug]);
+		}
+
+		if ($schedulingsD->starting_different_time_first_day_yes_no == 1) {
+			$firstDayStart = $this->normalizeWizardTime($schedulingsD->different_first_day_start_time ?? null);
+			$firstDayEnd = $this->normalizeWizardTime($schedulingsD->different_first_day_end_time ?? null);
+			if (empty($firstDayStart) || empty($firstDayEnd) || !$this->isValidTimeRange($firstDayStart, $firstDayEnd)) {
+				$this->Flash->error('Scheduling wizard first-day window is invalid. Different first-day start and finish times are required and must be ordered correctly.');
+				return $this->redirect(['controller' => 'schedulings', 'action' => 'wizard', $convention_season_slug]);
+			}
+		}
+
+		if ($schedulingsD->sports_day_yes_no == 1) {
+			$sportsStart = $this->normalizeWizardTime($schedulingsD->sports_day_starting_time ?? null);
+			$sportsEnd = $this->normalizeWizardTime($schedulingsD->sports_day_finish_time ?? null);
+			if (empty($schedulingsD->sports_day) || empty($sportsStart) || empty($sportsEnd) || !$this->isValidTimeRange($sportsStart, $sportsEnd)) {
+				$this->Flash->error('Scheduling wizard sports-day window is invalid. Sports day, start time, and finish time are required and must be ordered correctly.');
+				return $this->redirect(['controller' => 'schedulings', 'action' => 'wizard', $convention_season_slug]);
+			}
+		}
+
 		return null;
+	}
+
+	private function normalizeWizardTime($timeValue)
+	{
+		if ($timeValue === null || $timeValue === '') {
+			return null;
+		}
+
+		if (is_object($timeValue) && method_exists($timeValue, 'format')) {
+			return $timeValue->format('H:i:s');
+		}
+
+		$timestamp = strtotime((string)$timeValue);
+		if ($timestamp === false) {
+			return null;
+		}
+
+		return date('H:i:s', $timestamp);
+	}
+
+	private function isValidTimeRange($startTime, $endTime): bool
+	{
+		$start = strtotime((string)$startTime);
+		$end = strtotime((string)$endTime);
+
+		if ($start === false || $end === false) {
+			return false;
+		}
+
+		return $start < $end;
 	}
 
 	private function applyNextConventionDay(&$schDay, &$schStartDate, &$cntrDays, $schedulingsD): bool
@@ -2572,8 +2693,8 @@ private $scheduleWindowWarningShown = false;
 					$windowExhausted = true;
 					break;
 				}
-				$normal_starting_time = date("H:i:s",strtotime($schedulingsD->normal_starting_time));
-				$normal_finish_time = date("H:i:s",strtotime($schedulingsD->normal_finish_time));
+				$normal_starting_time = $this->normalizeWizardTime($schedulingsD->normal_starting_time);
+				$normal_finish_time = $this->normalizeWizardTime($schedulingsD->normal_finish_time);
 				$start_time = $eventAvailableFrom !== null ? $eventAvailableFrom : $normal_starting_time;
 				$finish_time = date("H:i:s", strtotime('+ '.$eventSetupRoundJudTime.' minutes', strtotime($start_time)));
 				$slotChanged = true;
@@ -2593,8 +2714,8 @@ private $scheduleWindowWarningShown = false;
 						$windowExhausted = true;
 						break;
 					}
-					$normal_starting_time 	= date("H:i:s",strtotime($schedulingsD->normal_starting_time));
-					$normal_finish_time 	= date("H:i:s",strtotime($schedulingsD->normal_finish_time));
+					$normal_starting_time 	= $this->normalizeWizardTime($schedulingsD->normal_starting_time);
+					$normal_finish_time 	= $this->normalizeWizardTime($schedulingsD->normal_finish_time);
 					$start_time 	= $normal_starting_time;
 					$finish_time 	= date("H:i:s", strtotime('+ '.$eventSetupRoundJudTime.' minutes', strtotime($normal_starting_time)));
 				}
@@ -2604,8 +2725,8 @@ private $scheduleWindowWarningShown = false;
 			if($schedulingsD->judging_breaks_yes_no == 1)
 			{
 				// Morning break
-				$jb_morning_start 	= date("H:i:s",strtotime($schedulingsD->judging_breaks_morning_break_starting_time));
-				$jb_morning_end 	= date("H:i:s",strtotime($schedulingsD->judging_breaks_morning_break_finish_time));
+				$jb_morning_start 	= $this->normalizeWizardTime($schedulingsD->judging_breaks_morning_break_starting_time);
+				$jb_morning_end 	= $this->normalizeWizardTime($schedulingsD->judging_breaks_morning_break_finish_time);
 				
 				if( (strtotime($start_time)>=strtotime($jb_morning_start) && strtotime($start_time)<=strtotime($jb_morning_end)) || 
 				(strtotime($finish_time)>=strtotime($jb_morning_start) && strtotime($finish_time)<=strtotime($jb_morning_end)))
@@ -2621,16 +2742,16 @@ private $scheduleWindowWarningShown = false;
 						$windowExhausted = true;
 						break;
 					}
-					$normal_starting_time 	= date("H:i:s",strtotime($schedulingsD->normal_starting_time));
-					$normal_finish_time 	= date("H:i:s",strtotime($schedulingsD->normal_finish_time));
+					$normal_starting_time 	= $this->normalizeWizardTime($schedulingsD->normal_starting_time);
+					$normal_finish_time 	= $this->normalizeWizardTime($schedulingsD->normal_finish_time);
 					$start_time 	= $normal_starting_time;
 					$finish_time 	= date("H:i:s", strtotime('+ '.$eventSetupRoundJudTime.' minutes', strtotime($normal_starting_time)));
 					$slotChanged = true;
 				}
 				
 				// Afternoon break
-				$jb_afternoon_start = date("H:i:s",strtotime($schedulingsD->judging_breaks_afternoon_break_start_time));
-				$jb_afternoon_end 	= date("H:i:s",strtotime($schedulingsD->judging_breaks_afternoon_break_finish_time));
+				$jb_afternoon_start = $this->normalizeWizardTime($schedulingsD->judging_breaks_afternoon_break_start_time);
+				$jb_afternoon_end 	= $this->normalizeWizardTime($schedulingsD->judging_breaks_afternoon_break_finish_time);
 				
 				if( (strtotime($start_time)>=strtotime($jb_afternoon_start) && strtotime($start_time)<=strtotime($jb_afternoon_end)) || 
 				(strtotime($finish_time)>=strtotime($jb_afternoon_start) && strtotime($finish_time)<=strtotime($jb_afternoon_end)))
@@ -2646,8 +2767,8 @@ private $scheduleWindowWarningShown = false;
 						$windowExhausted = true;
 						break;
 					}
-					$normal_starting_time 	= date("H:i:s",strtotime($schedulingsD->normal_starting_time));
-					$normal_finish_time 	= date("H:i:s",strtotime($schedulingsD->normal_finish_time));
+					$normal_starting_time 	= $this->normalizeWizardTime($schedulingsD->normal_starting_time);
+					$normal_finish_time 	= $this->normalizeWizardTime($schedulingsD->normal_finish_time);
 					$start_time 	= $normal_starting_time;
 					$finish_time 	= date("H:i:s", strtotime('+ '.$eventSetupRoundJudTime.' minutes', strtotime($normal_starting_time)));
 					$slotChanged = true;
@@ -2658,8 +2779,8 @@ private $scheduleWindowWarningShown = false;
 			if($schedulingsD->sports_day_yes_no == 1)
 			{
 				$sports_day					= $schedulingsD->sports_day;
-				$sports_day_starting_time	= date("H:i:s",strtotime($schedulingsD->sports_day_starting_time));
-				$sports_day_finish_time		= date("H:i:s",strtotime($schedulingsD->sports_day_finish_time));
+				$sports_day_starting_time	= $this->normalizeWizardTime($schedulingsD->sports_day_starting_time);
+				$sports_day_finish_time		= $this->normalizeWizardTime($schedulingsD->sports_day_finish_time);
 				
 				if($sports_day == $schDay)
 				{
@@ -2677,8 +2798,8 @@ private $scheduleWindowWarningShown = false;
 							$windowExhausted = true;
 							break;
 						}
-						$normal_starting_time 	= date("H:i:s",strtotime($schedulingsD->normal_starting_time));
-						$normal_finish_time 	= date("H:i:s",strtotime($schedulingsD->normal_finish_time));
+						$normal_starting_time 	= $this->normalizeWizardTime($schedulingsD->normal_starting_time);
+						$normal_finish_time 	= $this->normalizeWizardTime($schedulingsD->normal_finish_time);
 						$start_time 	= $normal_starting_time;
 						$finish_time 	= date("H:i:s", strtotime('+ '.$eventSetupRoundJudTime.' minutes', strtotime($normal_starting_time)));
 						$slotChanged = true;
@@ -2706,8 +2827,8 @@ private $scheduleWindowWarningShown = false;
 						$windowExhausted = true;
 						break;
 					}
-					$normal_starting_time = date("H:i:s", strtotime($schedulingsD->normal_starting_time));
-					$normal_finish_time = date("H:i:s", strtotime($schedulingsD->normal_finish_time));
+					$normal_starting_time = $this->normalizeWizardTime($schedulingsD->normal_starting_time);
+					$normal_finish_time = $this->normalizeWizardTime($schedulingsD->normal_finish_time);
 					$start_time = (strtotime($effectiveRoomStart) > strtotime($normal_starting_time)) ? $effectiveRoomStart : $normal_starting_time;
 					$finish_time = date("H:i:s", strtotime('+ '.$eventSetupRoundJudTime.' minutes', strtotime($start_time)));
 					$slotChanged = true;

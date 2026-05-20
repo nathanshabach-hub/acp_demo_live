@@ -106,10 +106,15 @@ if ($physicalColumnIndex !== null && $platformColumnIndex !== null) {
 					<div class="category-column">
 						<?php foreach ($columnCategories as $eventcat): ?>
 						<div class="category-block">
-							<div class="category-title">
+							<?php $categoryBodyId = 'category_body_' . (int)$eventcat->id; ?>
+							<button type="button" class="category-title accordion-trigger is-open" data-target="<?php echo h($categoryBodyId); ?>" aria-expanded="true">
 								<span class="title-text"><?php echo strtoupper(h($eventcat->name)); ?></span>
-								<span class="title-meta"><?php echo $eventcat->max_events; ?> max</span>
-							</div>
+								<span class="title-badges">
+									<span class="title-meta"><?php echo $eventcat->max_events; ?> max</span>
+									<span class="accordion-icon">−</span>
+								</span>
+							</button>
+							<div id="<?php echo h($categoryBodyId); ?>" class="category-content">
 
 						<?php
 						$arrConvSeasonEventsDivsImplode = implode(",", $arrConvSeasonEventsDivs);
@@ -120,12 +125,18 @@ if ($physicalColumnIndex !== null && $platformColumnIndex !== null) {
 						$eventDivList = $this->Divisions->find()->where($condEvDivs)->order(['Divisions.sort_order' => 'ASC'])->all();
 						foreach ($eventDivList as $eventdiv):
 						$showDivisionHeading = strcasecmp(trim((string)$eventdiv->name), trim((string)$eventcat->name)) !== 0;
+						$divisionBodyId = 'division_body_' . (int)$eventcat->id . '_' . (int)$eventdiv->id;
 						?>
 						<?php if ($showDivisionHeading): ?>
-						<div class="division-name">
-							<span class="title-text"><?php echo strtoupper(h($eventdiv->name)); ?></span>
-							<span class="title-meta"><?php echo $eventdiv->max_events; ?> max</span>
-						</div>
+						<div class="division-block">
+							<button type="button" class="division-name accordion-trigger division-trigger is-open" data-target="<?php echo h($divisionBodyId); ?>" aria-expanded="true">
+								<span class="title-text"><?php echo strtoupper(h($eventdiv->name)); ?></span>
+								<span class="title-badges">
+									<span class="title-meta"><?php echo $eventdiv->max_events; ?> max</span>
+									<span class="accordion-icon small">−</span>
+								</span>
+							</button>
+							<div id="<?php echo h($divisionBodyId); ?>" class="division-content">
 						<?php endif; ?>
 						<table class="table table-bordered mini-event-table">
 							<thead>
@@ -158,7 +169,12 @@ if ($physicalColumnIndex !== null && $platformColumnIndex !== null) {
 								<?php endforeach; ?>
 							</tbody>
 						</table>
+						<?php if ($showDivisionHeading): ?>
+							</div>
+						</div>
+						<?php endif; ?>
 						<?php endforeach; ?>
+							</div>
 					</div>
 						<?php endforeach; ?>
 					</div>
@@ -306,6 +322,7 @@ if ($physicalColumnIndex !== null && $platformColumnIndex !== null) {
 }
 
 .category-title {
+	width: 100%;
 	font-size: 15px;
 	font-weight: 700;
 	border: 1px solid #dde7f5;
@@ -317,9 +334,35 @@ if ($physicalColumnIndex !== null && $platformColumnIndex !== null) {
 	justify-content: space-between;
 	align-items: center;
 	gap: 8px;
+	cursor: pointer;
+	text-align: left;
+}
+
+.category-content {
+	display: block;
+}
+
+.title-badges {
+	display: inline-flex;
+	align-items: center;
+	gap: 8px;
+}
+
+.accordion-icon {
+	font-size: 16px;
+	font-weight: 700;
+	line-height: 1;
+	color: var(--ui-accent);
+	min-width: 12px;
+	text-align: center;
+}
+
+.accordion-icon.small {
+	font-size: 14px;
 }
 
 .division-name {
+	width: 100%;
 	font-size: 13px;
 	font-weight: 700;
 	margin: 8px 0 4px;
@@ -332,6 +375,12 @@ if ($physicalColumnIndex !== null && $platformColumnIndex !== null) {
 	justify-content: space-between;
 	align-items: center;
 	gap: 8px;
+	cursor: pointer;
+	text-align: left;
+}
+
+.division-content {
+	display: block;
 }
 
 .title-meta {
@@ -480,6 +529,27 @@ if ($physicalColumnIndex !== null && $platformColumnIndex !== null) {
 
 <script>
 $(document).ready(function() {
+	function setAccordionState($trigger, shouldOpen) {
+		var targetId = $trigger.data('target');
+		if (!targetId) {
+			return;
+		}
+
+		var $content = $('#' + targetId);
+		$trigger.toggleClass('is-open', shouldOpen).attr('aria-expanded', shouldOpen ? 'true' : 'false');
+		$trigger.find('.accordion-icon').text(shouldOpen ? '−' : '+');
+		if (shouldOpen) {
+			$content.stop(true, true).slideDown(120);
+		} else {
+			$content.stop(true, true).slideUp(120);
+		}
+	}
+
+	$('#event_blocks').on('click', '.accordion-trigger', function(event) {
+		event.preventDefault();
+		setAccordionState($(this), !$(this).hasClass('is-open'));
+	});
+
 	function syncEventRowState(rowElement) {
 		var $row = $(rowElement);
 		var isChecked = $row.find('.event-checkbox').is(':checked');

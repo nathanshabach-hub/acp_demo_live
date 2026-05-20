@@ -17,7 +17,7 @@ class UsersController extends AppController {
     public $components = array('PImage');
 
     
-	public function beforeFilter(EventInterface $event) {
+	public function beforeFilter(EventInterface $event): void {
         parent::beforeFilter($event);
         // Auth component removed in CakePHP 5 - session-based auth is used directly
         
@@ -25,6 +25,7 @@ class UsersController extends AppController {
         $this->loadComponent('Flash');
 
 		$this->Emailtemplates = $this->loadModel('Emailtemplates');
+		$this->Admins = $this->loadModel('Admins');
 		$this->Conventions = $this->loadModel('Conventions');
 		$this->Conventionseasons = $this->loadModel('Conventionseasons');
 		$this->Events = $this->loadModel('Events');
@@ -154,7 +155,7 @@ class UsersController extends AppController {
 								if(!$checkRegExists)
 								{
 									// insert new record
-									$conventionregistrations = $this->Conventionregistrations->newEntity();
+									$conventionregistrations = $this->Conventionregistrations->newEntity([]);
 									$dataCR = $this->Conventionregistrations->patchEntity($conventionregistrations, array());
 
 									$dataCR->slug 					= "convention-registration-".$convention_id.'-'.$user_id.'-'.$season_id.'-'.time();
@@ -618,7 +619,7 @@ class UsersController extends AppController {
 		$userDetails = $this->Users->find()->where(['Users.id' => $user_id])->first();
         $this->set('userDetails', $userDetails);
 		
-        $users = $this->Users->newEntity();
+        $users = $this->Users->newEntity([]);
 
         if ($this->request->is('post')) {
             //die;
@@ -799,7 +800,7 @@ class UsersController extends AppController {
 		global $yesNoDD;
 		$this->set('yesNoDD', $yesNoDD);
 		
-        $users = $this->Users->newEntity();
+		$users = $this->Users->newEntity([]);
         if ($this->request->is('post')) {
 			
 			//$this->prx($this->request->getData());
@@ -1031,7 +1032,7 @@ class UsersController extends AppController {
 		global $genderDD;
 		$this->set('genderDD', $genderDD);
 		
-        $users = $this->Users->newEntity();
+        $users = $this->Users->newEntity([]);
         if ($this->request->is('post')) {
 			
 			//$this->prx($this->request->getData());
@@ -1203,7 +1204,7 @@ class UsersController extends AppController {
 		
 		$this->set('header_menu_judgesreg_active', 'active');
 		
-		$users = $this->Users->newEntity();
+		$users = $this->Users->newEntity([]);
         if ($this->request->is('post')) {
             
 			$data = $this->Users->patchEntity($users, $this->request->getData());

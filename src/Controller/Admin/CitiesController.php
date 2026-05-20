@@ -13,7 +13,7 @@ class CitiesController extends AppController {
 
     //public $helpers = array('Javascript', 'Ajax');
 
-    public function initialize() {
+    public function initialize(): void {
         parent::initialize();
         $this->loadComponent('Flash');
         $action = $this->request->getParam('action');
@@ -126,7 +126,7 @@ class CitiesController extends AppController {
         $this->set('manageCities', '1');
         $this->set('locationAdd', '1');
 
-        $cities = $this->Cities->newEntity();
+        $cities = $this->Cities->newEntity([]);
 
         if ($this->request->is('post')) {
 			

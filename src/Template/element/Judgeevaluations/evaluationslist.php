@@ -96,7 +96,7 @@ $this->Judgeevaluations = TableRegistry::getTableLocator()->get('Judgeevaluation
 						
 						?>
 						</td>
-						<td data-title="Date"><?php echo date("m/d/Y",strtotime($datarecord->created));?></td>
+						<td data-title="Date"><?php echo safe_date("m/d/Y", strtotime($datarecord->created));?></td>
 						
 						
 						<td data-title="Action">

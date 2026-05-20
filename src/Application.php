@@ -15,7 +15,7 @@ use Cake\Routing\RouteBuilder;
 
 class Application extends BaseApplication
 {
-    public function bootstrap()
+    public function bootstrap(): void
     {
         parent::bootstrap();
 
@@ -31,23 +31,23 @@ class Application extends BaseApplication
         }
     }
 
-    protected function bootstrapCli()
+    protected function bootstrapCli(): void
     {
         $this->addPlugin('Bake');
     }
 
-    public function middleware($middleware)
+    public function middleware(MiddlewareQueue $middlewareQueue): MiddlewareQueue
     {
-        $middleware
+        $middlewareQueue
             ->add(new ErrorHandlerMiddleware())
             ->add(new AssetMiddleware(['cacheTime' => Configure::read('Asset.cacheTime') ?? '+1 year']))
             ->add(new RoutingMiddleware($this))
             ->add(new BodyParserMiddleware());
 
-        return $middleware;
+        return $middlewareQueue;
     }
 
-    public function routes($routes)
+    public function routes(RouteBuilder $routes): void
     {
         parent::routes($routes);
         $closure = require CONFIG . 'routes.php';
@@ -56,7 +56,7 @@ class Application extends BaseApplication
         }
     }
 
-    public function console($commands)
+    public function console(CommandCollection $commands): CommandCollection
     {
         $commands = parent::console($commands);
         return $commands;

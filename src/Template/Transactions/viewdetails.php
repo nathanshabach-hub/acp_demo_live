@@ -45,7 +45,7 @@ $(document).ready(function () {
 												<td data-title="Discount"><?php echo CURR.' '.number_format($transactionD->total_discount_applied,2); ?></td>
 												<td data-title="Amount"><?php echo CURR.' '.number_format($transactionD->total_amount,2); ?></td>
 												<td data-title="Status"><?php echo $paymentStatus[$transactionD->status]; ?></td>
-												<td data-title="Transaction Date"><?php echo date('M d, Y H:i A', strtotime($transactionD->created)); ?></td>
+												<td data-title="Transaction Date"><?php echo safe_date('M d, Y H:i A', strtotime($transactionD->created)); ?></td>
 												<td data-title="Transaction ID"><?php echo $transactionD->transaction_id_received ? $transactionD->transaction_id_received : 'N/A'; ?></td>
 												
 												</td>

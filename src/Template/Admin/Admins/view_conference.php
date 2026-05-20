@@ -251,9 +251,9 @@ $totalRegistrations = $registrations->count();
                                 <td>
                                     <?php if ($hasOpen && $hasEnd): ?>
                                         <span style="font-size:12px;">
-                                            <?php echo date('d M', strtotime($cs->registration_start_date)); ?>
+                                            <?php echo safe_date('d M', strtotime($cs->registration_start_date)); ?>
                                             &rarr;
-                                            <?php echo date('d M Y', strtotime($cs->registration_end_date)); ?>
+                                            <?php echo safe_date('d M Y', strtotime($cs->registration_end_date)); ?>
                                         </span>
                                     <?php else: ?>
                                         <span class="text-muted" style="font-size:12px;">No window set</span>
@@ -311,7 +311,7 @@ $totalRegistrations = $registrations->count();
                                     <?php if ($adminEmail): ?><div class="school-email"><?php echo h($adminEmail); ?></div><?php endif; ?>
                                 </td>
                                 <td><?php echo h($reg->season_year); ?></td>
-                                <td><?php echo !empty($reg->created) ? date('d M Y', strtotime($reg->created)) : '—'; ?></td>
+                                <td><?php echo !empty($reg->created) ? safe_date('d M Y', strtotime($reg->created)) : '—'; ?></td>
                                 <td>
                                     <?php if ($attCount > 0): ?>
                                         <button type="button" class="exp-toggle" onclick="vcToggleAtt(<?php echo $reg->id; ?>)">

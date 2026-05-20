@@ -14,7 +14,7 @@ class JudgeevaluationsController extends AppController {
 
     //public $helpers = array('Javascript', 'Ajax');
 
-    public function initialize() {
+    public function initialize(): void {
         parent::initialize();
         $this->loadComponent('Flash');
         $action = $this->request->getParam('action');
@@ -32,6 +32,7 @@ class JudgeevaluationsController extends AppController {
 		$this->Conventionseasonevents = $this->loadModel('Conventionseasonevents');
 		$this->Conventionregistrations = $this->loadModel('Conventionregistrations');
 		$this->Eventsubmissions = $this->loadModel('Eventsubmissions');
+        $this->Judgeevaluations = $this->loadModel('Judgeevaluations');
 		$this->Judgeevaluationmarks = $this->loadModel('Judgeevaluationmarks');
         $this->JudgingAssignments = $this->loadModel('JudgingAssignments');
         $this->Users = $this->loadModel('Users');

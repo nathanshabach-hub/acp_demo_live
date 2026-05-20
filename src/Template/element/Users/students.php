@@ -46,7 +46,7 @@
                                 <td data-title="Age"><?php echo date("Y")-$datarecord->birth_year;?></td>
                                 
                                 <td data-title="Gender"><?php echo $datarecord->gender ? $datarecord->gender : 'N/A'; ?></td>
-                                <td data-title="Sign Up Date"><?php echo date('M d, Y', strtotime($datarecord->created)); ?></td>
+                                <td data-title="Sign Up Date"><?php echo safe_date('M d, Y', strtotime($datarecord->created)); ?></td>
                                 <td data-title="Status">
 									<?php
 									if($datarecord->status == 0) 

@@ -11,7 +11,7 @@ use Cake\I18n\I18n;
 
 class ConventionregistrationsController extends AppController {
 
-    public function initialize() {
+    public function initialize(): void {
         parent::initialize();
 
         // Include the FlashComponent
@@ -432,7 +432,7 @@ class ConventionregistrationsController extends AppController {
 			$this->redirect(['controller' => 'users', 'action' => 'dashboard']);
 		}
 		
-        $conventionregistrationteachers = $this->Conventionregistrationteachers->newEntity();
+        $conventionregistrationteachers = $this->Conventionregistrationteachers->newEntity([]);
 
         if ($this->request->is('post')) {
 
@@ -456,7 +456,7 @@ class ConventionregistrationsController extends AppController {
 			$failedCount = 0;
 
 			foreach ($teacherIds as $teacher_id) {
-				$dataCRT = $this->Conventionregistrationteachers->newEntity();
+				$dataCRT = $this->Conventionregistrationteachers->newEntity([]);
 				$dataCRT->slug 								= "conv-reg-supervisor-".$sess_selected_convention_registration_id.'-'.$teacher_id.'-'.time().'-'.mt_rand(1000,9999);
 				$dataCRT->conventionregistration_id			= $sess_selected_convention_registration_id;
 				$dataCRT->convention_id						= $conventionRegD->convention_id;
@@ -734,7 +734,7 @@ class ConventionregistrationsController extends AppController {
 			$this->redirect(['controller' => 'users', 'action' => 'dashboard']);
 		}
 		
-        $conventionregistrationstudents = $this->Conventionregistrationstudents->newEntity();
+        $conventionregistrationstudents = $this->Conventionregistrationstudents->newEntity([]);
 		if ($this->request->is('post')) {
 			
 			$studentIds = (array)$this->request->getData('Conventionregistrationstudents.student_id');
@@ -764,6 +764,18 @@ class ConventionregistrationsController extends AppController {
 			$failedCount = 0;
 			$ageFailedCount = 0;
 
+			$conventionType = 0;
+			$conventionD = $this->Conventions->find()
+				->where(['Conventions.id' => $conventionRegD->convention_id])
+				->select(['convention_type'])
+				->first();
+			if (!empty($conventionD)) {
+				$conventionType = (int)$conventionD->convention_type;
+			}
+
+			$minStudentAge = ($conventionType === 3) ? 8 : 11;
+			$ageRangeLabel = $minStudentAge . '-20';
+
 			foreach ($studentIds as $studentId) {
 				$studentD = $this->Users->find()
 					->where(['Users.id' => $studentId])
@@ -776,12 +788,12 @@ class ConventionregistrationsController extends AppController {
 				}
 
 				$studentAge = $conventionRegD->season_year - $studentD->birth_year;
-				if ($studentAge < 11 || $studentAge >= 21) {
+				if ($studentAge < $minStudentAge || $studentAge >= 21) {
 					$ageFailedCount++;
 					continue;
 				}
 
-				$data = $this->Conventionregistrationstudents->newEntity();
+				$data = $this->Conventionregistrationstudents->newEntity([]);
 				$data->slug 						= 'conv-reg-student-'.$sess_selected_convention_registration_id.'-'.$studentId.'-'.time().'-'.mt_rand(1000,9999);
 				$data->conventionregistration_id	= $sess_selected_convention_registration_id;
 				$data->convention_id				= $conventionRegD->convention_id;
@@ -803,7 +815,7 @@ class ConventionregistrationsController extends AppController {
 			if ($savedCount > 0) {
 				$message = $savedCount . ' student(s) added successfully to convention registration.';
 				if ($ageFailedCount > 0) {
-					$message .= ' ' . $ageFailedCount . ' student(s) were skipped due to age limits (11-20 years in convention year).';
+					$message .= ' ' . $ageFailedCount . ' student(s) were skipped due to age limits (' . $ageRangeLabel . ' years in convention year).';
 				}
 				if ($failedCount > 0) {
 					$message .= ' ' . $failedCount . ' student(s) could not be added.';
@@ -813,7 +825,7 @@ class ConventionregistrationsController extends AppController {
 			}
 
 			if ($ageFailedCount > 0) {
-				$this->Flash->error('No students were added. Selected students must be between 11 and 20 years old in the convention year.');
+				$this->Flash->error('No students were added. Selected students must be between ' . $ageRangeLabel . ' years old in the convention year.');
 			} else {
 				$this->Flash->error('No students were added. Please try again.');
 			}
@@ -948,7 +960,7 @@ class ConventionregistrationsController extends AppController {
 					$this->Conventionregistrations->updateAll(['modified' => date('Y-m-d H:i:s')], ['id' => $checkRegExists->id]);
 					$this->Flash->error('You have already registered for this conference.');
 				} else {
-					$conventionregistrations = $this->Conventionregistrations->newEntity();
+					$conventionregistrations = $this->Conventionregistrations->newEntity([]);
 					$dataCR = $this->Conventionregistrations->patchEntity($conventionregistrations, []);
 
 					$dataCR->conventionseason_id = $convSeasonD->id;
@@ -972,7 +984,7 @@ class ConventionregistrationsController extends AppController {
 						foreach ($selectedIds as $teacherId) {
 							$teacherUser = $this->Users->find()->where(['Users.id' => $teacherId])->first();
 							if (!$teacherUser) continue;
-							$at = $this->Conventionregistrationteachers->newEntity();
+							$at = $this->Conventionregistrationteachers->newEntity([]);
 							$at->slug                       = "conv-reg-supervisor-{$regId}-{$teacherId}-" . time();
 							$at->conventionregistration_id  = $regId;
 							$at->convention_id              = $convention_id;
@@ -1004,7 +1016,7 @@ class ConventionregistrationsController extends AppController {
 							if ($existUser) {
 								$newTeacherId = $existUser->id;
 							} else {
-								$newU = $this->Users->newEntity();
+								$newU = $this->Users->newEntity([]);
 								$newU->user_type            = 'Teacher_Parent';
 								$newU->school_id            = $userDetails->school_id;
 								$newU->first_name           = $firstName;
@@ -1018,7 +1030,7 @@ class ConventionregistrationsController extends AppController {
 								$newTeacherId               = $savedUser ? $savedUser->id : null;
 							}
 							if (!$newTeacherId) continue;
-							$at = $this->Conventionregistrationteachers->newEntity();
+							$at = $this->Conventionregistrationteachers->newEntity([]);
 							$at->slug                       = "conv-reg-supervisor-{$regId}-{$newTeacherId}-" . time() . "-{$i}";
 							$at->conventionregistration_id  = $regId;
 							$at->convention_id              = $convention_id;
@@ -1117,7 +1129,7 @@ class ConventionregistrationsController extends AppController {
 					else
 					{
 						// insert new record
-						$conventionregistrations = $this->Conventionregistrations->newEntity();
+						$conventionregistrations = $this->Conventionregistrations->newEntity([]);
 						$dataCR = $this->Conventionregistrations->patchEntity($conventionregistrations, array());
 
 						$dataCR->conventionseason_id 	= $convSeasonD->id;
@@ -1411,7 +1423,7 @@ class ConventionregistrationsController extends AppController {
 			$this->redirect(['controller' => 'users', 'action' => 'dashboard']);
 		}
 
-		$conventionregistrationstudents = $this->Conventionregistrationstudents->newEntity();
+		$conventionregistrationstudents = $this->Conventionregistrationstudents->newEntity([]);
 		
 		if ($this->request->is('post'))
 		{
@@ -1478,12 +1490,16 @@ class ConventionregistrationsController extends AppController {
 						continue;
 					}
 					$eventD = $eventsById[$event_id];
+					$registrationConventionType = isset($conventionRegD->Conventions['convention_type']) ? (int)$conventionRegD->Conventions['convention_type'] : 0;
+					if ((int)$eventD->event_grp_name === 5 && $registrationConventionType !== 3) {
+						continue;
+					}
 
 					$checkValidEvent = $this->checkAgeWithGroup($studentAge, $eventD->event_grp_name);
 					$checkValidEventGender = $this->checkGenderWithEvent($studentGender, $eventD->event_gender);
 
 					if ($checkValidEvent && $checkValidEventGender && $studentAge < 21) {
-						$crstudentevents = $this->Crstudentevents->newEntity();
+						$crstudentevents = $this->Crstudentevents->newEntity([]);
 						$dataCRSE = $this->Crstudentevents->patchEntity($crstudentevents, $this->request->getData());
 
 						$dataCRSE->slug								= "conv-student-event-".$event_id.'-'.$student_id.'-'.time().'-'.mt_rand(1000,9999);
@@ -1559,7 +1575,7 @@ class ConventionregistrationsController extends AppController {
 		
 		$selectedEvents = array();
 		$liveEventsCounter = 0;
-		$conventionregistrationstudents = $this->Conventionregistrationstudents->newEntity();
+		$conventionregistrationstudents = $this->Conventionregistrationstudents->newEntity([]);
 		
 		// to check if registration is still open//$this->checkRegistrationStillOpen($this->request->getSession()->read("sess_selected_convention_registration_id"));
 		
@@ -1654,6 +1670,10 @@ class ConventionregistrationsController extends AppController {
 				
 				// to check group of this event, if group is not open, then check age of student
 				$checkValidEvent = $this->checkAgeWithGroup($studentAge,$eventD->event_grp_name);
+				if((int)$eventD->event_grp_name === 5 && (int)$convention_type !== 3)
+				{
+					continue;
+				}
 				
 				// to check that females cannot participate in male event and vice versa
 				$checkValidEventGender = $this->checkGenderWithEvent($studentGender,$eventD->event_gender);
@@ -1780,6 +1800,10 @@ class ConventionregistrationsController extends AppController {
 					
 					// to check group of this event, if group is not open, then check age of student
 					$checkValidEvent = $this->checkAgeWithGroup($studentAge,$eventD->event_grp_name);
+					if((int)$eventD->event_grp_name === 5 && (int)$convention_type !== 3)
+					{
+						continue;
+					}
 					
 					// to check that females cannot participate in male event and vice versa
 					$checkValidEventGender = $this->checkGenderWithEvent($studentGender,$eventD->event_gender);
@@ -1797,7 +1821,7 @@ class ConventionregistrationsController extends AppController {
 						else
 						{
 							// now add a nee entry in crstudentevent
-							$crstudentevents = $this->Crstudentevents->newEntity();
+							$crstudentevents = $this->Crstudentevents->newEntity([]);
 							$dataCRSE = $this->Crstudentevents->patchEntity($crstudentevents, $this->request->getData());
 
 							$dataCRSE->slug								= "conv-student-event-".$event_id.'-'.$student_id.'-'.time();
@@ -1977,13 +2001,17 @@ class ConventionregistrationsController extends AppController {
 				
 				// to check group of this event, if group is not open, then check age of student
 				$checkValidEvent = $this->checkAgeWithGroup($studentAge,$eventD->event_grp_name);
+				if((int)$eventD->event_grp_name === 5 && (int)$convention_type !== 3)
+				{
+					continue;
+				}
 				
 				// to check that females cannot participate in male event and vice versa
 				$checkValidEventGender = $this->checkGenderWithEvent($studentGender,$eventD->event_gender);
 				
 				if($checkValidEvent && $checkValidEventGender && $studentAge<21)
 				{
-					$crstudentevents = $this->Crstudentevents->newEntity();
+					$crstudentevents = $this->Crstudentevents->newEntity([]);
 					$dataCRSE = $this->Crstudentevents->patchEntity($crstudentevents, $this->request->getData());
 
 					$dataCRSE->slug								= "conv-student-event-".$event_id.'-'.$student_id.'-'.time();
@@ -2244,7 +2272,7 @@ class ConventionregistrationsController extends AppController {
 				$this->set('alreadySelectedIds', $alreadySelectedIds);
 
 				// Always provide a new entity for the form (GET and POST new-record path)
-				$conventionregistrations = $this->Conventionregistrations->newEntity();
+				$conventionregistrations = $this->Conventionregistrations->newEntity([]);
 				$this->set('conventionregistrations', $conventionregistrations);
 				
 				if ($this->request->is('post'))
@@ -2267,7 +2295,7 @@ class ConventionregistrationsController extends AppController {
 					else
 					{
 						// insert new record
-						$conventionregistrations = $this->Conventionregistrations->newEntity();
+						$conventionregistrations = $this->Conventionregistrations->newEntity([]);
 						$dataCR = $this->Conventionregistrations->patchEntity($conventionregistrations, array());
 
 						$dataCR->conventionseason_id 	= $convSeasonD->id;
@@ -2511,7 +2539,7 @@ class ConventionregistrationsController extends AppController {
 				}
 				else
 				{
-					$judgeevaluations = $this->Judgeevaluations->newEntity();
+					$judgeevaluations = $this->Judgeevaluations->newEntity([]);
 					$dataJ = $this->Judgeevaluations->patchEntity($judgeevaluations, array());
 
 					$dataJ->slug = "judge-event-evaluation-".$submission->id.'-'.time().'-'.rand(100,1000000);
@@ -2607,7 +2635,7 @@ class ConventionregistrationsController extends AppController {
 				}
 				else
 				{
-					$judgeevaluations = $this->Judgeevaluations->newEntity();
+					$judgeevaluations = $this->Judgeevaluations->newEntity([]);
 					$dataJ = $this->Judgeevaluations->patchEntity($judgeevaluations, array());
 
 					$dataJ->slug = "judge-event-evaluation-".$submission->id.'-'.time().'-'.rand(100,1000000);

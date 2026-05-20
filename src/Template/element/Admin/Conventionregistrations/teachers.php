@@ -64,7 +64,7 @@ if (isset($conventionregistrationteachers) && !$conventionregistrationteachers->
                                         <span style="color:#b8c2cc;">—</span>
                                     <?php } ?>
                                 </td>
-                                <td><?php echo date('M d, Y', strtotime($datarecord->created)); ?></td>
+                                <td><?php echo safe_date('M d, Y', strtotime($datarecord->created)); ?></td>
                             </tr>
                         <?php } ?>
                     </tbody>

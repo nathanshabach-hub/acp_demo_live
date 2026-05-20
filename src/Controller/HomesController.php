@@ -11,7 +11,7 @@ use Cake\I18n\I18n;
 
 class HomesController extends AppController {
 
-    public function initialize() {
+    public function initialize(): void {
         parent::initialize();
 
         // Include the FlashComponent
@@ -211,7 +211,7 @@ class HomesController extends AppController {
 						else
 						{
 							// insert new record
-							$conventionregistrations = $this->Conventionregistrations->newEntity();
+							$conventionregistrations = $this->Conventionregistrations->newEntity([]);
 							$dataCR = $this->Conventionregistrations->patchEntity($conventionregistrations, array());
 
 							$dataCR->conventionseason_id 	= $convSeasonD->id;
@@ -299,7 +299,7 @@ class HomesController extends AppController {
 				// .. then send link to verify account and create password
 				$schoolD = $this->Users->find()->where(['Users.id' => $conventionRegD->user_id])->first();
 				
-				$users = $this->Users->newEntity();
+				$users = $this->Users->newEntity([]);
 				$dataUT = $this->Users->patchEntity($users, array());
 
 				$dataUT->slug 					= $this->getSlug($schoolD->middle_name.'-'.rand(100,1000000). time(), 'Users');
@@ -739,6 +739,11 @@ class HomesController extends AppController {
 		$discardLastEventSelected 	= 0;
 		$errorFlag 					= 0;
 		$errorMsg 					= array();
+		$totalEvChecked 			= 0;
+		$lastEventCategoryId 		= null;
+		$lastEventDivisionId 		= null;
+		$lastEventIsPhotography 	= false;
+		$lastEventIsDesignTech 		= false;
 		
 		if($checkedEventIDS)
 		{
@@ -813,11 +818,33 @@ class HomesController extends AppController {
 					$designTechCount++;
 				}
 			}
+
+			$lastEvent = null;
+			if ($lastCheckedEVID) {
+				$lastEvent = $this->Events->find()
+					->where(['Events.id' => $lastCheckedEVID])
+					->contain(['Divisions'])
+					->first();
+			}
+
+			if ($lastEvent && !empty($lastEvent->Divisions)) {
+				$lastEventCategoryId = $lastEvent->Divisions['eventcategory_id'];
+				$lastEventDivisionId = $lastEvent->division_id;
+
+				$lastDivisionName = strtolower(trim((string)($lastEvent->Divisions['name'] ?? '')));
+				$lastDivisionName = preg_replace('/\s+/', ' ', $lastDivisionName);
+				$lastEventIsPhotography = strpos($lastDivisionName, 'photography') !== false;
+				$lastEventIsDesignTech = (strpos($lastDivisionName, 'design') !== false && strpos($lastDivisionName, 'technology') !== false);
+			}
 			
 			// now check in each category, max events allowed
 			$eventCats = $this->Eventcategories->find()->where([])->all();
 			foreach($eventCats as $eventcat)
 			{
+				if ($lastEventCategoryId === null || (int)$eventcat->id !== (int)$lastEventCategoryId) {
+					continue;
+				}
+
 				// now check that if this cat exists in selected events, then check max
 				// if max exceeds, then generate error
 				if(in_array('cat_'.$eventcat->id,$arrLiveEventCats))
@@ -836,6 +863,10 @@ class HomesController extends AppController {
 			$eventDivs = $this->Divisions->find()->where([])->all();
 			foreach($eventDivs as $eventdiv)
 			{
+				if ($lastEventDivisionId === null || (int)$eventdiv->id !== (int)$lastEventDivisionId) {
+					continue;
+				}
+
 				// now check that if this div exists in selected events, then check max
 				// if max exceeds, then generate error
 				if(in_array('div_'.$eventdiv->id,$arrLiveEventDivs))
@@ -851,17 +882,17 @@ class HomesController extends AppController {
 			}
 
 			$mediaArtsTotal = $photographyCount + $designTechCount;
-			if ($photographyCount > 3) {
+			if ($lastEventIsPhotography && $photographyCount > 3) {
 				$errorFlag = 1;
 				$errorMsg[] = 'Maximum events reached in division Photography.';
 				$discardLastEventSelected = 1;
 			}
-			if ($designTechCount > 3) {
+			if ($lastEventIsDesignTech && $designTechCount > 3) {
 				$errorFlag = 1;
 				$errorMsg[] = 'Maximum events reached in division Design & Technology.';
 				$discardLastEventSelected = 1;
 			}
-			if ($mediaArtsTotal > 5) {
+			if (($lastEventIsPhotography || $lastEventIsDesignTech) && $mediaArtsTotal > 5) {
 				$errorFlag = 1;
 				$errorMsg[] = 'Maximum events reached in division Media Arts.';
 				$discardLastEventSelected = 1;
@@ -919,7 +950,7 @@ class HomesController extends AppController {
 					
 					// to get division id
 					
-					$events = $this->Events->newEntity();
+					$events = $this->Events->newEntity([]);
 					$dataE 	= $this->Events->patchEntity($events, array());
 
 					$dataE->event_id_number					= trim($data[0]);
@@ -1085,7 +1116,7 @@ class HomesController extends AppController {
 					{
 						// add new record
 						
-						$events = $this->Events->newEntity();
+						$events = $this->Events->newEntity([]);
 						$dataE 	= $this->Events->patchEntity($events, array());
 
 						$dataE->event_id_number					= $arrEventsData['event_id_number'];

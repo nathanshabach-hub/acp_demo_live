@@ -14,7 +14,7 @@ class NametagsController extends AppController {
 
     //public $helpers = array('Javascript', 'Ajax');
 
-    public function initialize() {
+    public function initialize(): void {
         parent::initialize();
         $this->loadComponent('Flash');
         $action = $this->request->getParam('action');
@@ -222,7 +222,7 @@ class NametagsController extends AppController {
 			$condition[] = "(Visitors.conventionseason_id = '".$sess_admin_header_season_id."')";
 		}
 		
-        $visitors = $this->Visitors->newEntity();
+        $visitors = $this->Visitors->newEntity([]);
         if ($this->request->is('post')) {
 			
 			//$this->prx($this->request->getData());

@@ -62,7 +62,7 @@ $this->Events = TableRegistry::getTableLocator()->get('Events');
 								<td data-title="Title"><?php echo $datarecord->mediafile_title;?></td>
 								<td data-title="Document"><?php echo $datarecord->mediafile_original_file_name;?></td>
 								<td data-title="Uploaded By"><?php echo $datarecord->Uploadeduser['first_name'].' '.$datarecord->Uploadeduser['last_name'];?></td>
-                                <td data-title="Uploaded Date"><?php echo date('M d, Y', strtotime($datarecord->created)); ?></td>
+                                <td data-title="Uploaded Date"><?php echo safe_date('M d, Y', strtotime($datarecord->created)); ?></td>
                                 <td data-title="Action">
 									
 									<?php

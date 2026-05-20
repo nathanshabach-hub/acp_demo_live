@@ -128,7 +128,7 @@ foreach ($conventionregistrations as $r) {
                                     ?>
                                 </td>
                                 <td><span class="cr-status <?php echo $sm['class']; ?>"><span class="dot"></span><?php echo h($sm['label']); ?></span></td>
-                                <td><?php echo $datarecord->created ? date('M d, Y', strtotime($datarecord->created)) : ''; ?></td>
+                                <td><?php echo $datarecord->created ? safe_date('M d, Y', strtotime($datarecord->created)) : ''; ?></td>
                                 <td>
                                     <div class="cr-actions">
                                     <?php
