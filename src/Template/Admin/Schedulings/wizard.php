@@ -120,24 +120,24 @@
 <?php
 if(!empty($schedulings->start_date) && isset($schedulings->start_date))
 {
-	$schedulings->start_date = safe_date("Y-m-d", strtotime($schedulings->start_date));
+	$schedulings->start_date = safe_date("Y-m-d", $schedulings->start_date);
 }
 
 if(!empty($schedulings->normal_starting_time) && isset($schedulings->normal_starting_time))
 {
-	$schedulings->normal_starting_time= safe_date("h:i A", strtotime($schedulings->normal_starting_time));
+	$schedulings->normal_starting_time= safe_date("h:i A", $schedulings->normal_starting_time);
 }
 if(!empty($schedulings->normal_finish_time) && isset($schedulings->normal_finish_time))
 {
-	$schedulings->normal_finish_time= safe_date("h:i A", strtotime($schedulings->normal_finish_time));
+	$schedulings->normal_finish_time= safe_date("h:i A", $schedulings->normal_finish_time);
 }
 if(!empty($schedulings->lunch_time_start) && isset($schedulings->lunch_time_start))
 {
-	$schedulings->lunch_time_start= safe_date("h:i A", strtotime($schedulings->lunch_time_start));
+	$schedulings->lunch_time_start= safe_date("h:i A", $schedulings->lunch_time_start);
 }
 if(!empty($schedulings->lunch_time_end) && isset($schedulings->lunch_time_end))
 {
-	$schedulings->lunch_time_end = safe_date("h:i A", strtotime($schedulings->lunch_time_end));
+	$schedulings->lunch_time_end = safe_date("h:i A", $schedulings->lunch_time_end);
 }
 
 // to check if start on different time on first day
@@ -148,11 +148,11 @@ if($schedulings->starting_different_time_first_day_yes_no)
 	
 	if(!empty($schedulings->different_first_day_start_time) && isset($schedulings->different_first_day_start_time))
 	{
-		$schedulings->different_first_day_start_time = safe_date("h:i A", strtotime($schedulings->different_first_day_start_time));
+		$schedulings->different_first_day_start_time = safe_date("h:i A", $schedulings->different_first_day_start_time);
 	}
 	if(!empty($schedulings->different_first_day_end_time) && isset($schedulings->different_first_day_end_time))
 	{
-		$schedulings->different_first_day_end_time = safe_date("h:i A", strtotime($schedulings->different_first_day_end_time));
+		$schedulings->different_first_day_end_time = safe_date("h:i A", $schedulings->different_first_day_end_time);
 	}
 }
 
@@ -163,19 +163,19 @@ if($schedulings->judging_breaks_yes_no)
 	
 	if(!empty($schedulings->judging_breaks_morning_break_starting_time) && isset($schedulings->judging_breaks_morning_break_starting_time))
 	{
-		$schedulings->judging_breaks_morning_break_starting_time= safe_date("h:i A", strtotime($schedulings->judging_breaks_morning_break_starting_time));
+		$schedulings->judging_breaks_morning_break_starting_time= safe_date("h:i A", $schedulings->judging_breaks_morning_break_starting_time);
 	}
 	if(!empty($schedulings->judging_breaks_morning_break_finish_time) && isset($schedulings->judging_breaks_morning_break_finish_time))
 	{
-		$schedulings->judging_breaks_morning_break_finish_time= safe_date("h:i A", strtotime($schedulings->judging_breaks_morning_break_finish_time));
+		$schedulings->judging_breaks_morning_break_finish_time= safe_date("h:i A", $schedulings->judging_breaks_morning_break_finish_time);
 	}
 	if(!empty($schedulings->judging_breaks_afternoon_break_start_time) && isset($schedulings->judging_breaks_afternoon_break_start_time))
 	{
-		$schedulings->judging_breaks_afternoon_break_start_time= safe_date("h:i A", strtotime($schedulings->judging_breaks_afternoon_break_start_time));
+		$schedulings->judging_breaks_afternoon_break_start_time= safe_date("h:i A", $schedulings->judging_breaks_afternoon_break_start_time);
 	}
 	if(!empty($schedulings->judging_breaks_afternoon_break_finish_time) && isset($schedulings->judging_breaks_afternoon_break_finish_time))
 	{
-		$schedulings->judging_breaks_afternoon_break_finish_time= safe_date("h:i A", strtotime($schedulings->judging_breaks_afternoon_break_finish_time));
+		$schedulings->judging_breaks_afternoon_break_finish_time= safe_date("h:i A", $schedulings->judging_breaks_afternoon_break_finish_time);
 	}
 }
 
@@ -187,11 +187,11 @@ if($schedulings->sports_day_yes_no)
 	
 	if(!empty($schedulings->sports_day_starting_time) && isset($schedulings->sports_day_starting_time))
 	{
-		$schedulings->sports_day_starting_time= safe_date("h:i A", strtotime($schedulings->sports_day_starting_time));
+		$schedulings->sports_day_starting_time= safe_date("h:i A", $schedulings->sports_day_starting_time);
 	}
 	if(!empty($schedulings->sports_day_finish_time) && isset($schedulings->sports_day_finish_time))
 	{
-		$schedulings->sports_day_finish_time= safe_date("h:i A", strtotime($schedulings->sports_day_finish_time));
+		$schedulings->sports_day_finish_time= safe_date("h:i A", $schedulings->sports_day_finish_time);
 	}
 }
 
@@ -203,11 +203,11 @@ if($schedulings->sports_day_having_events_after_sport_yes_no)
 	
 	if(!empty($schedulings->sports_day_other_starting_time) && isset($schedulings->sports_day_other_starting_time))
 	{
-		$schedulings->sports_day_other_starting_time= safe_date("h:i A", strtotime($schedulings->sports_day_other_starting_time));
+		$schedulings->sports_day_other_starting_time= safe_date("h:i A", $schedulings->sports_day_other_starting_time);
 	}
 	if(!empty($schedulings->sports_day_other_finish_time) && isset($schedulings->sports_day_other_finish_time))
 	{
-		$schedulings->sports_day_other_finish_time= safe_date("h:i A", strtotime($schedulings->sports_day_other_finish_time));
+		$schedulings->sports_day_other_finish_time= safe_date("h:i A", $schedulings->sports_day_other_finish_time);
 	}
 }
 ?>

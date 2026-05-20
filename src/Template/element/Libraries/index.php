@@ -35,7 +35,7 @@
 			?>
 		  </p>
 		  <div class="new-row">
-			  <div class="date-row"><?php echo safe_date("d F Y", strtotime($library->created)); ?></div>
+			  <div class="date-row"><?php echo safe_date("d F Y", $library->created); ?></div>
 			  <div class="user-nema"><i class="fa fa-user-o" aria-hidden="true"></i>
 			  <?php
 			  if($library->user_id>0)

@@ -35,7 +35,7 @@ if (is_file($logoPath)) {
 
 $lunchBanner = '';
 if (!empty($schedulingD->lunch_time_start) && !empty($schedulingD->lunch_time_end)) {
-    $lunchBanner = 'LUNCH '.safe_date('g:i a', strtotime((string)$schedulingD->lunch_time_start)).' - '.safe_date('g:i a', strtotime((string)$schedulingD->lunch_time_end));
+    $lunchBanner = 'LUNCH '.safe_date('g:i a', $schedulingD->lunch_time_start).' - '.safe_date('g:i a', $schedulingD->lunch_time_end);
 }
 ?>
 

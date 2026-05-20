@@ -96,9 +96,9 @@
                                 <?php if ($room->available_from || $room->available_to): ?>
                                 <div class="rla-window">
                                     Window: <?php
-                                        echo ($room->available_from ? safe_date('H:i', strtotime($room->available_from)) : '—')
+                                        echo ($room->available_from ? safe_date('H:i', $room->available_from) : '—')
                                            . ' → '
-                                           . ($room->available_to ? safe_date('H:i', strtotime($room->available_to)) : '—');
+                                           . ($room->available_to ? safe_date('H:i', $room->available_to) : '—');
                                     ?>
                                 </div>
                                 <?php endif; ?>

@@ -38,12 +38,12 @@
 <?php
 if(!empty($books->registration_start_date) && $books->registration_start_date != NULL)
 {
-	$books->registration_start_date = safe_date("Y-m-d", strtotime($books->registration_start_date));
+	$books->registration_start_date = safe_date("Y-m-d", $books->registration_start_date);
 }
 
 if(!empty($books->registration_end_date) && $books->registration_end_date != NULL)
 {
-	$books->registration_end_date = safe_date("Y-m-d", strtotime($books->registration_end_date));
+	$books->registration_end_date = safe_date("Y-m-d", $books->registration_end_date);
 }
 ?>
 

@@ -219,7 +219,7 @@ $regFee     = (!empty($convSeasonD->student_registration_fees)) ? $convSeasonD->
                             <?php endif; ?>
                             <span><i class="fa fa-calendar"></i> <?php echo h($seasonD->season_year); ?></span>
                             <?php if ($convSeasonD && !empty($convSeasonD->registration_start_date) && $convSeasonD->registration_start_date !== '0000-00-00'): ?>
-                            <span><i class="fa fa-clock-o"></i> <?php echo safe_date('d M Y', strtotime($convSeasonD->registration_start_date)); ?> – <?php echo safe_date('d M Y', strtotime($convSeasonD->registration_end_date)); ?></span>
+                            <span><i class="fa fa-clock-o"></i> <?php echo safe_date('d M Y', $convSeasonD->registration_start_date); ?> – <?php echo safe_date('d M Y', $convSeasonD->registration_end_date); ?></span>
                             <?php endif; ?>
                             <?php if ($regFee): ?>
                             <span><i class="fa fa-tag"></i> <?php echo $currency . ' ' . number_format($regFee, 2); ?> / delegate</span>

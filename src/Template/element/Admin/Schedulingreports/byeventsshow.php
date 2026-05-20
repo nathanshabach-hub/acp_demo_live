@@ -35,12 +35,12 @@ $this->Schedulingtimings = TableRegistry::getTableLocator()->get('Schedulingtimi
 							<td data-title="Day" width="15%"><?php echo $datarecord->day;?></td>
 							<td data-title="Start" width="10%">
 							<?php 
-							echo $datarecord->start_time!=NULL ? safe_date("h:i A", strtotime($datarecord->start_time)) : '';
+							echo $datarecord->start_time!=NULL ? safe_date("h:i A", $datarecord->start_time) : '';
 							?>
 							</td>
 							<td data-title="Finish" width="10%">
 							<?php 
-							echo $datarecord->finish_time!=NULL ? safe_date("h:i A", strtotime($datarecord->finish_time)) : '';
+							echo $datarecord->finish_time!=NULL ? safe_date("h:i A", $datarecord->finish_time) : '';
 							?>
 							</td>
 							<td data-title="Event" width="20%"><?php echo $datarecord->Events['event_name'];?> (<?php echo $datarecord->Events['event_id_number'];?>)</td>

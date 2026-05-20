@@ -50,8 +50,8 @@ $this->Events = TableRegistry::getTableLocator()->get('Events');
                                 <td data-title="DB ID"><?php echo $datarecord->id;?></td>
                                 <td data-title="Room"><?php echo (isset($datarecord->Conventionrooms) ? $datarecord->Conventionrooms->room_name : '');?></td>
                                 <td data-title="Day"><?php echo $datarecord->day;?></td>
-                                <td data-title="Start"><?php echo safe_date("h:i A", strtotime($datarecord->start_time));?></td>
-                                <td data-title="Finish"><?php echo safe_date("h:i A", strtotime($datarecord->finish_time));?></td>
+                                <td data-title="Start"><?php echo safe_date("h:i A", $datarecord->start_time);?></td>
+                                <td data-title="Finish"><?php echo safe_date("h:i A", $datarecord->finish_time);?></td>
                                 <td data-title="Event"><?php echo (isset($datarecord->Events) ? $datarecord->Events->event_name : '');?> (<?php echo (isset($datarecord->Events) ? $datarecord->Events->event_id_number : '');?>)</td>
                                 <td data-title="Match">
 								<?php

@@ -59,7 +59,7 @@
                                         'class'       => 'form-control input-sm mdtpicker',
                                         'placeholder' => 'hh:mm (24hr)',
                                         'value'       => ($room->available_from)
-                                            ? safe_date('H:i', strtotime($room->available_from)) : '',
+                                            ? safe_date('H:i', $room->available_from) : '',
                                     ]
                                 ); ?>
                             </td>
@@ -70,15 +70,15 @@
                                         'class'       => 'form-control input-sm mdtpicker',
                                         'placeholder' => 'hh:mm (24hr)',
                                         'value'       => ($room->available_to)
-                                            ? safe_date('H:i', strtotime($room->available_to)) : '',
+                                            ? safe_date('H:i', $room->available_to) : '',
                                     ]
                                 ); ?>
                             </td>
                             <td>
                                 <?php
                                 if ($room->available_from || $room->available_to) {
-                                    $from = $room->available_from ? safe_date('H:i', strtotime($room->available_from)) : '...';
-                                    $to   = $room->available_to   ? safe_date('H:i', strtotime($room->available_to))   : '...';
+                                    $from = $room->available_from ? safe_date('H:i', $room->available_from) : '...';
+                                    $to   = $room->available_to   ? safe_date('H:i', $room->available_to)   : '...';
                                     echo '<span class="label label-warning">' . h($from) . ' – ' . h($to) . '</span>';
                                 } else {
                                     echo '<span class="text-muted">Convention hours</span>';

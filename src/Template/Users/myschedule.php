@@ -24,7 +24,7 @@
 							<?php foreach ($schedulingTimingsList as $timing): ?>
 								<tr>
 									<td><?php echo h($timing->day); ?></td>
-									<td><?php echo $timing->start_time ? safe_date('h:i A', strtotime($timing->start_time)) : '-'; ?></td>
+									<td><?php echo $timing->start_time ? safe_date('h:i A', $timing->start_time) : '-'; ?></td>
 									<td>
 										<?php echo h($timing->Events['event_name'] ?? ''); ?>
 										<?php if (!empty($timing->Events['event_id_number'])): ?>

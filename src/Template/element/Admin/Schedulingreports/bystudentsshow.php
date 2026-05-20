@@ -59,7 +59,7 @@ $this->Crstudentevents = TableRegistry::getTableLocator()->get('Crstudentevents'
 						$arrSch		= array();
 						$arrSch['sch_date_time']	= $datarecord->sch_date_time;
 						$arrSch['day']	= $datarecord->day;
-						$arrSch['start_time']	= $datarecord->start_time!=NULL ? safe_date("h:i A", strtotime($datarecord->start_time)) : '';
+						$arrSch['start_time']	= $datarecord->start_time!=NULL ? safe_date("h:i A", $datarecord->start_time) : '';
 						
 						$arrSch['event_name']	= $datarecord->Events['event_name'].' ('.$datarecord->Events['event_id_number'].')';
 						
@@ -113,7 +113,7 @@ $this->Crstudentevents = TableRegistry::getTableLocator()->get('Crstudentevents'
 								$arrSch		= array();
 								$arrSch['sch_date_time']	= $schstudgrprec->sch_date_time;
 								$arrSch['day']	= $schstudgrprec->day;
-								$arrSch['start_time']	= $schstudgrprec->start_time!=NULL ? safe_date("h:i A", strtotime($schstudgrprec->start_time)) : '';
+								$arrSch['start_time']	= $schstudgrprec->start_time!=NULL ? safe_date("h:i A", $schstudgrprec->start_time) : '';
 								
 								$arrSch['event_name']	= $schstudgrprec->Events['event_name'].' ('.$schstudgrprec->Events['event_id_number'].')';
 								

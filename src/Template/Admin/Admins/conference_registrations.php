@@ -159,7 +159,7 @@ $roleColors = [
                         <td><?php echo h($reg->season_year); ?></td>
                         <td><span class="diet-pill <?php echo $diet === 'None' ? 'diet-none' : ''; ?>"><?php echo h($diet); ?></span></td>
                         <td><?php echo $a->attending_both_days ? '<i class="fa fa-check text-success"></i> Yes' : '<i class="fa fa-times text-muted"></i> No'; ?></td>
-                        <td style="color:#666;font-size:12.5px;"><?php echo !empty($reg->created) ? safe_date('d M Y', strtotime($reg->created)) : '—'; ?></td>
+                        <td style="color:#666;font-size:12.5px;"><?php echo !empty($reg->created) ? safe_date('d M Y', $reg->created) : '—'; ?></td>
                     </tr>
                     <?php endforeach; ?>
                 </tbody>

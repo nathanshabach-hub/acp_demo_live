@@ -174,7 +174,7 @@
                                         <div class="conference-recent-name"><?php echo h($name); ?></div>
                                         <div class="conference-recent-role"><?php echo h($role); ?></div>
                                     </div>
-                                    <div class="conference-recent-date"><?php echo !empty($reg->created) ? safe_date('d M', strtotime($reg->created)) : '-'; ?></div>
+                                    <div class="conference-recent-date"><?php echo !empty($reg->created) ? safe_date('d M', $reg->created) : '-'; ?></div>
                                 </div>
                             <?php } ?>
                         <?php } else { ?>

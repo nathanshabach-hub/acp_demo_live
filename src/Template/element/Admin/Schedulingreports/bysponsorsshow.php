@@ -27,7 +27,7 @@ $this->Schedulingtimings = TableRegistry::getTableLocator()->get('Schedulingtimi
                     <?php foreach ($schedulingTimingsList as $datarecord) { ?>
                         <tr>
                             <td data-title="Day"><?php echo $datarecord->day; ?></td>
-                            <td data-title="Start"><?php echo $datarecord->start_time != NULL ? safe_date("h:i A", strtotime($datarecord->start_time)) : ''; ?></td>
+                            <td data-title="Start"><?php echo $datarecord->start_time != NULL ? safe_date("h:i A", $datarecord->start_time) : ''; ?></td>
                             <td data-title="Event"><?php echo $datarecord->Events['event_name']; ?> (<?php echo $datarecord->Events['event_id_number']; ?>)</td>
                             <td data-title="Location"><?php echo $datarecord->Conventionrooms['room_name'] ?? ''; ?></td>
                             <td data-title="School">

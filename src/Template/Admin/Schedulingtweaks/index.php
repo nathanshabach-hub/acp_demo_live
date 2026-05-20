@@ -239,10 +239,10 @@
                                                 <span class="tweak-rule-chip">Room: <?php echo h($pinnedRoomName ?: ('#'.$tw->pinned_room_id)); ?></span>
                                             <?php endif; ?>
                                             <?php if ($tw && $tw->pinned_start_time): ?>
-                                                <span class="tweak-rule-chip">Start: <?php echo safe_date('H:i', strtotime($tw->pinned_start_time)); ?></span>
+                                                <span class="tweak-rule-chip">Start: <?php echo safe_date('H:i', $tw->pinned_start_time); ?></span>
                                             <?php endif; ?>
                                             <?php if ($tw && ($tw->available_from_time || $tw->available_to_time)): ?>
-                                                <span class="tweak-rule-chip">Window: <?php echo h(($tw->available_from_time ? safe_date('H:i', strtotime($tw->available_from_time)) : '...') . ' - ' . ($tw->available_to_time ? safe_date('H:i', strtotime($tw->available_to_time)) : '...')); ?></span>
+                                                <span class="tweak-rule-chip">Window: <?php echo h(($tw->available_from_time ? safe_date('H:i', $tw->available_from_time) : '...') . ' - ' . ($tw->available_to_time ? safe_date('H:i', $tw->available_to_time) : '...')); ?></span>
                                             <?php endif; ?>
                                             <?php if (!$hasAny): ?>
                                                 <span class="tweak-rule-chip dim">No active rules</span>
@@ -263,9 +263,9 @@
                                                 data-event-kind="<?php echo h($ev->event_kind_id); ?>"
                                                 data-pinned-day="<?php echo h($tw->pinned_day ?? ''); ?>"
                                                 data-pinned-room-id="<?php echo h($tw->pinned_room_id ?? ''); ?>"
-                                                data-pinned-start-time="<?php echo h(($tw && $tw->pinned_start_time) ? safe_date('H:i', strtotime($tw->pinned_start_time)) : ''); ?>"
-                                                data-available-from="<?php echo h(($tw && $tw->available_from_time) ? safe_date('H:i', strtotime($tw->available_from_time)) : ''); ?>"
-                                                data-available-to="<?php echo h(($tw && $tw->available_to_time) ? safe_date('H:i', strtotime($tw->available_to_time)) : ''); ?>"
+                                                data-pinned-start-time="<?php echo h(($tw && $tw->pinned_start_time) ? safe_date('H:i', $tw->pinned_start_time) : ''); ?>"
+                                                data-available-from="<?php echo h(($tw && $tw->available_from_time) ? safe_date('H:i', $tw->available_from_time) : ''); ?>"
+                                                data-available-to="<?php echo h(($tw && $tw->available_to_time) ? safe_date('H:i', $tw->available_to_time) : ''); ?>"
                                                 data-clear-url="<?php echo h($clearUrl); ?>"
                                             >Edit</button>
                                         </td>

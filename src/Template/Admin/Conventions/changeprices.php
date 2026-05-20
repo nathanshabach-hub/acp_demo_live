@@ -39,11 +39,11 @@
 <?php
 if($conventionseasons->registration_start_date != '0000-00-00')
 {
-	$conventionseasons->registration_start_date = safe_date("Y-m-d", strtotime($conventionseasons->registration_start_date));
+	$conventionseasons->registration_start_date = safe_date("Y-m-d", $conventionseasons->registration_start_date);
 }
 if($conventionseasons->registration_end_date != '0000-00-00')
 {
-	$conventionseasons->registration_end_date = safe_date("Y-m-d", strtotime($conventionseasons->registration_end_date));
+	$conventionseasons->registration_end_date = safe_date("Y-m-d", $conventionseasons->registration_end_date);
 }	
 ?>
 
